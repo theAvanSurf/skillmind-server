@@ -4,13 +4,15 @@ import { RedisModule } from "./infrastucture/cache/redis.module";
 import { KafkaModule } from "./infrastucture/messaging/kafka.module";
 import { LoggerModule } from "./common/logger/logger.module";
 import { RequestLoggerMiddleware } from "./common/middleware/request-logger.middleware";
+import { UploaderModule } from "./infrastucture/media/cloudinary.module";
 
 @Module({
     imports: [
         LoggerModule,
         HealthModule,
         RedisModule,
-        KafkaModule
+        KafkaModule,
+        UploaderModule
     ]
 })
 
@@ -20,6 +22,4 @@ export class AppModule implements NestModule{
         .apply(RequestLoggerMiddleware)
         .forRoutes('*') //'*' Aplicar a todas las rutas 
     }
-
-
 }
