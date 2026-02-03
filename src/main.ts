@@ -1,22 +1,43 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { LoggerService } from './common/logger/logger.service';
 
-async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  const port = process.env.PORT || 3000;
+  async function bootstrap() {                              //const app = await NestFactory.create(AppModule);
+    const app = await NestFactory.create(AppModule,{
+      logger: false, // Deshabilitar logger por defecto de NestJS
+    });
+
+    //Obtener nuestro LoggerService custom
+    const logger = app.get(LoggerService);  //const port = process.env.PORT || 3000;
+
+    //usar nuestro LoggerService custom
+    app.useLogger(logger);
 
   const config = new DocumentBuilder()
         .setTitle('SkillMind API Gateway')
-        .setDescription('The SkillMind API Gateway description')
+        .setDescription('API Gateway for SkillMind platform')
         .setVersion('1.0')
+        .addBearerAuth()
         .build();
+
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('api', app, document);
   
-  await app.listen(port, '0.0.0.0');
+//Inicia el servidor
+  const port = process.env.PORT || 3000;
+  await app.listen(port);
   
-  console.log(`Application is running on port ${port}`);
+  //Loguear que la app inicio correctamente
+    logger.info('Application started successfully',{
+      service: 'api-gateway',
+      environment: process.env.NODE_ENV || 'development',
+      timestamp: new Date().toISOString(),
+      port,
+      swaggerURL: `http://localhost:${port}/api`,
+    });
+
+  //console.log(`Application is running on port ${port}`);
 }
 
 void bootstrap();
