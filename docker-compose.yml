@@ -10,7 +10,9 @@ services:
     restart: always
 
   api-gateway:
-    build: .
+    build:
+      context: .
+      target: development
     container_name: skillmind-api-gateway
     ports:
       - "3000:3000"
@@ -21,6 +23,10 @@ services:
       CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
       CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
       CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
+    volumes:
+      - ./api-gateway/src:/usr/src/app/src
+      - ./api-gateway/tsconfig.json:/usr/src/app/tsconfig.json
+      - ./api-gateway/nest-cli.json:/usr/src/app/nest-cli.json
     depends_on:
       - redis
       - kafka
