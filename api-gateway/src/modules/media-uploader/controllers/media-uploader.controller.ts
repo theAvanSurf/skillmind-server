@@ -7,7 +7,7 @@ import {
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes, ApiOperation } from "@nestjs/swagger";
 import * as multer from "multer";
-import { UploaderService } from "src/infrastucture/media/cloudinary";
+import { UploaderService } from "../../../infrastucture/media/cloudinary";
 
 @Controller("media-upload")
 export class UploaderController {
