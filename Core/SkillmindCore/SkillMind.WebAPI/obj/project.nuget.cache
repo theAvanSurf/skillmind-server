@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "Fyzp2+1DhNI=",
+  "success": true,
+  "projectFilePath": "/Volumes/Files/Projects/skillmind-server/Core/SkillmindCore/SkillMind.WebAPI/SkillMind.WebAPI.csproj",
+  "expectedPackageFiles": [
+    "/Users/teudyencarnacion/.nuget/packages/microsoft.aspnetcore.openapi/10.0.3/microsoft.aspnetcore.openapi.10.0.3.nupkg.sha512",
+    "/Users/teudyencarnacion/.nuget/packages/microsoft.openapi/2.0.0/microsoft.openapi.2.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}

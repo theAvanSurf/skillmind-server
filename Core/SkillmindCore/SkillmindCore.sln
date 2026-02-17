@@ -1,0 +1,53 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{3E39A729-BFEA-4CEE-BC8D-3EC154896C9F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkillMind.Core.Domain", "SkillMind.Core.Domain\SkillMind.Core.Domain.csproj", "{FE6629FB-CEBA-46A7-AE26-4175A7EA00BD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkillMind.Core.Application", "SkillMind.Core.Application\SkillMind.Core.Application.csproj", "{728F21CC-046E-4437-A4C8-D5CECD060870}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastructure", "{0284A398-D486-4A0D-9AF9-DF404B99602F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkillMind.Infrastructure.Persistence", "SkillMind.Infrastructure.Persistence\SkillMind.Infrastructure.Persistence.csproj", "{C1C315D8-1C4B-4EA6-B343-C2FC8F9F18F3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkillMind.Infrastructure.Identity", "SkillMind.Infrastructure.Identity\SkillMind.Infrastructure.Identity.csproj", "{C443DDEA-DF0F-4AEC-8DC5-F6CDC139916E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Presentation", "Presentation", "{D704EBAD-16E3-4722-AD74-3B6D50901FD3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkillMind.WebAPI", "SkillMind.WebAPI\SkillMind.WebAPI.csproj", "{1379CA75-19BB-4CC6-9A12-5EBBF325B13B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FE6629FB-CEBA-46A7-AE26-4175A7EA00BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE6629FB-CEBA-46A7-AE26-4175A7EA00BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE6629FB-CEBA-46A7-AE26-4175A7EA00BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE6629FB-CEBA-46A7-AE26-4175A7EA00BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{728F21CC-046E-4437-A4C8-D5CECD060870}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{728F21CC-046E-4437-A4C8-D5CECD060870}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{728F21CC-046E-4437-A4C8-D5CECD060870}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{728F21CC-046E-4437-A4C8-D5CECD060870}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C1C315D8-1C4B-4EA6-B343-C2FC8F9F18F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1C315D8-1C4B-4EA6-B343-C2FC8F9F18F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1C315D8-1C4B-4EA6-B343-C2FC8F9F18F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1C315D8-1C4B-4EA6-B343-C2FC8F9F18F3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C443DDEA-DF0F-4AEC-8DC5-F6CDC139916E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C443DDEA-DF0F-4AEC-8DC5-F6CDC139916E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C443DDEA-DF0F-4AEC-8DC5-F6CDC139916E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C443DDEA-DF0F-4AEC-8DC5-F6CDC139916E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1379CA75-19BB-4CC6-9A12-5EBBF325B13B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1379CA75-19BB-4CC6-9A12-5EBBF325B13B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1379CA75-19BB-4CC6-9A12-5EBBF325B13B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1379CA75-19BB-4CC6-9A12-5EBBF325B13B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{FE6629FB-CEBA-46A7-AE26-4175A7EA00BD} = {3E39A729-BFEA-4CEE-BC8D-3EC154896C9F}
+		{728F21CC-046E-4437-A4C8-D5CECD060870} = {3E39A729-BFEA-4CEE-BC8D-3EC154896C9F}
+		{C1C315D8-1C4B-4EA6-B343-C2FC8F9F18F3} = {0284A398-D486-4A0D-9AF9-DF404B99602F}
+		{C443DDEA-DF0F-4AEC-8DC5-F6CDC139916E} = {0284A398-D486-4A0D-9AF9-DF404B99602F}
+		{1379CA75-19BB-4CC6-9A12-5EBBF325B13B} = {D704EBAD-16E3-4722-AD74-3B6D50901FD3}
+	EndGlobalSection
+EndGlobal
