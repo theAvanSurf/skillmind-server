@@ -5,6 +5,7 @@ import { KafkaModule } from "./infrastucture/messaging/kafka.module";
 import { LoggerModule } from "./common/logger/logger.module";
 import { RequestLoggerMiddleware } from "./common/middleware/request-logger.middleware";
 import { UploaderModule } from "./infrastucture/media/cloudinary.module";
+import { DatabaseModule } from "./infrastucture/database/database.module";
 
 @Module({
     imports: [
@@ -12,7 +13,8 @@ import { UploaderModule } from "./infrastucture/media/cloudinary.module";
         HealthModule,
         RedisModule,
         KafkaModule,
-        UploaderModule
+        UploaderModule,
+        DatabaseModule
     ]
 })
 
