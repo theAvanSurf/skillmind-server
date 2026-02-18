@@ -12,6 +12,7 @@ services:
   api-gateway:
     build:
       context: .
+      dockerfile: api-gateway/Dockerfile
       target: development
     container_name: skillmind-api-gateway
     ports:
@@ -23,6 +24,13 @@ services:
       CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
       CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
       CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
+      # Database environment variables for API Gateway (if applicable)
+      DATABASE_URL: ${POSTGRES_URL}
+      # Email settings
+      EMAILER_HOST: ${EMAILER_HOST}
+      EMAILER_PORT: ${EMAILER_PORT}
+      EMAILER_USER: ${EMAILER_USER}
+      EMAILER_PASS: ${EMAILER_PASS}
     volumes:
       - ./api-gateway/src:/usr/src/app/src
       - ./api-gateway/tsconfig.json:/usr/src/app/tsconfig.json
@@ -30,6 +38,28 @@ services:
     depends_on:
       - redis
       - kafka
+      - core
+
+  core:
+    build:
+      context: ./Core/SkillmindCore
+      dockerfile: Dockerfile
+    container_name: skillmind-core
+    ports:
+      - "5001:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DatabaseUrl=${POSTGRES_URL}
+      - JwtSettings__SecretKey=${JWT_SECRET_KEY}
+      - JwtSettings__Issuer=${JWT_ISSUER}
+      - JwtSettings__Audience=${JWT_AUDIENCE}
+      - JwtSettings__DurationInMinutes=${JWT_DURATION_MINUTES}
+      - EmailSettings__Host=${EMAILER_HOST}
+      - EmailSettings__Port=${EMAILER_PORT}
+      - EmailSettings__User=${EMAILER_USER}
+      - EmailSettings__Password=${EMAILER_PASS}
+    depends_on:
+      - redis
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
