@@ -70,11 +70,10 @@ public static class ServicesRegistration
                 ClockSkew = TimeSpan.FromMinutes(2),
                 ValidIssuer = configuration["JwtSettings:Issuer"],
                 ValidAudience = configuration["JwtSettings:Audience"],
-                // ✅ Fixed: was "JwtSettings:SecretKey", now matches appsettings "JwtSettings:Key"
                 IssuerSigningKey = new SymmetricSecurityKey(
                     Encoding.UTF8.GetBytes(
-                        configuration["JwtSettings:Key"]
-                        ?? throw new InvalidOperationException("JwtSettings:Key is not configured.")
+                        configuration["JwtSettings:SecretKey"]
+                        ?? throw new InvalidOperationException("JwtSettings:SecretKey is not configured.")
                     )
                 )
             };

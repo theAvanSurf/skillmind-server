@@ -6,10 +6,6 @@ import { KafkaModule } from "./infrastucture/messaging/kafka.module";
 import { LoggerModule } from "./common/logger/logger.module";
 import { RequestLoggerMiddleware } from "./common/middleware/request-logger.middleware";
 import { UploaderModule } from "./infrastucture/media/cloudinary.module";
-<<<<<<< Updated upstream
-import { OAuthModule } from "./modules/oauth/oauth.module.js";
-=======
->>>>>>> Stashed changes
 
 @Module({
     imports: [
@@ -19,10 +15,6 @@ import { OAuthModule } from "./modules/oauth/oauth.module.js";
         RedisModule,
         KafkaModule,
         UploaderModule,
-<<<<<<< Updated upstream
-        OAuthModule,
-=======
->>>>>>> Stashed changes
     ]
 })
 

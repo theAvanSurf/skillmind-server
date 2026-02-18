@@ -25,6 +25,28 @@ public class AuthController(IAccountServicesApi accountServiceForWebApi) : BaseC
         }
     }
 
+    [HttpPost("register")]
+    public async Task<IActionResult> Register([FromBody] CreateUserDto dto)
+    {
+        try
+        {
+            if (!ModelState.IsValid)
+                return BadRequest("All Fields are required.");
+
+            var origin = Request.Headers["origin"];
+            var result = await accountServiceForWebApi.RegisterUser(dto, origin!, true);
+
+            if (result.HasError)
+                return BadRequest(result.Errors);
+
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+        }
+    }
+
     [Authorize]
     [HttpPost("account/confirm")]
     public async Task<IActionResult> Confirm([FromBody] ConfirmRequestDto dto)

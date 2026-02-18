@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SkillMind.WebAPI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+cf11a3798725bc7a8fff4ccfa1741b2c9c2f1947")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1fac4205ae987de9254e3b5d2b6970d885046da5")]
 [assembly: System.Reflection.AssemblyProductAttribute("SkillMind.WebAPI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SkillMind.WebAPI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
