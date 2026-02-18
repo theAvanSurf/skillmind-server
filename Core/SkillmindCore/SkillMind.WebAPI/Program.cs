@@ -1,6 +1,9 @@
 
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
+using SkillMind.Core.Application;
 using SkillMind.Infrastructure.Identity;
+using SkillMind.Infrastructure.Persistence;
+using SkillMind.Infrastructure.Shared;
 using SkillMind.WebAPI.Extensions;
 using SkillMind.WebAPI.Transformers;
 
@@ -9,13 +12,14 @@ builder.Services.AddIdentityLayer(builder.Configuration);
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerExtension();
 builder.Services.AddApiVersioningExtension();
-// Add services to the container.
+builder.Services.AddPersistenceLayerIoc(builder.Configuration);
+builder.Services.AddSharedLayer(builder.Configuration);
+builder.Services.AddApplicationLayer();
 
 builder.Services.AddControllers(options =>
 {
     options.Conventions.Add(new RouteTokenTransformerConvention(new SlugifyParameterTransformer()));
 });
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
 var app = builder.Build();

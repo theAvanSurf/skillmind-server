@@ -48,9 +48,11 @@ public abstract class BaseServices(UserManager<ApplicationUser> userManager)
             Email = saveDto.Email,
             UserName = saveDto.UserName,
             EmailConfirmed = false,
+            AccountTypes = saveDto.AccountTypes,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
             Status = GlobalStatus.Inactive
+            
         };
 
         var result = await userManager.CreateAsync(newUser, saveDto.Password);

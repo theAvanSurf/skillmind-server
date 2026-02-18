@@ -1,4 +1,3 @@
-using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SkillMind.Core.Application.Dtos.Common;
@@ -6,7 +5,7 @@ using SkillMind.Core.Application.Interfaces;
 
 namespace SkillMind.WebAPI.Controllers.v1;
 
-[ApiVersion("1.0")]
+
 public class AuthController(IAccountServicesApi accountServiceForWebApi) : BaseController
 {
     [HttpPost("login")]

@@ -19,6 +19,13 @@ RUN dotnet build "SkillMind.WebAPI.csproj" -c Release -o /app/build
 FROM build AS publish
 RUN dotnet publish "SkillMind.WebAPI.csproj" -c Release -o /app/publish
 
+# Development stage with SDK and tools
+FROM build AS development
+WORKDIR /src/SkillMind.WebAPI
+RUN dotnet tool install --global dotnet-ef
+ENV PATH="$PATH:/root/.dotnet/tools"
+CMD ["dotnet", "run", "--no-launch-profile"]
+
 # Build runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app

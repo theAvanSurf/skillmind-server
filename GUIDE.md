@@ -55,6 +55,26 @@ The project uses environment variables to manage sensitive configuration like da
     docker-compose down
     ```
 
+## Database Migrations
+
+To update the database schema, you must run the Entity Framework Core migrations inside the running Docker container (where the environment variables and network access are configured).
+
+**Run the following command:**
+
+For the Persistence Layer
+
+```bash
+docker exec -it skillmind-core dotnet ef database update --project ../SkillMind.Infrastructure.Persistence/SkillMind.Infrastructure.Persistence.csproj --startup-project . --context SkillMind.Infrastructure.Persistence.Context.SkillMindDbContext
+```
+
+For the Identiy Layer
+
+```bash
+docker exec -it skillmind-core dotnet ef database update --project ../SkillMind.Infrastructure.Identity/SkillMind.Infrastructure.Identity.csproj --startup-project . --context SkillMind.Infrastructure.Identity.Context.IdentityDatabaseContext
+```
+
+This ensures the migration tool uses the connection string and environment variables defined in your Docker setup.
+
 ## Project Structure
 
 -   `api-gateway/`: NestJS application acting as the API Gateway.

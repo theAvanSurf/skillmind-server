@@ -6,4 +6,15 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <PackageReference Include="StackExchange.Redis" Version="2.11.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\SkillMind.Core.Application\SkillMind.Core.Application.csproj" />
+      <ProjectReference Include="..\SkillMind.Core.Domain\SkillMind.Core.Domain.csproj" />
+      <ProjectReference Include="..\SkillMind.Infrastructure.Identity\SkillMind.Infrastructure.Identity.csproj" />
+      <ProjectReference Include="..\SkillMind.Infrastructure.Persistence\SkillMind.Infrastructure.Persistence.csproj" />
+    </ItemGroup>
+
 </Project>

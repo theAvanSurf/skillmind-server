@@ -44,6 +44,7 @@ services:
     build:
       context: ./Core/SkillmindCore
       dockerfile: Dockerfile
+      target: development
     container_name: skillmind-core
     ports:
       - "5001:8080"
@@ -58,6 +59,7 @@ services:
       - EmailSettings__Port=${EMAILER_PORT}
       - EmailSettings__User=${EMAILER_USER}
       - EmailSettings__Password=${EMAILER_PASS}
+      - REDIS=${REDIS_URL}
     depends_on:
       - redis
 
