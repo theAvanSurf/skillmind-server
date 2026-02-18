@@ -48,8 +48,8 @@ public abstract class BaseServices(UserManager<ApplicationUser> userManager)
             Email = saveDto.Email,
             UserName = saveDto.UserName,
             EmailConfirmed = false,
-            CreatedAt = DateTime.Now,
-            UpdatedAt = DateTime.Now,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
             Status = GlobalStatus.Inactive
         };
 
@@ -68,7 +68,7 @@ public abstract class BaseServices(UserManager<ApplicationUser> userManager)
         response.Email = newUser.Email;
         response.UserName = newUser.UserName;
         response.HasError = false;
-        await userManager.AddToRoleAsync(newUser, nameof(saveDto.Role));
+        await userManager.AddToRoleAsync(newUser, saveDto.Role.ToString());
 
         if (isApi != null && !isApi.Value)
         {
@@ -77,209 +77,184 @@ public abstract class BaseServices(UserManager<ApplicationUser> userManager)
 
         return response;
     }
-    
+
     public virtual async Task<EditResponseDto> EditUser(CreateUserDto saveDto, string origin, bool? isApi = false)
-		{
-			EditResponseDto response = new()
-			{
-				Email = "",
-				Id = "",
-				LastName = "",
-				Name = "",
-				UserName = "",
-				Cedula = "",
-				HasError = false,
-				Errors = []
-			};
+    {
+        EditResponseDto response = new()
+        {
+            Email = "",
+            Id = "",
+            LastName = "",
+            Name = "",
+            UserName = "",
+            Cedula = "",
+            HasError = false,
+            Errors = []
+        };
 
-			var userWithSameUserName = await userManager.FindByNameAsync(saveDto.UserName);
-			if (userWithSameUserName != null && userWithSameUserName.Id != saveDto.Id)
-			{
-				response.HasError = true;
-				response.Errors.Add($"The username: {saveDto.UserName} is already taken. Please choose another name.");
-			}
+        var userWithSameUserName = await userManager.FindByNameAsync(saveDto.UserName);
+        if (userWithSameUserName != null && userWithSameUserName.Id != saveDto.Id)
+        {
+            response.HasError = true;
+            response.Errors.Add($"The username: {saveDto.UserName} is already taken. Please choose another name.");
+        }
 
-			var userWithSameEmail = await userManager.FindByEmailAsync(saveDto.Email);
-			if (userWithSameEmail != null && userWithSameEmail.Id != saveDto.Id)
-			{
-				response.HasError = true;
-				response.Errors.Add("The given email is already taken. Choose another email.");
-			}
+        var userWithSameEmail = await userManager.FindByEmailAsync(saveDto.Email);
+        if (userWithSameEmail != null && userWithSameEmail.Id != saveDto.Id)
+        {
+            response.HasError = true;
+            response.Errors.Add("The given email is already taken. Choose another email.");
+        }
 
-			if (response.HasError)
-				return response;
+        if (response.HasError)
+            return response;
 
-			var user = await userManager.FindByIdAsync(saveDto.Id!);
-			if (user == null)
-			{
-				response.HasError = true;
-				response.Errors.Add("There is no account registered with that user.");
-				return response;
-			}
+        var user = await userManager.FindByIdAsync(saveDto.Id!);
+        if (user == null)
+        {
+            response.HasError = true;
+            response.Errors.Add("There is no account registered with that user.");
+            return response;
+        }
 
-			var emailChanged = user.Email != saveDto.Email;
+        var emailChanged = user.Email != saveDto.Email;
 
+        user.FirstName = saveDto.Name;
+        user.LastName = saveDto.LastName;
+        user.UserName = saveDto.UserName;
 
-			user.FirstName = saveDto.Name;
-			user.LastName = saveDto.LastName;
-			user.UserName = saveDto.UserName;
+        if (emailChanged)
+        {
+            user.Email = saveDto.Email;
+            user.EmailConfirmed = false;
+        }
 
-			if (emailChanged)
-			{
-				user.Email = saveDto.Email;
-				user.EmailConfirmed = false;
-			}
+        var updateResult = await userManager.UpdateAsync(user);
 
-			var updateResult = await userManager.UpdateAsync(user);
+        if (!updateResult.Succeeded)
+        {
+            response.HasError = true;
+            response.Errors.AddRange(updateResult.Errors.Select(e => e.Description));
+            return response;
+        }
 
-			if (!updateResult.Succeeded)
-			{
-				response.HasError = true;
-				response.Errors.AddRange(updateResult.Errors.Select(e => e.Description));
-				return response;
-			}
+        if (emailChanged)
+        {
+            if (isApi != null && !isApi.Value)
+            {
+                var verificationUri = await GetVerificationEmailUri(user, origin) ?? "";
+            }
+            else
+            {
+                var verificationUri = await GetVerificationEmailUri(user, origin) ?? "";
+            }
+        }
 
+        if (!string.IsNullOrWhiteSpace(saveDto.Password))
+        {
+            var token = await userManager.GeneratePasswordResetTokenAsync(user);
+            await userManager.ResetPasswordAsync(user, token, saveDto.Password);
+        }
 
-			if (emailChanged)
-			{
-				if (isApi != null && !isApi.Value)
-				{
-					var verificationUri = await GetVerificationEmailUri(user, origin) ?? "";
-					
-				}
-				else
-				{
-					var verificationUri = await GetVerificationEmailUri(user, origin) ?? "";
+        response.Id = user.Id;
+        response.Email = user.Email ?? "";
+        response.UserName = user.UserName ?? "";
+        response.Name = user.FirstName;
+        response.LastName = user.LastName;
+        response.IsVerified = user.EmailConfirmed;
 
-				}
+        return response;
+    }
 
-
-			}
-
-			if (!string.IsNullOrWhiteSpace(saveDto.Password))
-			{
-				var token = await userManager.GeneratePasswordResetTokenAsync(user);
-				await userManager.ResetPasswordAsync(user, token, saveDto.Password);
-			}
-
-			var rolesAfterUpdate = await userManager.GetRolesAsync(user);
-
-			response.Id = user.Id;
-			response.Email = user.Email ?? "";
-			response.UserName = user.UserName ?? "";
-			response.Name = user.FirstName;
-			response.LastName = user.LastName;
-			response.IsVerified = user.EmailConfirmed;
-
-			return response;
-		}
-    
     public virtual async Task<string> ConfirmAccountAsync(string userId, string userToken)
-		{
-			var user = await userManager.FindByIdAsync(userId);
+    {
+        var user = await userManager.FindByIdAsync(userId);
 
-			if (user == null)
-			{
-				return "User not found. Please verify the confirmation link or contact support.";
-			}
+        if (user == null)
+            return "User not found. Please verify the confirmation link or contact support.";
 
-			userToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(userToken));
-			var result = await userManager.ConfirmEmailAsync(user, userToken);
+        userToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(userToken));
+        var result = await userManager.ConfirmEmailAsync(user, userToken);
 
-			if (result.Succeeded)
-			{
-				user.Status = GlobalStatus.Active;
-				await userManager.UpdateAsync(user);
-				return $"Success! The account for user {user.UserName} has been successfully activated.";
-			}
-			else
-			{
-				return $"Email confirmation failed for {user.Email}. Please ensure the confirmation link is valid or request a new confirmation email.";
-			}
-		}
+        if (result.Succeeded)
+        {
+            user.Status = GlobalStatus.Active;
+            await userManager.UpdateAsync(user);
+            return $"Success! The account for user {user.UserName} has been successfully activated.";
+        }
 
-		public virtual async Task<bool> ActivateOrDesactivateUser(string userId, string origin, bool? isApi = false)
-		{
-			var currentUser = await userManager.FindByIdAsync(userId);
+        return $"Email confirmation failed for {user.Email}. Please ensure the confirmation link is valid or request a new confirmation email.";
+    }
 
-			if (currentUser == null)
-				throw new NullReferenceException("The requested user was not found.");
+    public virtual async Task<bool> ActivateOrDesactivateUser(string userId, string origin, bool? isApi = false)
+    {
+        var currentUser = await userManager.FindByIdAsync(userId);
 
-			if (currentUser.Status == GlobalStatus.Active)
-			{
-				currentUser.Status = GlobalStatus.Inactive;
-				currentUser.EmailConfirmed = false;
+        if (currentUser == null)
+            throw new NullReferenceException("The requested user was not found.");
 
-				var result = await userManager.UpdateAsync(currentUser);
-				if (!result.Succeeded)
-					throw new Exception("Error updating the user, please try again");
+        if (currentUser.Status == GlobalStatus.Active)
+        {
+            currentUser.Status = GlobalStatus.Inactive;
+            currentUser.EmailConfirmed = false;
 
-				return false;
-			}
-			else
-			{
-				currentUser.Status = GlobalStatus.Active;
-				var result = await userManager.UpdateAsync(currentUser);
+            var result = await userManager.UpdateAsync(currentUser);
+            if (!result.Succeeded)
+                throw new Exception("Error updating the user, please try again");
 
-				if (!result.Succeeded)
-					throw new Exception("Error updating the user status, please try again.");
+            return false;
+        }
+        else
+        {
+            currentUser.Status = GlobalStatus.Active;
+            var result = await userManager.UpdateAsync(currentUser);
 
-				if (isApi != null && !isApi.Value)
-				{
-					var verificationUri = await GetVerificationEmailUri(currentUser, origin) ?? "";
+            if (!result.Succeeded)
+                throw new Exception("Error updating the user status, please try again.");
 
-					
-				}
-				else
-				{
-					var verificationEmailToken = await GetVerificationEmailToken(currentUser) ?? "";
+            if (isApi != null && !isApi.Value)
+            {
+                var verificationUri = await GetVerificationEmailUri(currentUser, origin) ?? "";
+            }
+            else
+            {
+                var verificationEmailToken = await GetVerificationEmailToken(currentUser) ?? "";
+            }
 
-					
+            return true;
+        }
+    }
 
-				}
-
-				return true;
-			}
-		}
-
-	
-	
-	
-    
     public virtual async Task<UserResponseDto> ForgotPasswordAsync(string email, string origin, bool? isApi = false)
-		{
-			UserResponseDto response = new() { HasError = false, Errors = [] };
+    {
+        UserResponseDto response = new() { HasError = false, Errors = [] };
 
-			var user = await userManager.FindByEmailAsync(email);
-			if (user == null)
-			{
-				response.HasError = true;
-				response.Errors.Add("There is no user registered with that email.");
-				return response;
-			}
+        var user = await userManager.FindByEmailAsync(email);
+        if (user == null)
+        {
+            response.HasError = true;
+            response.Errors.Add("There is no user registered with that email.");
+            return response;
+        }
 
-			if (!user.EmailConfirmed)
-			{
-				response.HasError = true;
-				response.Errors.Add("This email hasn't been confirmed yet.");
-				return response;
-			}
+        if (!user.EmailConfirmed)
+        {
+            response.HasError = true;
+            response.Errors.Add("This email hasn't been confirmed yet.");
+            return response;
+        }
 
-			if (isApi != null && !isApi.Value)
-			{
-				var resetPasswordUri = await GetResetPasswordUri(user, origin) ?? "";
-				
-			}
-			else
-			{
-				var resetPasswordToken = await GetResetPasswordToken(user) ?? "";
+        if (isApi != null && !isApi.Value)
+        {
+            var resetPasswordUri = await GetResetPasswordUri(user, origin) ?? "";
+        }
+        else
+        {
+            var resetPasswordToken = await GetResetPasswordToken(user) ?? "";
+        }
 
-				
-
-			}
-
-			return response;
-		}
+        return response;
+    }
 
     private async Task<string?> GetVerificationEmailUri(ApplicationUser user, string origin)
     {
@@ -292,14 +267,14 @@ public abstract class BaseServices(UserManager<ApplicationUser> userManager)
         return verificationUri;
     }
 
-    protected async Task<string?> GetVerificationEmailToken(ApplicationUser user)
+    private async Task<string?> GetVerificationEmailToken(ApplicationUser user)
     {
         var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
         token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
         return token;
     }
 
-    protected async Task<string?> GetResetPasswordUri(ApplicationUser user, string origin)
+    private async Task<string?> GetResetPasswordUri(ApplicationUser user, string origin)
     {
         var token = await userManager.GeneratePasswordResetTokenAsync(user);
         token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
@@ -310,7 +285,7 @@ public abstract class BaseServices(UserManager<ApplicationUser> userManager)
         return resetUri;
     }
 
-    protected async Task<string?> GetResetPasswordToken(ApplicationUser user)
+    private async Task<string?> GetResetPasswordToken(ApplicationUser user)
     {
         var token = await userManager.GeneratePasswordResetTokenAsync(user);
         token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));

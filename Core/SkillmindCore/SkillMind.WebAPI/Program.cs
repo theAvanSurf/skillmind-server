@@ -1,6 +1,8 @@
 
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using SkillMind.Infrastructure.Identity;
 using SkillMind.WebAPI.Extensions;
+using SkillMind.WebAPI.Transformers;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddIdentityLayer(builder.Configuration);
@@ -9,7 +11,10 @@ builder.Services.AddSwaggerExtension();
 builder.Services.AddApiVersioningExtension();
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.Conventions.Add(new RouteTokenTransformerConvention(new SlugifyParameterTransformer()));
+});
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 

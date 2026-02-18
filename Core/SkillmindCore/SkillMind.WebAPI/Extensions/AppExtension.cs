@@ -7,12 +7,11 @@ public static class AppExtension
         app.UseSwaggerUI(opt =>
         {
             var versionDescriptions = routeBuilder.DescribeApiVersions();
-            if (versionDescriptions != null && versionDescriptions.Any()) {
-                foreach (var apiVersion in versionDescriptions) {
-                    var url = $"/swagger/{apiVersion.GroupName}/swagger.json";
-                    var name = $"HermesBank - {apiVersion.GroupName.ToUpperInvariant()}";
-                    opt.SwaggerEndpoint(url,name);
-                }                
+            if (!versionDescriptions.Any()) return;
+            foreach (var apiVersion in versionDescriptions) {
+                var url = $"/swagger/{apiVersion.GroupName}/swagger.json";
+                var name = $"SkillMind - {apiVersion.GroupName.ToUpperInvariant()}";
+                opt.SwaggerEndpoint(url,name);
             }
         });
     }

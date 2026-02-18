@@ -2,7 +2,7 @@ namespace SkillMind.Core.Domain.Enums;
 
 public enum Roles
 {
-    Professor,
-    Admin,
-    Student
+    Professor = 0,
+    Admin = 1,
+    Student = 2
 }
