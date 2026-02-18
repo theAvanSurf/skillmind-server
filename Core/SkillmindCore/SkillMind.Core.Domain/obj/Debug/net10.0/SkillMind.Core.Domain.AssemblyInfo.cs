@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SkillMind.Core.Domain")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7c57c6b1c88e956dba3a8817d2fd4905d3108ca8")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f3446ff2e971c024bc19ca7ec0f667664bb0e29c")]
 [assembly: System.Reflection.AssemblyProductAttribute("SkillMind.Core.Domain")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SkillMind.Core.Domain")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
