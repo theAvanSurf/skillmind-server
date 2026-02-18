@@ -6,4 +6,13 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\SkillMind.Core.Application\SkillMind.Core.Application.csproj" />
+      <ProjectReference Include="..\SkillMind.Core.Domain\SkillMind.Core.Domain.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="10.1.3" />
+    </ItemGroup>
+
 </Project>

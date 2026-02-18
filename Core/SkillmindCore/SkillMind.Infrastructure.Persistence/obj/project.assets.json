@@ -1,11 +1,121 @@
 {
   "version": 3,
   "targets": {
-    "net10.0": {}
+    "net10.0": {
+      "Microsoft.OpenApi/2.4.1": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/Microsoft.OpenApi.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Microsoft.OpenApi.dll": {
+            "related": ".pdb;.xml"
+          }
+        }
+      },
+      "Swashbuckle.AspNetCore.Swagger/10.1.3": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.OpenApi": "2.4.1"
+        },
+        "compile": {
+          "lib/net10.0/Swashbuckle.AspNetCore.Swagger.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "runtime": {
+          "lib/net10.0/Swashbuckle.AspNetCore.Swagger.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "frameworkReferences": [
+          "Microsoft.AspNetCore.App"
+        ]
+      },
+      "SkillMind.Core.Application/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v10.0",
+        "dependencies": {
+          "SkillMind.Core.Domain": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/SkillMind.Core.Application.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/SkillMind.Core.Application.dll": {}
+        }
+      },
+      "SkillMind.Core.Domain/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v10.0",
+        "compile": {
+          "bin/placeholder/SkillMind.Core.Domain.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/SkillMind.Core.Domain.dll": {}
+        }
+      }
+    }
   },
-  "libraries": {},
+  "libraries": {
+    "Microsoft.OpenApi/2.4.1": {
+      "sha512": "u7QhXCISMQuab3flasb1hoaiERmUqyWsW7tmQODyILoQ7mJV5IRGM+2KKZYo0QUfC13evEOcHAb6TPWgqEQtrw==",
+      "type": "package",
+      "path": "microsoft.openapi/2.4.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "lib/net8.0/Microsoft.OpenApi.dll",
+        "lib/net8.0/Microsoft.OpenApi.pdb",
+        "lib/net8.0/Microsoft.OpenApi.xml",
+        "lib/netstandard2.0/Microsoft.OpenApi.dll",
+        "lib/netstandard2.0/Microsoft.OpenApi.pdb",
+        "lib/netstandard2.0/Microsoft.OpenApi.xml",
+        "microsoft.openapi.2.4.1.nupkg.sha512",
+        "microsoft.openapi.nuspec"
+      ]
+    },
+    "Swashbuckle.AspNetCore.Swagger/10.1.3": {
+      "sha512": "rKvcTzaqQ60jLaBpPLjUmdE9WCnraOMBJ8p6AtBh9eCqnzwmXREWTyJjXMK6W693aGqHr5DiGTG/J+WT0c/PNg==",
+      "type": "package",
+      "path": "swashbuckle.aspnetcore.swagger/10.1.3",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net10.0/Swashbuckle.AspNetCore.Swagger.dll",
+        "lib/net10.0/Swashbuckle.AspNetCore.Swagger.pdb",
+        "lib/net10.0/Swashbuckle.AspNetCore.Swagger.xml",
+        "lib/net8.0/Swashbuckle.AspNetCore.Swagger.dll",
+        "lib/net8.0/Swashbuckle.AspNetCore.Swagger.pdb",
+        "lib/net8.0/Swashbuckle.AspNetCore.Swagger.xml",
+        "lib/net9.0/Swashbuckle.AspNetCore.Swagger.dll",
+        "lib/net9.0/Swashbuckle.AspNetCore.Swagger.pdb",
+        "lib/net9.0/Swashbuckle.AspNetCore.Swagger.xml",
+        "package-readme.md",
+        "swashbuckle.aspnetcore.swagger.10.1.3.nupkg.sha512",
+        "swashbuckle.aspnetcore.swagger.nuspec"
+      ]
+    },
+    "SkillMind.Core.Application/1.0.0": {
+      "type": "project",
+      "path": "../SkillMind.Core.Application/SkillMind.Core.Application.csproj",
+      "msbuildProject": "../SkillMind.Core.Application/SkillMind.Core.Application.csproj"
+    },
+    "SkillMind.Core.Domain/1.0.0": {
+      "type": "project",
+      "path": "../SkillMind.Core.Domain/SkillMind.Core.Domain.csproj",
+      "msbuildProject": "../SkillMind.Core.Domain/SkillMind.Core.Domain.csproj"
+    }
+  },
   "projectFileDependencyGroups": {
-    "net10.0": []
+    "net10.0": [
+      "SkillMind.Core.Application >= 1.0.0",
+      "SkillMind.Core.Domain >= 1.0.0",
+      "Swashbuckle.AspNetCore.Swagger >= 10.1.3"
+    ]
   },
   "packageFolders": {
     "/Users/teudyencarnacion/.nuget/packages/": {}
@@ -32,7 +142,14 @@
       "frameworks": {
         "net10.0": {
           "targetAlias": "net10.0",
-          "projectReferences": {}
+          "projectReferences": {
+            "/Volumes/Files/Projects/skillmind-server/Core/SkillmindCore/SkillMind.Core.Application/SkillMind.Core.Application.csproj": {
+              "projectPath": "/Volumes/Files/Projects/skillmind-server/Core/SkillmindCore/SkillMind.Core.Application/SkillMind.Core.Application.csproj"
+            },
+            "/Volumes/Files/Projects/skillmind-server/Core/SkillmindCore/SkillMind.Core.Domain/SkillMind.Core.Domain.csproj": {
+              "projectPath": "/Volumes/Files/Projects/skillmind-server/Core/SkillmindCore/SkillMind.Core.Domain/SkillMind.Core.Domain.csproj"
+            }
+          }
         }
       },
       "warningProperties": {
@@ -50,6 +167,12 @@
     "frameworks": {
       "net10.0": {
         "targetAlias": "net10.0",
+        "dependencies": {
+          "Swashbuckle.AspNetCore.Swagger": {
+            "target": "Package",
+            "version": "[10.1.3, )"
+          }
+        },
         "imports": [
           "net461",
           "net462",

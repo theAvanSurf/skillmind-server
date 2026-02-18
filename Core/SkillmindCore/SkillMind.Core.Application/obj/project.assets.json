@@ -1,11 +1,30 @@
 {
   "version": 3,
   "targets": {
-    "net10.0": {}
+    "net10.0": {
+      "SkillMind.Core.Domain/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v10.0",
+        "compile": {
+          "bin/placeholder/SkillMind.Core.Domain.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/SkillMind.Core.Domain.dll": {}
+        }
+      }
+    }
   },
-  "libraries": {},
+  "libraries": {
+    "SkillMind.Core.Domain/1.0.0": {
+      "type": "project",
+      "path": "../SkillMind.Core.Domain/SkillMind.Core.Domain.csproj",
+      "msbuildProject": "../SkillMind.Core.Domain/SkillMind.Core.Domain.csproj"
+    }
+  },
   "projectFileDependencyGroups": {
-    "net10.0": []
+    "net10.0": [
+      "SkillMind.Core.Domain >= 1.0.0"
+    ]
   },
   "packageFolders": {
     "/Users/teudyencarnacion/.nuget/packages/": {}
@@ -32,7 +51,11 @@
       "frameworks": {
         "net10.0": {
           "targetAlias": "net10.0",
-          "projectReferences": {}
+          "projectReferences": {
+            "/Volumes/Files/Projects/skillmind-server/Core/SkillmindCore/SkillMind.Core.Domain/SkillMind.Core.Domain.csproj": {
+              "projectPath": "/Volumes/Files/Projects/skillmind-server/Core/SkillmindCore/SkillMind.Core.Domain/SkillMind.Core.Domain.csproj"
+            }
+          }
         }
       },
       "warningProperties": {
