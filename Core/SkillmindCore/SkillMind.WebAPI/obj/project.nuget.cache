@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "zg0zmDue2Do=",
+  "dgSpecHash": "8UoF943zDgY=",
   "success": true,
-  "projectFilePath": "/Volumes/Files/Projects/skillmind-server/Core/SkillmindCore/SkillMind.WebAPI/SkillMind.WebAPI.csproj",
+  "projectFilePath": "/Users/teudyencarnacion/Documents/PersonalProjects/skillmind-server/Core/SkillmindCore/SkillMind.WebAPI/SkillMind.WebAPI.csproj",
   "expectedPackageFiles": [
     "/Users/teudyencarnacion/.nuget/packages/asp.versioning.abstractions/8.1.0/asp.versioning.abstractions.8.1.0.nupkg.sha512",
     "/Users/teudyencarnacion/.nuget/packages/asp.versioning.http/8.1.1/asp.versioning.http.8.1.1.nupkg.sha512",

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SkillMind.Infrastructure.Identity")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+00283129f484abc940dee063e8b07f24cc883cb8")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f9841feff614c1adbe53b1d068eb4b27b575685f")]
 [assembly: System.Reflection.AssemblyProductAttribute("SkillMind.Infrastructure.Identity")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SkillMind.Infrastructure.Identity")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -1,10 +1,11 @@
 using SkillMind.Core.Application.Dtos.Profiles;
 using SkillMind.Core.Application.Dtos.Sessions;
+using SkillMind.Core.Application.Interfaces;
 using SkillMind.Core.Domain.Interfaces;
 
 namespace SkillMind.Core.Application.Services;
 
-public class SessionManager(IRedisContext redisContext)
+public class SessionManager(IRedisContext redisContext) : ISessionManager
 {
     private readonly IRedisSet<SessionDto> _cache = redisContext.Set<SessionDto>("sessions");
 

@@ -11,5 +11,6 @@ public static class ServiceInjection
     {
         services.AddAutoMapper(cfg => { }, typeof(ServiceInjection));
         services.AddTransient<IProfilesServices, ProfilesServices>();
+        services.AddTransient<ISessionManager, SessionManager>();
     }
 }

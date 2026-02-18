@@ -10,3 +10,15 @@
 /Volumes/Files/Projects/skillmind-server/Core/SkillmindCore/SkillMind.Core.Domain/obj/Debug/net10.0/refint/SkillMind.Core.Domain.dll
 /Volumes/Files/Projects/skillmind-server/Core/SkillmindCore/SkillMind.Core.Domain/obj/Debug/net10.0/SkillMind.Core.Domain.pdb
 /Volumes/Files/Projects/skillmind-server/Core/SkillmindCore/SkillMind.Core.Domain/obj/Debug/net10.0/ref/SkillMind.Core.Domain.dll
+/Users/teudyencarnacion/Documents/PersonalProjects/skillmind-server/Core/SkillmindCore/SkillMind.Core.Domain/bin/Debug/net10.0/SkillMind.Core.Domain.deps.json
+/Users/teudyencarnacion/Documents/PersonalProjects/skillmind-server/Core/SkillmindCore/SkillMind.Core.Domain/bin/Debug/net10.0/SkillMind.Core.Domain.dll
+/Users/teudyencarnacion/Documents/PersonalProjects/skillmind-server/Core/SkillmindCore/SkillMind.Core.Domain/bin/Debug/net10.0/SkillMind.Core.Domain.pdb
+/Users/teudyencarnacion/Documents/PersonalProjects/skillmind-server/Core/SkillmindCore/SkillMind.Core.Domain/obj/Debug/net10.0/SkillMind.Core.Domain.GeneratedMSBuildEditorConfig.editorconfig
+/Users/teudyencarnacion/Documents/PersonalProjects/skillmind-server/Core/SkillmindCore/SkillMind.Core.Domain/obj/Debug/net10.0/SkillMind.Core.Domain.AssemblyInfoInputs.cache
+/Users/teudyencarnacion/Documents/PersonalProjects/skillmind-server/Core/SkillmindCore/SkillMind.Core.Domain/obj/Debug/net10.0/SkillMind.Core.Domain.AssemblyInfo.cs
+/Users/teudyencarnacion/Documents/PersonalProjects/skillmind-server/Core/SkillmindCore/SkillMind.Core.Domain/obj/Debug/net10.0/SkillMind.Core.Domain.csproj.CoreCompileInputs.cache
+/Users/teudyencarnacion/Documents/PersonalProjects/skillmind-server/Core/SkillmindCore/SkillMind.Core.Domain/obj/Debug/net10.0/SkillMind.Core.Domain.sourcelink.json
+/Users/teudyencarnacion/Documents/PersonalProjects/skillmind-server/Core/SkillmindCore/SkillMind.Core.Domain/obj/Debug/net10.0/SkillMind.Core.Domain.dll
+/Users/teudyencarnacion/Documents/PersonalProjects/skillmind-server/Core/SkillmindCore/SkillMind.Core.Domain/obj/Debug/net10.0/refint/SkillMind.Core.Domain.dll
+/Users/teudyencarnacion/Documents/PersonalProjects/skillmind-server/Core/SkillmindCore/SkillMind.Core.Domain/obj/Debug/net10.0/SkillMind.Core.Domain.pdb
+/Users/teudyencarnacion/Documents/PersonalProjects/skillmind-server/Core/SkillmindCore/SkillMind.Core.Domain/obj/Debug/net10.0/ref/SkillMind.Core.Domain.dll

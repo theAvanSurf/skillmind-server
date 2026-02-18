@@ -1,28 +1,46 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SkillMind.Core.Application.Dtos.Common;
+using SkillMind.Core.Application.Dtos.Sessions;
 using SkillMind.Core.Application.Interfaces;
 
 namespace SkillMind.WebAPI.Controllers.v1;
 
 
-public class AuthController(IAccountServicesApi accountServiceForWebApi) : BaseController
+public class AuthController(IAccountServicesApi accountServiceForWebApi, ISessionManager sessionManager, IProfilesServices profilesServices) : BaseController
 {
     [HttpPost("login")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Login([FromBody] LoginDto dto)
     {
-        try
-        {
-            if (!ModelState.IsValid)
-                return BadRequest("All Fields are required.");
+        if (!ModelState.IsValid)
+            return BadRequest(new { Message = "All fields are required." });
 
-            return Ok(await accountServiceForWebApi.AuthenticateAsync(dto));
-        }
-        catch
+        var authResult = await accountServiceForWebApi.AuthenticateAsync(dto);
+
+        if (authResult?.Data is null)
+            return Unauthorized(new { Message = "Email or password are invalid." });
+
+        if (!Guid.TryParse(authResult.Data.Id, out var userId))
+            return BadRequest(new { Message = "Invalid user identifier." });
+
+        var profiles = await profilesServices.GetAllProfilesAsync(userId);
+
+        var session = new SessionDto
         {
-            return Unauthorized("Email or Password Are Invalid.");
-        }
+            UserId = userId,
+            Profiles = profiles,
+            SessionJwtToken = authResult.Data.JwtToken,
+            CreatedAt = DateTime.UtcNow // if you have this property, you should.
+        };
+
+        await sessionManager.CreateSessionAsync(session);
+
+        return Ok(authResult);
     }
+
 
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] CreateUserDto dto)

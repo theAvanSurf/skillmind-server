@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "X78czA7KLkY=",
+  "dgSpecHash": "ZVB8wC68y8Q=",
   "success": true,
-  "projectFilePath": "/Volumes/Files/Projects/skillmind-server/Core/SkillmindCore/SkillMind.Infrastructure.Persistence/SkillMind.Infrastructure.Persistence.csproj",
+  "projectFilePath": "/Users/teudyencarnacion/Documents/PersonalProjects/skillmind-server/Core/SkillmindCore/SkillMind.Infrastructure.Persistence/SkillMind.Infrastructure.Persistence.csproj",
   "expectedPackageFiles": [
     "/Users/teudyencarnacion/.nuget/packages/automapper/16.0.0/automapper.16.0.0.nupkg.sha512",
     "/Users/teudyencarnacion/.nuget/packages/microsoft.entityframeworkcore/10.0.3/microsoft.entityframeworkcore.10.0.3.nupkg.sha512",

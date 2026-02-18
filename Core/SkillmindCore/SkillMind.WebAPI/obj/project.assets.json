@@ -3414,11 +3414,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Volumes/Files/Projects/skillmind-server/Core/SkillmindCore/SkillMind.WebAPI/SkillMind.WebAPI.csproj",
+      "projectUniqueName": "/Users/teudyencarnacion/Documents/PersonalProjects/skillmind-server/Core/SkillmindCore/SkillMind.WebAPI/SkillMind.WebAPI.csproj",
       "projectName": "SkillMind.WebAPI",
-      "projectPath": "/Volumes/Files/Projects/skillmind-server/Core/SkillmindCore/SkillMind.WebAPI/SkillMind.WebAPI.csproj",
+      "projectPath": "/Users/teudyencarnacion/Documents/PersonalProjects/skillmind-server/Core/SkillmindCore/SkillMind.WebAPI/SkillMind.WebAPI.csproj",
       "packagesPath": "/Users/teudyencarnacion/.nuget/packages/",
-      "outputPath": "/Volumes/Files/Projects/skillmind-server/Core/SkillmindCore/SkillMind.WebAPI/obj/",
+      "outputPath": "/Users/teudyencarnacion/Documents/PersonalProjects/skillmind-server/Core/SkillmindCore/SkillMind.WebAPI/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/Users/teudyencarnacion/.nuget/NuGet/NuGet.Config"
@@ -3427,21 +3427,20 @@
         "net10.0"
       ],
       "sources": {
-        "/usr/local/share/dotnet/library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net10.0": {
           "targetAlias": "net10.0",
           "projectReferences": {
-            "/Volumes/Files/Projects/skillmind-server/Core/SkillmindCore/SkillMind.Infrastructure.Identity/SkillMind.Infrastructure.Identity.csproj": {
-              "projectPath": "/Volumes/Files/Projects/skillmind-server/Core/SkillmindCore/SkillMind.Infrastructure.Identity/SkillMind.Infrastructure.Identity.csproj"
+            "/Users/teudyencarnacion/Documents/PersonalProjects/skillmind-server/Core/SkillmindCore/SkillMind.Infrastructure.Identity/SkillMind.Infrastructure.Identity.csproj": {
+              "projectPath": "/Users/teudyencarnacion/Documents/PersonalProjects/skillmind-server/Core/SkillmindCore/SkillMind.Infrastructure.Identity/SkillMind.Infrastructure.Identity.csproj"
             },
-            "/Volumes/Files/Projects/skillmind-server/Core/SkillmindCore/SkillMind.Infrastructure.Persistence/SkillMind.Infrastructure.Persistence.csproj": {
-              "projectPath": "/Volumes/Files/Projects/skillmind-server/Core/SkillmindCore/SkillMind.Infrastructure.Persistence/SkillMind.Infrastructure.Persistence.csproj"
+            "/Users/teudyencarnacion/Documents/PersonalProjects/skillmind-server/Core/SkillmindCore/SkillMind.Infrastructure.Persistence/SkillMind.Infrastructure.Persistence.csproj": {
+              "projectPath": "/Users/teudyencarnacion/Documents/PersonalProjects/skillmind-server/Core/SkillmindCore/SkillMind.Infrastructure.Persistence/SkillMind.Infrastructure.Persistence.csproj"
             },
-            "/Volumes/Files/Projects/skillmind-server/Core/SkillmindCore/SkillMind.Infrastructure.Shared/SkillMind.Infrastructure.Shared.csproj": {
-              "projectPath": "/Volumes/Files/Projects/skillmind-server/Core/SkillmindCore/SkillMind.Infrastructure.Shared/SkillMind.Infrastructure.Shared.csproj"
+            "/Users/teudyencarnacion/Documents/PersonalProjects/skillmind-server/Core/SkillmindCore/SkillMind.Infrastructure.Shared/SkillMind.Infrastructure.Shared.csproj": {
+              "projectPath": "/Users/teudyencarnacion/Documents/PersonalProjects/skillmind-server/Core/SkillmindCore/SkillMind.Infrastructure.Shared/SkillMind.Infrastructure.Shared.csproj"
             }
           }
         }
