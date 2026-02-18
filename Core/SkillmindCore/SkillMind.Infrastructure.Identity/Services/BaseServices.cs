@@ -4,10 +4,11 @@ using Microsoft.AspNetCore.WebUtilities;
 using SkillMind.Core.Application.Dtos.Common;
 using SkillMind.Core.Domain.Enums;
 using SkillMind.Infrastructure.Identity.Entities;
+using SkillMind.Infrastructure.Shared;
 
 namespace SkillMind.Infrastructure.Identity.Services;
 
-public abstract class BaseServices(UserManager<ApplicationUser> userManager)
+public abstract class BaseServices(UserManager<ApplicationUser> userManager, KafkaEventService kafkaEventService)
 {
     public virtual async Task<RegisterResponseDto> RegisterUser(CreateUserDto saveDto, string origin, bool? isApi = false)
     {
@@ -37,6 +38,8 @@ public abstract class BaseServices(UserManager<ApplicationUser> userManager)
             response.HasError = true;
             response.Errors.Add("The given email is already taken. choose another email.");
         }
+
+        
 
         if (response.HasError)
             return response;
@@ -69,6 +72,14 @@ public abstract class BaseServices(UserManager<ApplicationUser> userManager)
         response.UserName = newUser.UserName;
         response.HasError = false;
         await userManager.AddToRoleAsync(newUser, saveDto.Role.ToString());
+
+        await kafkaEventService.PublishAsync("notification.send", new
+        {
+            type = "email",
+            to = newUser.Email,
+            subject = "Bienvenido a Skillmind 🎉",
+            body = $"Hola {newUser.FirstName}, gracias por registrarte en Skillmind."
+        });
 
         if (isApi != null && !isApi.Value)
         {

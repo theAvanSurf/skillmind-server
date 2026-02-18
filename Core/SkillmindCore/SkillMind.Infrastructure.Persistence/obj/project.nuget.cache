@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "sMdWIgYdzo0=",
+  "dgSpecHash": "MQKnLo/8W54=",
   "success": true,
-  "projectFilePath": "/Volumes/Files/Projects/skillmind-server/Core/SkillmindCore/SkillMind.Infrastructure.Persistence/SkillMind.Infrastructure.Persistence.csproj",
+  "projectFilePath": "C:\\Users\\siden\\Desktop\\Skillmind-Kafka\\Core\\SkillmindCore\\SkillMind.Infrastructure.Persistence\\SkillMind.Infrastructure.Persistence.csproj",
   "expectedPackageFiles": [
-    "/Users/teudyencarnacion/.nuget/packages/microsoft.openapi/2.4.1/microsoft.openapi.2.4.1.nupkg.sha512",
-    "/Users/teudyencarnacion/.nuget/packages/swashbuckle.aspnetcore.swagger/10.1.3/swashbuckle.aspnetcore.swagger.10.1.3.nupkg.sha512"
+    "C:\\Users\\siden\\.nuget\\packages\\microsoft.openapi\\2.4.1\\microsoft.openapi.2.4.1.nupkg.sha512",
+    "C:\\Users\\siden\\.nuget\\packages\\swashbuckle.aspnetcore.swagger\\10.1.3\\swashbuckle.aspnetcore.swagger.10.1.3.nupkg.sha512"
   ],
   "logs": []
 }

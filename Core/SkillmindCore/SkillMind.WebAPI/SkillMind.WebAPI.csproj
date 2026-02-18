@@ -25,6 +25,7 @@
     <ItemGroup>
       <ProjectReference Include="..\SkillMind.Infrastructure.Identity\SkillMind.Infrastructure.Identity.csproj" />
       <ProjectReference Include="..\SkillMind.Infrastructure.Persistence\SkillMind.Infrastructure.Persistence.csproj" />
+      <ProjectReference Include="..\SkillMind.Infrastructure.Shared\SkillMind.Infrastructure.Shared.csproj" />
     </ItemGroup>
 
 </Project>

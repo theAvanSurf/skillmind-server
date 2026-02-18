@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "rvpWQr8WFTI=",
+  "dgSpecHash": "SWi//jC4ogE=",
   "success": true,
-  "projectFilePath": "/Volumes/Files/Projects/skillmind-server/Core/SkillmindCore/SkillMind.Core.Application/SkillMind.Core.Application.csproj",
+  "projectFilePath": "C:\\Users\\siden\\Desktop\\Skillmind-Kafka\\Core\\SkillmindCore\\SkillMind.Core.Application\\SkillMind.Core.Application.csproj",
   "expectedPackageFiles": [],
   "logs": []
 }
