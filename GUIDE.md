@@ -43,6 +43,10 @@ The project uses environment variables to manage sensitive configuration like da
 2.  **Access the services**:
     *   **API Gateway**: http://localhost:3000
     *   **Core Service**: http://localhost:5001 (Internal Docker port is 8080)
+    *   **Redis**: `localhost:6379`
+    *   **Kafka**: `localhost:9092` (Internal Docker network address is `kafka:29092`)
+        *   *Note: Your applications connect here. Zookeeper is just a background requirement for Kafka.*
+    *   **Zookeeper**: `localhost:2181` (Required by Kafka, usually not accessed directly)
 
 3.  **Stopping the services**:
     Press `Ctrl+C` in the terminal where `docker-compose` is running, or run:
