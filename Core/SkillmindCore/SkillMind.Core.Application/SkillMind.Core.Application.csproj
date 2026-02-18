@@ -6,4 +6,8 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\SkillMind.Core.Domain\SkillMind.Core.Domain.csproj" />
+    </ItemGroup>
+
 </Project>

@@ -1,5 +1,12 @@
-var builder = WebApplication.CreateBuilder(args);
 
+using SkillMind.Infrastructure.Identity;
+using SkillMind.WebAPI.Extensions;
+
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddIdentityLayer(builder.Configuration);
+builder.Services.AddOpenApi();
+builder.Services.AddSwaggerExtension();
+builder.Services.AddApiVersioningExtension();
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -7,10 +14,11 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
+await app.Services.SeedDatabaseAsync();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    app.UseSwaggerExtension(app);
     app.MapOpenApi();
 }
 

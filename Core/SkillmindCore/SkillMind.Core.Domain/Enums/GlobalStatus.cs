@@ -1,6 +1,8 @@
 namespace SkillMind.Core.Domain.Enums;
 
-public class GlobalStatus
+public enum GlobalStatus
 {
-    
+    Active,
+    Inactive,
+    Verified
 }
