@@ -30,6 +30,7 @@ public class AuthController(IAccountServicesApi accountServiceForWebApi, ISessio
 
         var session = new SessionDto
         {
+            SessionId = Guid.NewGuid(),
             UserId = userId,
             Profiles = profiles,
             SessionJwtToken = authResult.Data.JwtToken,

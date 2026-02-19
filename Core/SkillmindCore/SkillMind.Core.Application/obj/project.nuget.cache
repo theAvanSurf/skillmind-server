@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "DPxqxfeEAv4=",
+  "dgSpecHash": "2z5VnsTmMWo=",
   "success": true,
-  "projectFilePath": "/Users/teudyencarnacion/Documents/PersonalProjects/skillmind-server/Core/SkillmindCore/SkillMind.Core.Application/SkillMind.Core.Application.csproj",
+  "projectFilePath": "/Volumes/Files/Projects/skillmind-server/Core/SkillmindCore/SkillMind.Core.Application/SkillMind.Core.Application.csproj",
   "expectedPackageFiles": [
     "/Users/teudyencarnacion/.nuget/packages/automapper/16.0.0/automapper.16.0.0.nupkg.sha512",
     "/Users/teudyencarnacion/.nuget/packages/microsoft.extensions.dependencyinjection.abstractions/10.0.0/microsoft.extensions.dependencyinjection.abstractions.10.0.0.nupkg.sha512",

@@ -7,7 +7,11 @@ using SkillMind.Core.Domain.Interfaces;
 
 namespace SkillMind.Core.Application.Services;
 
-public class ProfilesServices(IProfilesRepository repository, IMapper mapper, IPaginationService paginationService)
+public class ProfilesServices(
+    IProfilesRepository repository,
+    IMapper mapper,
+    IPaginationService paginationService,
+    ISessionManager sessionManager)
     : GenericService<Profiles, ProfilesDto>(repository, mapper), IProfilesServices
 {
     private readonly IMapper _mapper = mapper;
@@ -28,6 +32,8 @@ public class ProfilesServices(IProfilesRepository repository, IMapper mapper, IP
             .Where(dto => existingProfiles.All(p => p.ProfileName != dto.ProfileName))
             .Select(dto => _mapper.Map<ProfilesDto>(dto))
             .ToList();
+        
+        List<ProfilesDto> savedProfiles;
 
         switch (newDtos.Count)
         {
@@ -37,11 +43,26 @@ public class ProfilesServices(IProfilesRepository repository, IMapper mapper, IP
             {
                 var result = await AddAsync(newDtos[0]);
                 if (result == null) throw new Exception($"Failed to create profile '{newDtos[0].ProfileName}'.");
-                return [result];
+                savedProfiles = [result];
+                break;
             }
             default:
-                return await AddRangeAsync(newDtos) ?? throw new Exception("Failed to create profiles.");
+                savedProfiles = await AddRangeAsync(newDtos) ?? throw new Exception("Failed to create profiles.");
+                break;
         }
+
+        // Update session for each new profile
+        if (savedProfiles.Count > 0)
+        {
+            // Assuming all profiles belong to the same user (which they should based on Controller logic)
+            var userId = savedProfiles.First().UserId;
+            foreach (var profile in savedProfiles)
+            {
+                await sessionManager.AddProfileAsync(userId, profile);
+            }
+        }
+
+        return savedProfiles;
     }
 
     public async Task<PagedResultDto<ProfilesDto>> GetProfilesAsync(string userId, PagedQueryDto query)
@@ -71,6 +92,9 @@ public class ProfilesServices(IProfilesRepository repository, IMapper mapper, IP
 
         await repository.DeleteAsync(profileId);
 
+        // Remove from session
+        await sessionManager.RemoveProfileAsync(userId, profileId);
+
         return _mapper.Map<ProfilesDto>(entity);
     }
 
@@ -96,8 +120,15 @@ public class ProfilesServices(IProfilesRepository repository, IMapper mapper, IP
             throw new InvalidOperationException("A profile with this name already exists.");
         
         var updatedEntity = await repository.UpdateAsync(profileId, entity);
+        var resultDto = updatedEntity == null ? throw new Exception("Failed to update profile.") : _mapper.Map<ProfilesDto>(updatedEntity);
 
-        return updatedEntity == null ? throw new Exception("Failed to update profile.") : _mapper.Map<ProfilesDto>(updatedEntity);
+        // Update in session (Remove old, Add new/updated)
+        // Alternatively we could have an UpdateProfileAsync on SessionManager, 
+        // but Remove+Add is a safe way to ensure it's refreshed.
+        await sessionManager.RemoveProfileAsync(userId, profileId);
+        await sessionManager.AddProfileAsync(userId, resultDto);
+
+        return resultDto;
     }
 
     public async Task<List<ProfilesDto>> GetAllProfilesAsync(Guid userId)
