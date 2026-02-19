@@ -20,6 +20,6 @@ import { NotificationsModule } from '../notifications/notifications.module';
     ]),
     NotificationsModule,
   ],
-  providers: [KafkaConsumer],
+  controllers: [KafkaConsumer],
 })
-export class KafkaModule {}
+export class KafkaModule { }

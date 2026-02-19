@@ -132,9 +132,6 @@ public static class ServicesRegistration
         #region Services Registration
 
         service.AddScoped<IAccountServicesApi, AccountServices>();
-        service.AddSingleton(new KafkaEventService(
-        configuration["KAFKA_BROKER"] ?? "localhost:29092"
-        ));
         #endregion
     }
 

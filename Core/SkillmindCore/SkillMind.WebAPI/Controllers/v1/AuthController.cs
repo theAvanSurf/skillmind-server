@@ -52,7 +52,7 @@ public class AuthController(IAccountServicesApi accountServiceForWebApi, ISessio
                 return BadRequest("All Fields are required.");
 
             var origin = Request.Headers["origin"];
-            var result = await accountServiceForWebApi.RegisterUser(dto, origin!, true);
+            var result = await accountServiceForWebApi.RegisterUser(dto, origin!, false);
 
             if (result.HasError)
                 return BadRequest(result.Errors);
@@ -93,7 +93,7 @@ public class AuthController(IAccountServicesApi accountServiceForWebApi, ISessio
             if (!ModelState.IsValid)
                 return BadRequest();
 
-            var result = await accountServiceForWebApi.ForgotPasswordAsync(dto.Email, null!, true);
+            var result = await accountServiceForWebApi.ForgotPasswordAsync(dto.Email, null!, false);
 
             if (result.HasError)
                 return BadRequest(result.Errors);
