@@ -1,18 +1,69 @@
-# Dependencies
+# ============================================================
+# DEPENDENCIES
+# ============================================================
 node_modules/
 **/node_modules/
 pnpm-lock.yaml
 yarn.lock
 package-lock.json
 
-# Build outputs
+# ============================================================
+# BUILD OUTPUTS
+# ============================================================
+
+# Node / TypeScript
 dist/
 build/
 **/dist/
 **/build/
 *.tsbuildinfo
 
-# Environment variables
+# C# / .NET
+bin/
+obj/
+*.exe
+*.dll
+*.pdb
+*.mdb
+*.cache
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+[Pp]ackages/
+*.nupkg
+*.snupkg
+artifacts/
+_ReSharper*/
+*.DotSettings.user
+BenchmarkDotNet.Artifacts/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+*.egg
+*.egg-info/
+dist/
+eggs/
+.eggs/
+*.whl
+*.spec
+pip-log.txt
+pip-delete-this-directory.txt
+.venv/
+venv/
+env/
+ENV/
+.Python
+site-packages/
+
+# ============================================================
+# ENVIRONMENT VARIABLES
+# ============================================================
 .env
 .env.local
 .env.development
@@ -22,7 +73,9 @@ build/
 .env.production
 .env.production.local
 
-# Logs
+# ============================================================
+# LOGS
+# ============================================================
 logs/
 *.log
 npm-debug.log*
@@ -31,7 +84,9 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
+# ============================================================
 # OS
+# ============================================================
 .DS_Store
 .DS_Store?
 ._*
@@ -39,9 +94,11 @@ lerna-debug.log*
 .Trashes
 ehthumbs.db
 Thumbs.db
+desktop.ini
 
-# IDEs and editors
-/.idea
+# ============================================================
+# IDEs AND EDITORS
+# ============================================================
 .idea/
 .project
 .classpath
@@ -50,40 +107,51 @@ Thumbs.db
 .settings/
 *.sublime-workspace
 *.sublime-project
-
-# VSCode
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+*.code-workspace
+.history/
 
-# Testing
-/coverage
-/.nyc_output
+# ============================================================
+# TESTING & COVERAGE
+# ============================================================
+coverage/
+.nyc_output/
 *.coverage
 .jest-*
+.pytest_cache/
+htmlcov/
+.tox/
+nosetests.xml
+test-results/
 
-# Temporary files
-.temp
-.tmp
+# ============================================================
+# TEMPORARY & RUNTIME
+# ============================================================
+.temp/
+.tmp/
 *.tmp
 *.temp
-
-# Runtime data
 pids/
 *.pid
 *.seed
 *.pid.lock
 
-# Docker
-*.log
+# ============================================================
+# DOCKER
+# ============================================================
 docker-compose.override.yml
 
-# Cache
+# ============================================================
+# CACHE
+# ============================================================
 .cache/
 .eslintcache
 .prettier-cache
-
-# Diagnostic reports
-report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.ruff_cache/
