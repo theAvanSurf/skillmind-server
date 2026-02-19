@@ -1,13 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>net10.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-    </PropertyGroup>
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
 
-    <ItemGroup>
-      <PackageReference Include="Confluent.Kafka" Version="2.13.0" />
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Confluent.Kafka" Version="2.13.0" />
+    <PackageReference Include="StackExchange.Redis" Version="2.11.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SkillMind.Core.Application\SkillMind.Core.Application.csproj" />
+    <ProjectReference Include="..\SkillMind.Core.Domain\SkillMind.Core.Domain.csproj" />
+    <ProjectReference Include="..\SkillMind.Infrastructure.Identity\SkillMind.Infrastructure.Identity.csproj" />
+    <ProjectReference Include="..\SkillMind.Infrastructure.Persistence\SkillMind.Infrastructure.Persistence.csproj" />
+  </ItemGroup>
 
 </Project>
