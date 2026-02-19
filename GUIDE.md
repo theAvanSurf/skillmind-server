@@ -44,7 +44,7 @@ The project uses environment variables to manage sensitive configuration like da
     *   **API Gateway**: http://localhost:3000
     *   **Core Service**: http://localhost:5001 (Internal Docker port is 8080)
     *   **Redis**: `localhost:6379`
-    *   **Kafka**: `localhost:9092` (Internal Docker network address is `kafka:29092`)
+    *   **Kafka**: `localhost:29092` (Internal Docker network address is `kafka:29092`)
         *   *Note: Your applications connect here. Zookeeper is just a background requirement for Kafka.*
     *   **Zookeeper**: `localhost:2181` (Required by Kafka, usually not accessed directly)
 

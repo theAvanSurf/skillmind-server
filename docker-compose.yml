@@ -1,4 +1,3 @@
-
 services:
   redis:
     image: redis:7.2-alpine
@@ -8,60 +7,6 @@ services:
     volumes:
       - redis-data:/data
     restart: always
-
-  api-gateway:
-    build:
-      context: .
-      dockerfile: api-gateway/Dockerfile
-      target: development
-    container_name: skillmind-api-gateway
-    ports:
-      - "3000:3000"
-    environment:
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      KAFKA_BROKER: kafka:29092
-      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
-      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
-      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
-      # Database environment variables for API Gateway (if applicable)
-      DATABASE_URL: ${POSTGRES_URL}
-      # Email settings
-      EMAILER_HOST: ${EMAILER_HOST}
-      EMAILER_PORT: ${EMAILER_PORT}
-      EMAILER_USER: ${EMAILER_USER}
-      EMAILER_PASS: ${EMAILER_PASS}
-    volumes:
-      - ./api-gateway/src:/usr/src/app/src
-      - ./api-gateway/tsconfig.json:/usr/src/app/tsconfig.json
-      - ./api-gateway/nest-cli.json:/usr/src/app/nest-cli.json
-    depends_on:
-      - redis
-      - kafka
-      - core
-
-  core:
-    build:
-      context: ./Core/SkillmindCore
-      dockerfile: Dockerfile
-      target: development
-    container_name: skillmind-core
-    ports:
-      - "5001:8080"
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DatabaseUrl=${POSTGRES_URL}
-      - JwtSettings__SecretKey=${JWT_SECRET_KEY}
-      - JwtSettings__Issuer=${JWT_ISSUER}
-      - JwtSettings__Audience=${JWT_AUDIENCE}
-      - JwtSettings__DurationInMinutes=${JWT_DURATION_MINUTES}
-      - EmailSettings__Host=${EMAILER_HOST}
-      - EmailSettings__Port=${EMAILER_PORT}
-      - EmailSettings__User=${EMAILER_USER}
-      - EmailSettings__Password=${EMAILER_PASS}
-      - REDIS=${REDIS_URL}
-    depends_on:
-      - redis
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
@@ -88,7 +33,94 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
 
+  core:
+    build:
+      context: ./Core/SkillmindCore
+      dockerfile: Dockerfile
+      target: development
+    container_name: skillmind-core
+    ports:
+      - "5001:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DatabaseUrl=${POSTGRES_URL}
+      - JwtSettings__SecretKey=${JWT_SECRET_KEY}
+      - JwtSettings__Issuer=${JWT_ISSUER}
+      - JwtSettings__Audience=${JWT_AUDIENCE}
+      - JwtSettings__DurationInMinutes=${JWT_DURATION_MINUTES}
+      - EmailSettings__Host=${EMAILER_HOST}
+      - EmailSettings__Port=${EMAILER_PORT}
+      - EmailSettings__User=${EMAILER_USER}
+      - EmailSettings__Password=${EMAILER_PASS}
+      - KAFKA_BROKER=kafka:29092
+      - REDIS=${REDIS_URL}
+    depends_on:
+      kafka:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    restart: on-failure
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
+      target: development
+    container_name: skillmind-api-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      KAFKA_BROKER: kafka:29092
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
+      DATABASE_URL: ${POSTGRES_URL}
+      EMAILER_HOST: ${EMAILER_HOST}
+      EMAILER_PORT: ${EMAILER_PORT}
+      EMAILER_USER: ${EMAILER_USER}
+      EMAILER_PASS: ${EMAILER_PASS}
+    volumes:
+      - ./api-gateway/src:/usr/src/app/src
+      - ./api-gateway/tsconfig.json:/usr/src/app/tsconfig.json
+      - ./api-gateway/nest-cli.json:/usr/src/app/nest-cli.json
+    depends_on:
+      kafka:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      core:
+        condition: service_started
+    restart: on-failure
+
+  notification-service:
+    build:
+      context: ./notification-service
+      dockerfile: Dockerfile
+    container_name: skillmind-notification-service
+    ports:
+      - "3001:3001"
+    environment:
+      PORT: 3001
+      KAFKA_BROKER: kafka:29092
+      SMTP_HOST: ${EMAILER_HOST}
+      SMTP_PORT: ${EMAILER_PORT}
+      SMTP_USER: ${EMAILER_USER}
+      SMTP_PASS: ${EMAILER_PASS}
+      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID}
+      FIREBASE_CLIENT_EMAIL: ${FIREBASE_CLIENT_EMAIL}
+      FIREBASE_PRIVATE_KEY: ${FIREBASE_PRIVATE_KEY}
+    depends_on:
+      kafka:
+        condition: service_healthy
+    restart: always
 
 volumes:
   redis-data:

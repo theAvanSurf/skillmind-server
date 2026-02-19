@@ -14,6 +14,7 @@ using SkillMind.Core.Domain.Settings;
 using SkillMind.Infrastructure.Identity.Contexts;
 using SkillMind.Infrastructure.Identity.Entities;
 using SkillMind.Infrastructure.Identity.Services;
+using SkillMind.Infrastructure.Shared;
 
 namespace SkillMind.Infrastructure.Identity;
 
@@ -131,7 +132,9 @@ public static class ServicesRegistration
         #region Services Registration
 
         service.AddScoped<IAccountServicesApi, AccountServices>();
-
+        service.AddSingleton(new KafkaEventService(
+        configuration["KAFKA_BROKER"] ?? "localhost:29092"
+        ));
         #endregion
     }
 

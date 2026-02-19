@@ -6,9 +6,13 @@ using SkillMind.Infrastructure.Persistence;
 using SkillMind.Infrastructure.Shared;
 using SkillMind.WebAPI.Extensions;
 using SkillMind.WebAPI.Transformers;
+using SkillMind.Infrastructure.Shared;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddIdentityLayer(builder.Configuration);
+builder.Services.AddSingleton(new KafkaEventService(
+    builder.Configuration["KAFKA_BROKER"] ?? "localhost:29092"
+));
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerExtension();
 builder.Services.AddApiVersioningExtension();
