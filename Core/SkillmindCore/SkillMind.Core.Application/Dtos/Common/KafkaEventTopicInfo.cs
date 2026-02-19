@@ -1,6 +1,7 @@
 namespace SkillMind.Core.Application.Dtos.Common;
 
-public class KafkaEventTopicInfo
-{
-    
-}
+public record KafkaTopicInfo(
+    string Topic,
+    int PartitionCount,
+    IReadOnlyList<int> PartitionIds
+);

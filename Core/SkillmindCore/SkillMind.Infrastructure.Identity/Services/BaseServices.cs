@@ -1,6 +1,7 @@
 using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
+using SkillMind.Application.Interfaces;
 using SkillMind.Core.Application.Dtos.Common;
 using SkillMind.Core.Domain.Enums;
 using SkillMind.Infrastructure.Identity.Entities;
@@ -8,8 +9,10 @@ using SkillMind.Infrastructure.Shared;
 
 namespace SkillMind.Infrastructure.Identity.Services;
 
-public abstract class BaseServices(UserManager<ApplicationUser> userManager, KafkaEventService kafkaEventService)
+public abstract class BaseServices(UserManager<ApplicationUser> userManager, IKafkaEventService kafkaEventService)
 {
+    private readonly IKafkaEventService _kafkaEventService = kafkaEventService;
+
     public virtual async Task<RegisterResponseDto> RegisterUser(CreateUserDto saveDto, string origin, bool? isApi = false)
     {
         RegisterResponseDto response = new()
@@ -24,7 +27,6 @@ public abstract class BaseServices(UserManager<ApplicationUser> userManager, Kaf
         };
 
         var userWithSameUserName = await userManager.FindByNameAsync(saveDto.UserName);
-
         if (userWithSameUserName != null)
         {
             response.HasError = true;
@@ -32,14 +34,11 @@ public abstract class BaseServices(UserManager<ApplicationUser> userManager, Kaf
         }
 
         var userWithSameEmail = await userManager.FindByEmailAsync(saveDto.Email);
-
         if (userWithSameEmail != null)
         {
             response.HasError = true;
             response.Errors.Add("The given email is already taken. choose another email.");
         }
-
-        
 
         if (response.HasError)
             return response;
@@ -55,7 +54,6 @@ public abstract class BaseServices(UserManager<ApplicationUser> userManager, Kaf
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
             Status = GlobalStatus.Inactive
-            
         };
 
         var result = await userManager.CreateAsync(newUser, saveDto.Password);
@@ -75,18 +73,31 @@ public abstract class BaseServices(UserManager<ApplicationUser> userManager, Kaf
         response.HasError = false;
         await userManager.AddToRoleAsync(newUser, saveDto.Role.ToString());
 
+        if (isApi == null || isApi.Value) return response;
+
+        var verificationUri = await GetVerificationEmailUri(newUser, origin);
+
         await kafkaEventService.PublishAsync("notification.send", new
         {
             type = "email",
             to = newUser.Email,
             subject = "Bienvenido a Skillmind 🎉",
-            body = $"Hola {newUser.FirstName}, gracias por registrarte en Skillmind."
+            body = $@"
+                <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+                    <h2 style='color: #4F46E5;'>¡Bienvenido a Skillmind, {newUser.FirstName}! 🎉</h2>
+                    <p>Gracias por unirte a nuestra plataforma. Estamos emocionados de tenerte con nosotros.</p>
+                    <p>Para comenzar, por favor verifica tu correo electrónico haciendo clic en el siguiente botón:</p>
+                    <a href='{verificationUri}'
+                       style='display: inline-block; padding: 12px 24px; background-color: #4F46E5; color: white;
+                              text-decoration: none; border-radius: 6px; margin: 16px 0;'>
+                        Verificar mi cuenta
+                    </a>
+                    <p style='color: #6B7280; font-size: 14px;'>Si no creaste una cuenta en Skillmind, puedes ignorar este correo.</p>
+                    <p style='color: #6B7280; font-size: 14px;'>Este enlace expirará en 24 horas.</p>
+                    <hr style='border: none; border-top: 1px solid #E5E7EB; margin: 24px 0;'/>
+                    <p style='color: #9CA3AF; font-size: 12px;'>© 2025 Skillmind. Todos los derechos reservados.</p>
+                </div>"
         });
-
-        if (isApi != null && !isApi.Value)
-        {
-            var verificationUri = await GetVerificationEmailUri(newUser, origin);
-        }
 
         return response;
     }
@@ -153,14 +164,29 @@ public abstract class BaseServices(UserManager<ApplicationUser> userManager, Kaf
 
         if (emailChanged)
         {
-            if (isApi != null && !isApi.Value)
+            var verificationUri = await GetVerificationEmailUri(user, origin) ?? "";
+
+            await kafkaEventService.PublishAsync("notification.send", new
             {
-                var verificationUri = await GetVerificationEmailUri(user, origin) ?? "";
-            }
-            else
-            {
-                var verificationUri = await GetVerificationEmailUri(user, origin) ?? "";
-            }
+                type = "email",
+                to = user.Email,
+                subject = "Verifica tu nuevo correo en Skillmind 📧",
+                body = $@"
+                    <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+                        <h2 style='color: #4F46E5;'>Hola {user.FirstName}, verifica tu nuevo correo 📧</h2>
+                        <p>Hemos recibido una solicitud para cambiar el correo electrónico asociado a tu cuenta de Skillmind.</p>
+                        <p>Por favor, confirma tu nuevo correo haciendo clic en el siguiente botón:</p>
+                        <a href='{verificationUri}'
+                           style='display: inline-block; padding: 12px 24px; background-color: #4F46E5; color: white;
+                                  text-decoration: none; border-radius: 6px; margin: 16px 0;'>
+                            Verificar mi nuevo correo
+                        </a>
+                        <p style='color: #6B7280; font-size: 14px;'>Si no solicitaste este cambio, por favor ignora este correo o contacta a soporte.</p>
+                        <p style='color: #6B7280; font-size: 14px;'>Este enlace expirará en 24 horas.</p>
+                        <hr style='border: none; border-top: 1px solid #E5E7EB; margin: 24px 0;'/>
+                        <p style='color: #9CA3AF; font-size: 12px;'>© 2025 Skillmind. Todos los derechos reservados.</p>
+                    </div>"
+            });
         }
 
         if (!string.IsNullOrWhiteSpace(saveDto.Password))
@@ -193,6 +219,22 @@ public abstract class BaseServices(UserManager<ApplicationUser> userManager, Kaf
         {
             user.Status = GlobalStatus.Active;
             await userManager.UpdateAsync(user);
+
+            await kafkaEventService.PublishAsync("notification.send", new
+            {
+                type = "email",
+                to = user.Email,
+                subject = "¡Tu cuenta ha sido verificada! ✅",
+                body = $@"
+                    <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+                        <h2 style='color: #4F46E5;'>¡Tu cuenta está activa, {user.FirstName}! ✅</h2>
+                        <p>Tu dirección de correo electrónico ha sido verificada exitosamente y tu cuenta en Skillmind ya está activa.</p>
+                        <p>Ya puedes iniciar sesión y comenzar a explorar todo lo que tenemos para ti.</p>
+                        <hr style='border: none; border-top: 1px solid #E5E7EB; margin: 24px 0;'/>
+                        <p style='color: #9CA3AF; font-size: 12px;'>© 2025 Skillmind. Todos los derechos reservados.</p>
+                    </div>"
+            });
+
             return $"Success! The account for user {user.UserName} has been successfully activated.";
         }
 
@@ -215,6 +257,20 @@ public abstract class BaseServices(UserManager<ApplicationUser> userManager, Kaf
             if (!result.Succeeded)
                 throw new Exception("Error updating the user, please try again");
 
+            await kafkaEventService.PublishAsync("notification.send", new
+            {
+                type = "email",
+                to = currentUser.Email,
+                subject = "Tu cuenta ha sido desactivada 🔒",
+                body = $@"
+                    <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+                        <h2 style='color: #4F46E5;'>Hola {currentUser.FirstName}, tu cuenta ha sido desactivada 🔒</h2>
+                        <p>Tu cuenta de Skillmind ha sido desactivada. Si crees que esto es un error, por favor contacta a nuestro equipo de soporte.</p>
+                        <hr style='border: none; border-top: 1px solid #E5E7EB; margin: 24px 0;'/>
+                        <p style='color: #9CA3AF; font-size: 12px;'>© 2025 Skillmind. Todos los derechos reservados.</p>
+                    </div>"
+            });
+
             return false;
         }
         else
@@ -225,14 +281,27 @@ public abstract class BaseServices(UserManager<ApplicationUser> userManager, Kaf
             if (!result.Succeeded)
                 throw new Exception("Error updating the user status, please try again.");
 
-            if (isApi != null && !isApi.Value)
+            var verificationUri = await GetVerificationEmailUri(currentUser, origin) ?? "";
+
+            await kafkaEventService.PublishAsync("notification.send", new
             {
-                var verificationUri = await GetVerificationEmailUri(currentUser, origin) ?? "";
-            }
-            else
-            {
-                var verificationEmailToken = await GetVerificationEmailToken(currentUser) ?? "";
-            }
+                type = "email",
+                to = currentUser.Email,
+                subject = "Tu cuenta ha sido reactivada 🎉",
+                body = $@"
+                    <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+                        <h2 style='color: #4F46E5;'>¡Bienvenido de vuelta, {currentUser.FirstName}! 🎉</h2>
+                        <p>Tu cuenta de Skillmind ha sido reactivada. Para completar el proceso, por favor verifica tu correo electrónico haciendo clic en el siguiente botón:</p>
+                        <a href='{verificationUri}'
+                           style='display: inline-block; padding: 12px 24px; background-color: #4F46E5; color: white;
+                                  text-decoration: none; border-radius: 6px; margin: 16px 0;'>
+                            Verificar mi cuenta
+                        </a>
+                        <p style='color: #6B7280; font-size: 14px;'>Este enlace expirará en 24 horas.</p>
+                        <hr style='border: none; border-top: 1px solid #E5E7EB; margin: 24px 0;'/>
+                        <p style='color: #9CA3AF; font-size: 12px;'>© 2025 Skillmind. Todos los derechos reservados.</p>
+                    </div>"
+            });
 
             return true;
         }
@@ -257,14 +326,29 @@ public abstract class BaseServices(UserManager<ApplicationUser> userManager, Kaf
             return response;
         }
 
-        if (isApi != null && !isApi.Value)
+        var resetPasswordUri = await GetResetPasswordUri(user, origin) ?? "";
+
+        await kafkaEventService.PublishAsync("notification.send", new
         {
-            var resetPasswordUri = await GetResetPasswordUri(user, origin) ?? "";
-        }
-        else
-        {
-            var resetPasswordToken = await GetResetPasswordToken(user) ?? "";
-        }
+            type = "email",
+            to = user.Email,
+            subject = "Restablece tu contraseña en Skillmind 🔑",
+            body = $@"
+                <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+                    <h2 style='color: #4F46E5;'>Hola {user.FirstName}, restablece tu contraseña 🔑</h2>
+                    <p>Recibimos una solicitud para restablecer la contraseña de tu cuenta en Skillmind.</p>
+                    <p>Haz clic en el siguiente botón para crear una nueva contraseña:</p>
+                    <a href='{resetPasswordUri}'
+                       style='display: inline-block; padding: 12px 24px; background-color: #4F46E5; color: white;
+                              text-decoration: none; border-radius: 6px; margin: 16px 0;'>
+                        Restablecer contraseña
+                    </a>
+                    <p style='color: #6B7280; font-size: 14px;'>Si no solicitaste restablecer tu contraseña, puedes ignorar este correo.</p>
+                    <p style='color: #6B7280; font-size: 14px;'>Este enlace expirará en 24 horas.</p>
+                    <hr style='border: none; border-top: 1px solid #E5E7EB; margin: 24px 0;'/>
+                    <p style='color: #9CA3AF; font-size: 12px;'>© 2025 Skillmind. Todos los derechos reservados.</p>
+                </div>"
+        });
 
         return response;
     }

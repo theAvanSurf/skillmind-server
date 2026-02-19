@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using SkillMind.Application.Interfaces;
 using SkillMind.Core.Application.Dtos.Common;
 using SkillMind.Core.Application.Interfaces;
 using SkillMind.Core.Domain.Enums;
@@ -14,7 +15,7 @@ using SkillMind.Infrastructure.Shared;
 
 namespace SkillMind.Infrastructure.Identity.Services;
 
-public sealed class AccountServices(UserManager<ApplicationUser> userManager, IOptions<JwtSettings> jwtSettings, SignInManager<ApplicationUser> signInManager, KafkaEventService  kafkaEventService) : BaseServices(userManager,  kafkaEventService), IAccountServicesApi
+public sealed class AccountServices(UserManager<ApplicationUser> userManager, IOptions<JwtSettings> jwtSettings, SignInManager<ApplicationUser> signInManager, IKafkaEventService kafkaEventService) : BaseServices(userManager, kafkaEventService), IAccountServicesApi
 {
     private readonly JwtSettings _jwtSettings = jwtSettings.Value;
     private readonly UserManager<ApplicationUser> _userManager = userManager;

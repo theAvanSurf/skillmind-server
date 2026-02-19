@@ -50,6 +50,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DatabaseUrl=${POSTGRES_URL}
+      - ConnectionStrings__Redis=redis:6379
       - JwtSettings__SecretKey=${JWT_SECRET_KEY}
       - JwtSettings__Issuer=${JWT_ISSUER}
       - JwtSettings__Audience=${JWT_AUDIENCE}
@@ -58,8 +59,7 @@ services:
       - EmailSettings__Port=${EMAILER_PORT}
       - EmailSettings__User=${EMAILER_USER}
       - EmailSettings__Password=${EMAILER_PASS}
-      - KAFKA_BROKER=kafka:29092
-      - REDIS=${REDIS_URL}
+      - Kafka__BrokerAddress=kafka:29092
     depends_on:
       kafka:
         condition: service_healthy
