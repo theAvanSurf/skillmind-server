@@ -34,7 +34,7 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
     healthcheck:
-      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      test: [ "CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092" ]
       interval: 10s
       timeout: 10s
       retries: 10
@@ -87,6 +87,8 @@ services:
       EMAILER_PORT: ${EMAILER_PORT}
       EMAILER_USER: ${EMAILER_USER}
       EMAILER_PASS: ${EMAILER_PASS}
+      CORE_SERVICE_URL: http://core:8080
+      API_VERSION: ${API_VERSION}
     volumes:
       - ./api-gateway/src:/usr/src/app/src
       - ./api-gateway/tsconfig.json:/usr/src/app/tsconfig.json

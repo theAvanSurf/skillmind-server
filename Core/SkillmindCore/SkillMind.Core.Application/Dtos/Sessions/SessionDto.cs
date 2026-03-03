@@ -9,7 +9,6 @@ public class SessionDto
     public required IEnumerable<ProfilesDto>?  Profiles { get; set; }
     public IEnumerable<Devices>? ConnectedDevices { get; set; }
     public int ConnectedDevicesCount => ConnectedDevices?.Count() ?? 0;
-    public required string SessionJwtToken { get; set; }
     public required DateTime CreatedAt { get; set; }
     public DateTime ExpiresAt { get; set; } = DateTime.UtcNow.AddHours(24);
 

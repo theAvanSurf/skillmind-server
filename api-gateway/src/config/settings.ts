@@ -1,7 +1,25 @@
-export const appConfig = {
-    DATABASE_HOST: process.env.DATABASE_HOST,
-    DATABASE_PORT: process.env.DATABASE_PORT,
-    DATABASE_USERNAME: process.env.DATABASE_USERNAME,
-    DATABASE_PASSWORD: process.env.DATABASE_PASSWORD,
-    DATABASE_NAME: process.env.DATABASE_NAME,
+function loadEnvVariables<T extends readonly string[]>(keys: T) {
+    const env: Record<string, string> = {};
+
+    for (const key of keys) {
+        const value = process.env[key];
+
+        if (!value) {
+            throw new Error(`Missing required environment variable: ${key}`);
+        }
+
+        env[key] = value;
+    }
+
+    return env as { [K in T[number]]: string };
 }
+
+const config = loadEnvVariables([
+    "CORE_SERVICE_URL",
+    "API_VERSION",
+] as const);
+
+export const appConfig = {
+    API_CORE_URL: `${config.CORE_SERVICE_URL}/api/v${config.API_VERSION}`,
+    API_GLOBAL_VERSION: config.API_VERSION
+} as const;

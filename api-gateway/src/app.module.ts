@@ -6,6 +6,9 @@ import { KafkaModule } from "./infrastucture/messaging/kafka.module";
 import { LoggerModule } from "./common/logger/logger.module";
 import { RequestLoggerMiddleware } from "./common/middleware/request-logger.middleware";
 import { UploaderModule } from "./infrastucture/media/cloudinary.module";
+import { AuthModule } from "./modules/auth/auth.module";
+import { ProfilesModule } from "./modules/profiles/profiles.module";
+import { SessionsModule } from "./modules/sessions/sessions.module";
 
 @Module({
     imports: [
@@ -15,13 +18,16 @@ import { UploaderModule } from "./infrastucture/media/cloudinary.module";
         RedisModule,
         KafkaModule,
         UploaderModule,
+        AuthModule,
+        ProfilesModule,
+        SessionsModule,
     ]
 })
 
-export class AppModule implements NestModule{
+export class AppModule implements NestModule {
     configure(consumer: MiddlewareConsumer) {
         consumer
-        .apply(RequestLoggerMiddleware)
-        .forRoutes('*') //'*' Aplicar a todas las rutas 
+            .apply(RequestLoggerMiddleware)
+            .forRoutes('*') //'*' Aplicar a todas las rutas 
     }
 }

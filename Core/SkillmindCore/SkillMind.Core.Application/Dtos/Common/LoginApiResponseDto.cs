@@ -16,5 +16,6 @@ namespace SkillMind.Core.Application.Dtos.Common
         public required List<string> Roles { get; set; }
         public bool IsVerified { get; set; }
         public required string JwtToken { get; set; }
+        public string? RefreshToken { get; set; }
     }
 }

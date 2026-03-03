@@ -20,6 +20,9 @@ public class AuthController(IAccountServicesApi accountServiceForWebApi, ISessio
 
         var authResult = await accountServiceForWebApi.AuthenticateAsync(dto);
 
+        if (authResult is not null && authResult.HasError)
+            return BadRequest(new { Message = authResult.Errors.FirstOrDefault() ?? "Email or password are invalid.", Errors = authResult.Errors });
+
         if (authResult?.Data is null)
             return Unauthorized(new { Message = "Email or password are invalid." });
 
@@ -33,11 +36,10 @@ public class AuthController(IAccountServicesApi accountServiceForWebApi, ISessio
             SessionId = Guid.NewGuid(),
             UserId = userId,
             Profiles = profiles,
-            SessionJwtToken = authResult.Data.JwtToken,
             CreatedAt = DateTime.UtcNow // if you have this property, you should.
         };
 
-        await sessionManager.CreateSessionAsync(session);
+        await sessionManager.GetOrCreateSessionAsync(session);
 
         return Ok(authResult);
     }
@@ -126,5 +128,27 @@ public class AuthController(IAccountServicesApi accountServiceForWebApi, ISessio
         {
             return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
         }
+    }
+
+    [HttpPost("refresh")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequestDto dto)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(new { Message = "UserId and RefreshToken are required." });
+
+        var result = await accountServiceForWebApi.RefreshTokenAsync(dto);
+
+        if (result.HasError)
+            return Unauthorized(new
+            {
+                statusCode = 401,
+                errorCode = "REFRESH_TOKEN_INVALID",
+                message = result.Errors.FirstOrDefault() ?? "Invalid or expired refresh token."
+            });
+
+        return Ok(result);
     }
 }

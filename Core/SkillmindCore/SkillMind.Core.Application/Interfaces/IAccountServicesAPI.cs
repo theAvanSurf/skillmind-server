@@ -12,4 +12,5 @@ public interface IAccountServicesApi
     Task<UserResponseDto> ResetPasswordAsync(ResetPasswordRequestApiDto request);
     Task<string> ConfirmAccountAsync(string userId, string userToken);
     Task<bool> ActivateOrDesactivateUser(string userId, string origin, bool? isApi = false);
+    Task<RefreshTokenResponseDto> RefreshTokenAsync(RefreshTokenRequestDto request);
 }
