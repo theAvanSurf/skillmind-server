@@ -44,7 +44,7 @@ public static class ServiceExtension
         {
             opt.DefaultApiVersion = new ApiVersion(1, 0);
             opt.AssumeDefaultVersionWhenUnspecified = true;
-            opt.ReportApiVersions = true;
+            opt.ReportApiVersions = false;
             opt.ApiVersionReader = ApiVersionReader.Combine(
                 new UrlSegmentApiVersionReader(),
                 new HeaderApiVersionReader("X-Api-Version")

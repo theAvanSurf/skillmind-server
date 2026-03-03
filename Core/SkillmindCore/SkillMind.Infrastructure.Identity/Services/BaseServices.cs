@@ -51,6 +51,9 @@ public abstract class BaseServices(UserManager<ApplicationUser> userManager, IKa
             UserName = saveDto.UserName,
             EmailConfirmed = false,
             AccountTypes = saveDto.AccountTypes,
+            BirthDate = DateTime.SpecifyKind(saveDto.BirthDate, DateTimeKind.Utc),
+            PhoneNumber = saveDto.PhoneNumber,
+            Country = saveDto.Country,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
             Status = GlobalStatus.Inactive
@@ -89,7 +92,7 @@ public abstract class BaseServices(UserManager<ApplicationUser> userManager, IKa
                     <p>Para comenzar, por favor verifica tu correo electrónico haciendo clic en el siguiente botón:</p>
                     <a href='{verificationUri}'
                        style='display: inline-block; padding: 12px 24px; background-color: #4F46E5; color: white;
-                              text-decoration: none; border-radius: 6px; margin: 16px 0;'>
+                              text-decoration: none; border-radius: 6px; margin: 16px 0; font-weight: bold; border: 1px solid #4F46E5;'>
                         Verificar mi cuenta
                     </a>
                     <p style='color: #6B7280; font-size: 14px;'>Si no creaste una cuenta en Skillmind, puedes ignorar este correo.</p>
@@ -178,7 +181,7 @@ public abstract class BaseServices(UserManager<ApplicationUser> userManager, IKa
                         <p>Por favor, confirma tu nuevo correo haciendo clic en el siguiente botón:</p>
                         <a href='{verificationUri}'
                            style='display: inline-block; padding: 12px 24px; background-color: #4F46E5; color: white;
-                                  text-decoration: none; border-radius: 6px; margin: 16px 0;'>
+                                  text-decoration: none; border-radius: 6px; margin: 16px 0; font-weight: bold; border: 1px solid #4F46E5;'>
                             Verificar mi nuevo correo
                         </a>
                         <p style='color: #6B7280; font-size: 14px;'>Si no solicitaste este cambio, por favor ignora este correo o contacta a soporte.</p>
@@ -294,7 +297,7 @@ public abstract class BaseServices(UserManager<ApplicationUser> userManager, IKa
                         <p>Tu cuenta de Skillmind ha sido reactivada. Para completar el proceso, por favor verifica tu correo electrónico haciendo clic en el siguiente botón:</p>
                         <a href='{verificationUri}'
                            style='display: inline-block; padding: 12px 24px; background-color: #4F46E5; color: white;
-                                  text-decoration: none; border-radius: 6px; margin: 16px 0;'>
+                                  text-decoration: none; border-radius: 6px; margin: 16px 0; font-weight: bold; border: 1px solid #4F46E5;'>
                             Verificar mi cuenta
                         </a>
                         <p style='color: #6B7280; font-size: 14px;'>Este enlace expirará en 24 horas.</p>
@@ -340,7 +343,7 @@ public abstract class BaseServices(UserManager<ApplicationUser> userManager, IKa
                     <p>Haz clic en el siguiente botón para crear una nueva contraseña:</p>
                     <a href='{resetPasswordUri}'
                        style='display: inline-block; padding: 12px 24px; background-color: #4F46E5; color: white;
-                              text-decoration: none; border-radius: 6px; margin: 16px 0;'>
+                              text-decoration: none; border-radius: 6px; margin: 16px 0; font-weight: bold; border: 1px solid #4F46E5;'>
                         Restablecer contraseña
                     </a>
                     <p style='color: #6B7280; font-size: 14px;'>Si no solicitaste restablecer tu contraseña, puedes ignorar este correo.</p>
@@ -355,6 +358,9 @@ public abstract class BaseServices(UserManager<ApplicationUser> userManager, IKa
 
     private async Task<string?> GetVerificationEmailUri(ApplicationUser user, string origin)
     {
+        if (string.IsNullOrWhiteSpace(origin))
+           origin = "http://localhost:5173";
+
         var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
         token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
         const string route = "auth/confirm-email";
@@ -373,6 +379,9 @@ public abstract class BaseServices(UserManager<ApplicationUser> userManager, IKa
 
     private async Task<string?> GetResetPasswordUri(ApplicationUser user, string origin)
     {
+        if (string.IsNullOrWhiteSpace(origin))
+           origin = "http://localhost:5173";
+
         var token = await userManager.GeneratePasswordResetTokenAsync(user);
         token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
         const string route = "auth/resetPassword";
