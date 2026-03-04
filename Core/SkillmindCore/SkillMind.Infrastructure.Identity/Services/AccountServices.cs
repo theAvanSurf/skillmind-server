@@ -2,7 +2,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SkillMind.Application.Interfaces;
@@ -16,11 +15,12 @@ using SkillMind.Infrastructure.Shared;
 
 namespace SkillMind.Infrastructure.Identity.Services;
 
-public sealed class AccountServices(UserManager<ApplicationUser> userManager, IOptions<JwtSettings> jwtSettings, SignInManager<ApplicationUser> signInManager, IKafkaEventService kafkaEventService, IRedisContext redisContext) : BaseServices(userManager, kafkaEventService), IAccountServicesApi
+public sealed class AccountServices(UserManager<ApplicationUser> userManager, IOptions<JwtSettings> jwtSettings, SignInManager<ApplicationUser> signInManager, IKafkaEventService kafkaEventService, IRedisContext redisContext) : BaseServices(userManager, kafkaEventService, redisContext), IAccountServicesApi
 {
     private readonly JwtSettings _jwtSettings = jwtSettings.Value;
     private readonly UserManager<ApplicationUser> _userManager = userManager;
     private readonly IRedisSet<string> _refreshTokens = redisContext.Set<string>("refresh-tokens");
+    private readonly IRedisSet<string> _passwordResetCodes = redisContext.Set<string>("password-reset-codes");
 
     public async Task<LoginApiResponseDto> AuthenticateAsync(LoginDto login)
     {
@@ -137,8 +137,21 @@ public sealed class AccountServices(UserManager<ApplicationUser> userManager, IO
             return response;
         }
 
-        var token = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(request.Token));
-        var result = await _userManager.ResetPasswordAsync(user, token, request.Password);
+        // Validate the OTP code from Redis
+        var storedCode = await _passwordResetCodes.GetAsync(request.Id);
+        if (storedCode is null || storedCode != request.Code)
+        {
+            response.HasError = true;
+            response.Errors.Add("Invalid or expired reset code. Please request a new one.");
+            return response;
+        }
+
+        // Invalidate the OTP — one-time use
+        await _passwordResetCodes.DeleteAsync(request.Id);
+
+        // Generate a fresh Identity reset token server-side and apply the new password
+        var identityToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+        var result = await _userManager.ResetPasswordAsync(user, identityToken, request.Password);
         if (!result.Succeeded)
         {
             response.HasError = true;

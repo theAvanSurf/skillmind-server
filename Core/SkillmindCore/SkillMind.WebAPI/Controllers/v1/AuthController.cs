@@ -67,8 +67,9 @@ public class AuthController(IAccountServicesApi accountServiceForWebApi, ISessio
         }
     }
 
-    [Authorize]
     [HttpPost("account/confirm")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Confirm([FromBody] ConfirmRequestDto dto)
     {
         try
@@ -76,7 +77,7 @@ public class AuthController(IAccountServicesApi accountServiceForWebApi, ISessio
             if (!ModelState.IsValid)
                 return BadRequest();
 
-            await accountServiceForWebApi.ConfirmAccountAsync(dto.UserId, dto.Token);
+            await accountServiceForWebApi.ConfirmAccountAsync(dto.UserId, dto.Code);
 
             return Ok("User has been successfully verified");
         }
@@ -86,8 +87,9 @@ public class AuthController(IAccountServicesApi accountServiceForWebApi, ISessio
         }
     }
 
-    [Authorize]
     [HttpPost("account/get-reset-token")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetResetToken([FromBody] ForgotApiRequestDto dto)
     {
         try
@@ -102,14 +104,15 @@ public class AuthController(IAccountServicesApi accountServiceForWebApi, ISessio
 
             return NoContent();
         }
-        catch
+        catch (Exception ex)
         {
-            return Unauthorized("This is missing the JWT Token");
+            return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
         }
     }
 
-    [Authorize]
     [HttpPost("account/reset-password")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> ChangePassword([FromBody] ResetPasswordRequestApiDto dto)
     {
         try
@@ -151,4 +154,10 @@ public class AuthController(IAccountServicesApi accountServiceForWebApi, ISessio
 
         return Ok(result);
     }
+
+    [Authorize]
+    [HttpGet("verify")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public IActionResult VerifyToken() => Ok();
 }

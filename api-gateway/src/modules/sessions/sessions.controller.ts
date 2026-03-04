@@ -1,12 +1,14 @@
-import { Body, Controller, Delete, Get, Headers, Param, Post, Put } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Headers, Param, Post, Put, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiBody, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { SessionsService } from "./sessions.service";
 import { DeviceDto } from "./sessions.dto";
 import type { SessionDto } from "./sessions.dto";
 import type { ProfilesDto } from "../profiles/profiles.dto";
+import { AuthGuard } from "../../common/guards/auth.guard";
 
 @ApiTags('Sessions')
 @ApiBearerAuth()
+@UseGuards(AuthGuard)
 @Controller('sessions')
 export class SessionsController {
     constructor(private readonly sessionsService: SessionsService) { }

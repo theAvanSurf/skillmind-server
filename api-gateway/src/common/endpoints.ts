@@ -6,6 +6,7 @@ export const API_ENDPOINTS = {
         AUTH_CONFIRM: "/auth/account/confirm",
         AUTH_RESET_PASSWORD: "/auth/account/reset-password",
         AUTH_REFRESH: "/auth/refresh",
+        AUTH_VERIFY: "/auth/verify",
 
         // Profiles
         PROFILES: "/profiles",
