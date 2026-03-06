@@ -1,0 +1,13 @@
+# .NET build outputs - never commit these
+**/bin/
+**/obj/
+
+# Windows-style path artifacts (backslash in name)
+**/bin\*/
+**/obj\*/
+
+# Additional .NET artifacts
+*.user
+*.suo
+.vs/
+*.DotSettings.user
