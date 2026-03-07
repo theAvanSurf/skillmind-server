@@ -44,21 +44,25 @@ public class SessionManager(IRedisContext redisContext) : ISessionManager
         return sessionDto;
     }
 
-    public async Task<SessionDto?> AddDeviceAsync(Guid userId, Devices device)
+    public async Task<AddDeviceResult> AddDeviceAsync(Guid userId, Devices device)
     {
         var session = await _cache.GetAsync(userId.ToString());
-        if (session is null) return null;
+        if (session is null)
+            return new(null, AddDeviceStatus.SessionNotFound);
 
         var devices = session.ConnectedDevices?.ToList() ?? [];
 
         if (devices.Any(d => d.DeviceId == device.DeviceId))
-            return session;
+            return new(session, AddDeviceStatus.AlreadyConnected);
+
+        if (devices.Count >= 4)
+            return new(null, AddDeviceStatus.DeviceLimitReached);
 
         devices.Add(device);
         session.ConnectedDevices = devices;
 
         await _cache.SetAsync(userId.ToString(), session, TimeSpan.FromHours(24));
-        return session;
+        return new(session, AddDeviceStatus.Success);
     }
 
     public async Task<SessionDto?> AddProfileAsync(Guid userId, ProfilesDto profile)

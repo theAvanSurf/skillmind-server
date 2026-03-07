@@ -21,6 +21,7 @@ build/
 # C# / .NET
 bin/
 obj/
+appsettings.Development.json
 *.exe
 *.dll
 *.pdb

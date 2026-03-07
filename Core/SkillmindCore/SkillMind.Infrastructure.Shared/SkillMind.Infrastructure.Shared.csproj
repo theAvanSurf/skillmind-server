@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="Confluent.Kafka" Version="2.13.0" />
     <PackageReference Include="StackExchange.Redis" Version="2.11.0" />
+    <PackageReference Include="Stripe.net" Version="50.4.1" />
   </ItemGroup>
 
   <ItemGroup>

@@ -15,7 +15,7 @@ public interface ISessionManager
 
     Task<SessionDto?> UpdateSessionAsync(SessionDto sessionDto);
 
-    Task<SessionDto?> AddDeviceAsync(Guid userId, Devices device);
+    Task<AddDeviceResult> AddDeviceAsync(Guid userId, Devices device);
 
     Task<SessionDto?> AddProfileAsync(Guid userId, ProfilesDto profile);
 

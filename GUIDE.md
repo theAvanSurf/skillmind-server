@@ -63,11 +63,22 @@ To update the database schema, you must run the Entity Framework Core migrations
 
 For the Persistence Layer
 
+Migrations
+
+```bash
+docker exec -it skillmind-core dotnet ef migrations add <MigrationName> --project ../SkillMind.Infrastructure.Persistence/SkillMind.Infrastructure.Persistence.csproj --startup-project . --context SkillMind.Infrastructure.Persistence.Context.SkillMindDbContext
+```
+
 ```bash
 docker exec -it skillmind-core dotnet ef database update --project ../SkillMind.Infrastructure.Persistence/SkillMind.Infrastructure.Persistence.csproj --startup-project . --context SkillMind.Infrastructure.Persistence.Context.SkillMindDbContext
 ```
 
 For the Identiy Layer
+
+Migrations
+
+```bash
+docker exec -it skillmind-core dotnet ef migrations add <MigrationName> --project ../SkillMind.Infrastructure.Identity/SkillMind.Infrastructure.Identity.csproj --startup-project . --context SkillMind.Infrastructure.Identity.Context.IdentityDatabaseContext```
 
 ```bash
 docker exec -it skillmind-core dotnet ef database update --project ../SkillMind.Infrastructure.Identity/SkillMind.Infrastructure.Identity.csproj --startup-project . --context SkillMind.Infrastructure.Identity.Context.IdentityDatabaseContext

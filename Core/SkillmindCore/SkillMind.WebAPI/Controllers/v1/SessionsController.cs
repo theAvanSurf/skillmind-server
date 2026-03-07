@@ -64,6 +64,7 @@ public class SessionsController(ISessionManager sessionManager) : BaseController
     [ProducesResponseType(typeof(SessionDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> AddDeviceAsync([FromBody] Devices device)
     {
         var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -71,9 +72,16 @@ public class SessionsController(ISessionManager sessionManager) : BaseController
         if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
             return Unauthorized("User identity could not be determined.");
 
-        var session = await sessionManager.AddDeviceAsync(userId, device);
+        var result = await sessionManager.AddDeviceAsync(userId, device);
 
-        return session is null ? NotFound("No active session found for this user.") : Ok(session);
+        return result.Status switch
+        {
+            AddDeviceStatus.SessionNotFound => NotFound("No active session found for this user."),
+            AddDeviceStatus.DeviceLimitReached => Conflict("Maximum of 4 devices allowed per session."),
+            AddDeviceStatus.AlreadyConnected => Ok(result.Session),
+            AddDeviceStatus.Success => Ok(result.Session),
+            _ => StatusCode(500)
+        };
     }
 
     [HttpDelete("devices/{deviceId}")]

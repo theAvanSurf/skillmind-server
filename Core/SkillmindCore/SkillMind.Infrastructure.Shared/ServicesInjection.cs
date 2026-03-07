@@ -17,6 +17,7 @@ public static class SharedLayerInjection
         services.AddSingleton<IRedisContext>(_ => new RedisContext(connectionString));
 
         services.Configure<KafkaSettings>(configuration.GetSection("Kafka"));
+        services.Configure<StripeConfigurations>(configuration.GetSection("Stripe"));
 
         services.AddSingleton<IProducer<string, string>>(sp =>
         {
