@@ -18,5 +18,13 @@ export const API_ENDPOINTS = {
         SESSIONS_DEVICE_BY_ID: (deviceId: string) => `/sessions/devices/${deviceId}`,
         SESSIONS_PROFILES: "/sessions/profiles",
         SESSIONS_PROFILE_BY_ID: (profileId: string) => `/sessions/profiles/${profileId}`,
+
+        // Payment
+        PAYMENT_CREATE_CHECKOUT_SESSION: "/payment/create-checkout-session",
+        PAYMENT_CREATE_SUBSCRIPTION: "/payment/create-subscription",
+        PAYMENT_SESSION_STATUS: "/payment/session-status",
+        PAYMENT_CREATE_PORTAL_SESSION: "/payment/create-portal-session",
+        PAYMENT_SUBSCRIPTION: "/payment/subscription",
+        PAYMENT_WEBHOOK: "/payment/webhook",
     }
 }

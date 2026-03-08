@@ -9,6 +9,7 @@ import { UploaderModule } from "./infrastucture/media/cloudinary.module";
 import { AuthModule } from "./modules/auth/auth.module";
 import { ProfilesModule } from "./modules/profiles/profiles.module";
 import { SessionsModule } from "./modules/sessions/sessions.module";
+import { PaymentModule } from "./modules/payment/payment.module";
 
 @Module({
     imports: [
@@ -21,6 +22,7 @@ import { SessionsModule } from "./modules/sessions/sessions.module";
         AuthModule,
         ProfilesModule,
         SessionsModule,
+        PaymentModule,
     ]
 })
 
