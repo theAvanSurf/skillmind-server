@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SkillMind.Infrastructure.Persistence.Context;
@@ -11,9 +12,11 @@ using SkillMind.Infrastructure.Persistence.Context;
 namespace SkillMind.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(SkillMindDbContext))]
-    partial class SkillMindDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260307155109_AddSubscriptionAndFailedEvents")]
+    partial class AddSubscriptionAndFailedEvents
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -112,10 +115,6 @@ namespace SkillMind.Infrastructure.Persistence.Migrations
                     b.Property<DateTime?>("GracePeriodStart")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("IntendedPlan")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
                     b.Property<bool>("IsInGracePeriod")
                         .HasColumnType("boolean");
 
@@ -153,18 +152,22 @@ namespace SkillMind.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(50)");
 
                     b.Property<string>("StripeCustomerId")
+                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
                     b.Property<string>("StripeLookupKey")
+                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
                     b.Property<string>("StripePriceId")
+                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
                     b.Property<string>("StripeSubscriptionId")
+                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
@@ -185,8 +188,7 @@ namespace SkillMind.Infrastructure.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("StripeSubscriptionId")
-                        .IsUnique()
-                        .HasFilter("\"StripeSubscriptionId\" IS NOT NULL");
+                        .IsUnique();
 
                     b.HasIndex("UserId");
 

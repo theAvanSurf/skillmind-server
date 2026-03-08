@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using SkillMind.Application.Interfaces;
 using SkillMind.Core.Application.Dtos.Common;
+using SkillMind.Core.Application.Interfaces;
+using SkillMind.Core.Domain.Entities;
 using SkillMind.Core.Domain.Enums;
 using SkillMind.Core.Domain.Interfaces;
 using SkillMind.Infrastructure.Identity.Entities;
@@ -13,7 +15,8 @@ namespace SkillMind.Infrastructure.Identity.Services;
 public abstract class BaseServices(
     UserManager<ApplicationUser> userManager,
     IKafkaEventService kafkaEventService,
-    IRedisContext redisContext)
+    IRedisContext redisContext,
+    ISubscriptionRepository subscriptionRepository)
 {
     private readonly IKafkaEventService _kafkaEventService = kafkaEventService;
     private readonly IRedisSet<string> _verificationCodes = redisContext.Set<string>("email-verification-codes");
@@ -81,6 +84,21 @@ public abstract class BaseServices(
         response.UserName = newUser.UserName;
         response.HasError = false;
         await userManager.AddToRoleAsync(newUser, saveDto.Role.ToString());
+
+        // Create a free-tier subscription record so the user always has a subscription row.
+        if (Guid.TryParse(newUser.Id, out var userGuid))
+        {
+            await subscriptionRepository.CreateAsync(new UserSubscription
+            {
+                Id = Guid.NewGuid(),
+                UserId = userGuid,
+                Status = "free",
+                SubscriptionStatus = SubscriptionStatus.Free,
+                Plan = "free",
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            });
+        }
 
         if (isApi == null || isApi.Value) return response;
 

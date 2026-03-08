@@ -4,6 +4,8 @@ using SkillMind.Core.Application;
 using SkillMind.Infrastructure.Identity;
 using SkillMind.Infrastructure.Persistence;
 using SkillMind.Infrastructure.Shared;
+using SkillMind.Infrastructure.Shared.Consumers;
+using SkillMind.Infrastructure.Shared.Jobs;
 using SkillMind.WebAPI.Extensions;
 using SkillMind.WebAPI.Transformers;
 using SkillMind.Infrastructure.Shared;
@@ -16,6 +18,13 @@ builder.Services.AddApiVersioningExtension();
 builder.Services.AddPersistenceLayerIoc(builder.Configuration);
 builder.Services.AddSharedLayer(builder.Configuration);
 builder.Services.AddApplicationLayer();
+
+// Stripe-related background services
+builder.Services.AddHostedService<SubscriptionEventConsumer>();
+builder.Services.AddHostedService<PaymentEventConsumer>();
+builder.Services.AddHostedService<FailedEventConsumer>();
+builder.Services.AddHostedService<GracePeriodEnforcementJob>();
+builder.Services.AddHostedService<PaymentRetryJob>();
 
 builder.Services.AddControllers(options =>
 {

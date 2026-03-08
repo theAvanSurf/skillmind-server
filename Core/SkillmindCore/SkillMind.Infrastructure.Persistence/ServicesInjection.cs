@@ -30,6 +30,7 @@ public static class ServicesInjection
         services.AddTransient(typeof(IGenericRepository<>), typeof(GenericRepository<>));
         services.AddTransient<IProfilesRepository, ProfilesRepository>();
         services.AddTransient<IPaginationService, PaginationService>();
+        services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
 
         #endregion
     }

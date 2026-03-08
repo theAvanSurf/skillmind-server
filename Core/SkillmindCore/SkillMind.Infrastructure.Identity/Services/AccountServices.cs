@@ -15,7 +15,7 @@ using SkillMind.Infrastructure.Shared;
 
 namespace SkillMind.Infrastructure.Identity.Services;
 
-public sealed class AccountServices(UserManager<ApplicationUser> userManager, IOptions<JwtSettings> jwtSettings, SignInManager<ApplicationUser> signInManager, IKafkaEventService kafkaEventService, IRedisContext redisContext) : BaseServices(userManager, kafkaEventService, redisContext), IAccountServicesApi
+public sealed class AccountServices(UserManager<ApplicationUser> userManager, IOptions<JwtSettings> jwtSettings, SignInManager<ApplicationUser> signInManager, IKafkaEventService kafkaEventService, IRedisContext redisContext, ISubscriptionRepository subscriptionRepository) : BaseServices(userManager, kafkaEventService, redisContext, subscriptionRepository), IAccountServicesApi
 {
     private readonly JwtSettings _jwtSettings = jwtSettings.Value;
     private readonly UserManager<ApplicationUser> _userManager = userManager;

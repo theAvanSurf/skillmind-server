@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SkillMind.Infrastructure.Persistence.Context;
@@ -11,9 +12,11 @@ using SkillMind.Infrastructure.Persistence.Context;
 namespace SkillMind.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(SkillMindDbContext))]
-    partial class SkillMindDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260307172329_MakeStripeFieldsNullable")]
+    partial class MakeStripeFieldsNullable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -111,10 +114,6 @@ namespace SkillMind.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTime?>("GracePeriodStart")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("IntendedPlan")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
 
                     b.Property<bool>("IsInGracePeriod")
                         .HasColumnType("boolean");

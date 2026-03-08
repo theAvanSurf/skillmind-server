@@ -3,9 +3,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using SkillMind.Application.Interfaces;
+using SkillMind.Core.Application.Interfaces;
 using SkillMind.Core.Domain.Interfaces;
 using SkillMind.Core.Domain.Settings;
 using SkillMind.Infrastructure.Shared.Contexts;
+using SkillMind.Infrastructure.Shared.Services;
+using Stripe;
 
 namespace SkillMind.Infrastructure.Shared;
 
@@ -16,8 +19,14 @@ public static class SharedLayerInjection
         var connectionString = configuration.GetConnectionString("Redis") ?? "localhost:6379";
         services.AddSingleton<IRedisContext>(_ => new RedisContext(connectionString));
 
+        // Configure Stripe API key globally for all Stripe.net client classes
+        var stripeSection = configuration.GetSection(StripeConfigurations.SectionName);
+        StripeConfiguration.ApiKey = stripeSection["SecretKey"] ?? string.Empty;
+
+
         services.Configure<KafkaSettings>(configuration.GetSection("Kafka"));
-        services.Configure<StripeConfigurations>(configuration.GetSection("Stripe"));
+        services.Configure<StripeConfigurations>(configuration.GetSection(StripeConfigurations.SectionName));
+        services.Configure<EmailSettings>(configuration.GetSection(EmailSettings.SectionName));
 
         services.AddSingleton<IProducer<string, string>>(sp =>
         {
@@ -34,5 +43,9 @@ public static class SharedLayerInjection
         });
 
         services.AddSingleton<IKafkaEventService, KafkaEventService>();
+
+        // Stripe & Email
+        services.AddScoped<IStripeServices, StripeServices>();
+        services.AddScoped<IEmailNotificationService, EmailNotificationService>();
     }
 }

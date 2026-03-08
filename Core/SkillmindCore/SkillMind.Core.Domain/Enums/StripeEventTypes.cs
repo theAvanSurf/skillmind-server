@@ -7,5 +7,10 @@ public enum StripeEventType
     CustomerSubscriptionCreated,
     CustomerSubscriptionTrialWillEnd,
     ActiveEntitlementSummaryUpdated,
+
+    // Invoice events — used for payment failure/recovery flow
+    InvoicePaymentFailed,
+    InvoicePaymentSucceeded,
+
     Unknown
 }

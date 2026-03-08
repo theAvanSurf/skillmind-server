@@ -60,6 +60,9 @@ services:
       - EmailSettings__User=${EMAILER_USER}
       - EmailSettings__Password=${EMAILER_PASS}
       - Kafka__BrokerAddress=kafka:29092
+      - StripeConfigurations__SecretKey=${STRIPE_SECRET_KEY}
+      - StripeConfigurations__WebhookSecret=${STRIPE_WEBHOOK_SECRET}
+      - StripeConfigurations__FrontendUrl=${FRONTEND_URL}
     depends_on:
       kafka:
         condition: service_healthy
