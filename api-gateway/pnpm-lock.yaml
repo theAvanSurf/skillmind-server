@@ -93,8 +93,8 @@ importers:
         specifier: ^0.3.28
         version: 0.3.28(ioredis@5.9.2)(redis@5.10.0)(ts-node@10.9.2(@types/node@22.19.7)(typescript@5.9.3))
       uuid:
-        specifier: ^13.0.0
-        version: 13.0.0
+        specifier: ^9.0.1
+        version: 9.0.1
       winston:
         specifier: ^3.19.0
         version: 3.19.0
@@ -9808,8 +9808,7 @@ snapshots:
 
   uuid@13.0.0: {}
 
-  uuid@9.0.1:
-    optional: true
+  uuid@9.0.1: {}
 
   v8-compile-cache-lib@3.0.1: {}
 
