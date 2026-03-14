@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { LoggerService } from './common/logger/logger.service';
+import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
 import { appConfig } from './config/settings';
@@ -9,7 +10,7 @@ import { appConfig } from './config/settings';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: false,
-    rawBody: true, // Required for Stripe webhook signature verification
+    rawBody: true,
   });
 
   app.enableVersioning({
@@ -31,6 +32,7 @@ async function bootstrap() {
 
   const logger = app.get(LoggerService);
   app.useLogger(logger);
+  app.useGlobalFilters(new GlobalExceptionFilter(logger));
 
   const config = new DocumentBuilder()
     .setTitle('SkillMind API Gateway')
