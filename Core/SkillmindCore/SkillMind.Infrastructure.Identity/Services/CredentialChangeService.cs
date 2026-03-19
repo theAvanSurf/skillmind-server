@@ -43,7 +43,7 @@ public sealed class CredentialChangeService(UserManager<ApplicationUser> userMan
         }
 
         // Validar que la nueva contraseña no sea igual a la anterior
-        if (_passwordHasher.VerifyHashedPassword(user, user.PasswordHash, newPassword) != PasswordVerificationResult.Failed)
+        if (_passwordHasher.VerifyHashedPassword(user, user.PasswordHash!, newPassword) != PasswordVerificationResult.Failed)
         {
             response.Message = "New password must be different from current password";
             return response;

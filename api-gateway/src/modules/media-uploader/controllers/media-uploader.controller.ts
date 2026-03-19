@@ -34,7 +34,7 @@ export class UploaderController {
   })
   @UseInterceptors(
     FileInterceptor("file", {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+       
       storage: multer.memoryStorage(),
       limits: {
         fileSize: 100 * 1024 * 1024, // 100MB

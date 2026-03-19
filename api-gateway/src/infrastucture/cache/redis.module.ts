@@ -8,7 +8,7 @@ import { redisStore } from 'cache-manager-redis-yet';
     CacheModule.registerAsync({
       isGlobal: true,
       useFactory: async () => ({
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+         
         store: await redisStore({
           socket: {
             host: process.env.REDIS_HOST || 'localhost',
