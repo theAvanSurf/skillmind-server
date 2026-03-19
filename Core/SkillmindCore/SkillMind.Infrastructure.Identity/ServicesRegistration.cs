@@ -25,6 +25,7 @@ public static class ServicesRegistration
         GeneralContextConfiguration(service, configuration);
 
         service.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
+        service.Configure<CredentialChangeSettings>(configuration.GetSection("CredentialChange"));
 
         #region Identity
         service.Configure<IdentityOptions>(opt =>

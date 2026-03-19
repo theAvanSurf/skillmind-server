@@ -1,4 +1,20 @@
-import { AuthenticateUserDto, CreateUserDto, LoginAPIResponse, RegistrerResponseDto, ForgotApiRequestDto, ConfirmRequestDto, ResetPasswordRequestApiDto, RefreshTokenRequestDto, RefreshTokenResponseDto } from "./auth.dto";
+import {
+    AuthenticateUserDto,
+    CompleteEmailChangeRequestDto,
+    CompletePasswordChangeRequestDto,
+    ConfirmRequestDto,
+    CredentialChangeActionResponseDto,
+    CredentialSecuritySettingsDto,
+    CreateUserDto,
+    ForgotApiRequestDto,
+    InitiateEmailChangeRequestDto,
+    InitiatePasswordChangeRequestDto,
+    LoginAPIResponse,
+    RefreshTokenRequestDto,
+    RefreshTokenResponseDto,
+    RegistrerResponseDto,
+    ResetPasswordRequestApiDto
+} from "./auth.dto";
 import httpClient from "../../config/baseHttpClient";
 import { API_ENDPOINTS } from "../../common/endpoints";
 import { Injectable } from "@nestjs/common";
@@ -45,5 +61,44 @@ export default class AuthService {
             API_ENDPOINTS.CORE.AUTH_REFRESH,
             request
         ) as unknown as RefreshTokenResponseDto;
+    }
+
+    async getCredentialSecuritySettings(token: string): Promise<CredentialSecuritySettingsDto> {
+        return await httpClient.get<CredentialSecuritySettingsDto>(
+            API_ENDPOINTS.CORE.AUTH_SECURITY_SETTINGS,
+            { headers: { Authorization: token } }
+        ) as unknown as CredentialSecuritySettingsDto;
+    }
+
+    async startPasswordChange(request: InitiatePasswordChangeRequestDto, token: string): Promise<CredentialChangeActionResponseDto> {
+        return await httpClient.post<CredentialChangeActionResponseDto>(
+            API_ENDPOINTS.CORE.AUTH_START_PASSWORD_CHANGE,
+            request,
+            { headers: { Authorization: token } }
+        ) as unknown as CredentialChangeActionResponseDto;
+    }
+
+    async completePasswordChange(request: CompletePasswordChangeRequestDto, token: string): Promise<CredentialChangeActionResponseDto> {
+        return await httpClient.post<CredentialChangeActionResponseDto>(
+            API_ENDPOINTS.CORE.AUTH_COMPLETE_PASSWORD_CHANGE,
+            request,
+            { headers: { Authorization: token } }
+        ) as unknown as CredentialChangeActionResponseDto;
+    }
+
+    async startEmailChange(request: InitiateEmailChangeRequestDto, token: string): Promise<CredentialChangeActionResponseDto> {
+        return await httpClient.post<CredentialChangeActionResponseDto>(
+            API_ENDPOINTS.CORE.AUTH_START_EMAIL_CHANGE,
+            request,
+            { headers: { Authorization: token } }
+        ) as unknown as CredentialChangeActionResponseDto;
+    }
+
+    async completeEmailChange(request: CompleteEmailChangeRequestDto, token: string): Promise<CredentialChangeActionResponseDto> {
+        return await httpClient.post<CredentialChangeActionResponseDto>(
+            API_ENDPOINTS.CORE.AUTH_COMPLETE_EMAIL_CHANGE,
+            request,
+            { headers: { Authorization: token } }
+        ) as unknown as CredentialChangeActionResponseDto;
     }
 }
