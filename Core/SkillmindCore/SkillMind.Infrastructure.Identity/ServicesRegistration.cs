@@ -131,6 +131,7 @@ public static class ServicesRegistration
         #region Services Registration
 
         service.AddScoped<IAccountServicesApi, AccountServices>();
+        service.AddScoped<CredentialChangeService>();
 
         #endregion
     }

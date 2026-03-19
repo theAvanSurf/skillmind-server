@@ -3,7 +3,33 @@
   "rootDir": ".",
   "testEnvironment": "node",
   "testRegex": ".e2e-spec.ts$",
+  "preset": "ts-jest",
   "transform": {
-    "^.+\\.(t|j)s$": "ts-jest"
-  }
+    "^.+\\.ts$": ["ts-jest", {
+      "tsconfig": {
+        "module": "commonjs",
+        "target": "ES2020",
+        "lib": ["ES2020"],
+        "moduleResolution": "node",
+        "resolvePackageJsonExports": false,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "declaration": false,
+        "removeComments": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "sourceMap": false,
+        "incremental": false,
+        "strictNullChecks": false,
+        "noImplicitAny": false,
+        "strictBindCallApply": false,
+        "noFallthroughCasesInSwitch": false,
+        "types": ["jest", "node"]
+      }
+    }]
+  },
+  "transformIgnorePatterns": ["/node_modules/(?!uuid)"]
 }
+

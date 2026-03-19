@@ -1,0 +1,16 @@
+C:\Users\jdeol\OneDrive\Desktop\ITLA\C7\Poryecto FInal\SkillmindBack\skillmind-server\Core\SkillmindCore\SkillMind.Core.Application\bin\Debug\net9.0\SkillMind.Core.Application.deps.json
+C:\Users\jdeol\OneDrive\Desktop\ITLA\C7\Poryecto FInal\SkillmindBack\skillmind-server\Core\SkillmindCore\SkillMind.Core.Application\bin\Debug\net9.0\SkillMind.Core.Application.dll
+C:\Users\jdeol\OneDrive\Desktop\ITLA\C7\Poryecto FInal\SkillmindBack\skillmind-server\Core\SkillmindCore\SkillMind.Core.Application\bin\Debug\net9.0\SkillMind.Core.Application.pdb
+C:\Users\jdeol\OneDrive\Desktop\ITLA\C7\Poryecto FInal\SkillmindBack\skillmind-server\Core\SkillmindCore\SkillMind.Core.Application\bin\Debug\net9.0\SkillMind.Core.Domain.dll
+C:\Users\jdeol\OneDrive\Desktop\ITLA\C7\Poryecto FInal\SkillmindBack\skillmind-server\Core\SkillmindCore\SkillMind.Core.Application\bin\Debug\net9.0\SkillMind.Core.Domain.pdb
+C:\Users\jdeol\OneDrive\Desktop\ITLA\C7\Poryecto FInal\SkillmindBack\skillmind-server\Core\SkillmindCore\SkillMind.Core.Application\obj\Debug\net9.0\SkillMind.Core.Application.csproj.AssemblyReference.cache
+C:\Users\jdeol\OneDrive\Desktop\ITLA\C7\Poryecto FInal\SkillmindBack\skillmind-server\Core\SkillmindCore\SkillMind.Core.Application\obj\Debug\net9.0\SkillMind.Core.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\jdeol\OneDrive\Desktop\ITLA\C7\Poryecto FInal\SkillmindBack\skillmind-server\Core\SkillmindCore\SkillMind.Core.Application\obj\Debug\net9.0\SkillMind.Core.Application.AssemblyInfoInputs.cache
+C:\Users\jdeol\OneDrive\Desktop\ITLA\C7\Poryecto FInal\SkillmindBack\skillmind-server\Core\SkillmindCore\SkillMind.Core.Application\obj\Debug\net9.0\SkillMind.Core.Application.AssemblyInfo.cs
+C:\Users\jdeol\OneDrive\Desktop\ITLA\C7\Poryecto FInal\SkillmindBack\skillmind-server\Core\SkillmindCore\SkillMind.Core.Application\obj\Debug\net9.0\SkillMind.Core.Application.csproj.CoreCompileInputs.cache
+C:\Users\jdeol\OneDrive\Desktop\ITLA\C7\Poryecto FInal\SkillmindBack\skillmind-server\Core\SkillmindCore\SkillMind.Core.Application\obj\Debug\net9.0\SkillMind.Core.Application.sourcelink.json
+C:\Users\jdeol\OneDrive\Desktop\ITLA\C7\Poryecto FInal\SkillmindBack\skillmind-server\Core\SkillmindCore\SkillMind.Core.Application\obj\Debug\net9.0\SkillMin.AA02BC35.Up2Date
+C:\Users\jdeol\OneDrive\Desktop\ITLA\C7\Poryecto FInal\SkillmindBack\skillmind-server\Core\SkillmindCore\SkillMind.Core.Application\obj\Debug\net9.0\SkillMind.Core.Application.dll
+C:\Users\jdeol\OneDrive\Desktop\ITLA\C7\Poryecto FInal\SkillmindBack\skillmind-server\Core\SkillmindCore\SkillMind.Core.Application\obj\Debug\net9.0\refint\SkillMind.Core.Application.dll
+C:\Users\jdeol\OneDrive\Desktop\ITLA\C7\Poryecto FInal\SkillmindBack\skillmind-server\Core\SkillmindCore\SkillMind.Core.Application\obj\Debug\net9.0\SkillMind.Core.Application.pdb
+C:\Users\jdeol\OneDrive\Desktop\ITLA\C7\Poryecto FInal\SkillmindBack\skillmind-server\Core\SkillmindCore\SkillMind.Core.Application\obj\Debug\net9.0\ref\SkillMind.Core.Application.dll
