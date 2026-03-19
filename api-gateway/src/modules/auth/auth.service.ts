@@ -187,6 +187,9 @@ export class AuthService {
         throw new CredentialChangeException(changeResult.message || 'Failed to change email in core service');
       }
 
+      // Invalidar todas las sesiones después del cambio exitoso (AC4.4)
+      await this.invalidateAllSessions(userId);
+
       // Enviar confirmación al email antiguo
       await this.emailService.sendCredentialChangeConfirmation(currentEmail, 'email', newEmail);
 
@@ -197,7 +200,7 @@ export class AuthService {
 
       return {
         success: true,
-        message: `Email changed successfully to ${newEmail}`,
+        message: `Email changed successfully to ${newEmail}. You have been logged out from all devices for security.`,
         credentialType: 'email',
       };
     } catch (error) {
