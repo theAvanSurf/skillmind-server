@@ -25,6 +25,7 @@
     <ItemGroup>
       <ProjectReference Include="..\SkillMind.Core.Application\SkillMind.Core.Application.csproj" />
       <ProjectReference Include="..\SkillMind.Core.Domain\SkillMind.Core.Domain.csproj" />
+      <ProjectReference Include="..\SkillMind.Infrastructure.Shared\SkillMind.Infrastructure.Shared.csproj" />
     </ItemGroup>
 
 </Project>

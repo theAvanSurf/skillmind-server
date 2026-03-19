@@ -2,21 +2,25 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using SkillMind.Application.Interfaces;
 using SkillMind.Core.Application.Dtos.Common;
 using SkillMind.Core.Application.Interfaces;
 using SkillMind.Core.Domain.Enums;
+using SkillMind.Core.Domain.Interfaces;
 using SkillMind.Core.Domain.Settings;
 using SkillMind.Infrastructure.Identity.Entities;
+using SkillMind.Infrastructure.Shared;
 
 namespace SkillMind.Infrastructure.Identity.Services;
 
-public sealed class AccountServices(UserManager<ApplicationUser> userManager, IOptions<JwtSettings> jwtSettings, SignInManager<ApplicationUser> signInManager) : BaseServices(userManager), IAccountServicesApi
+public sealed class AccountServices(UserManager<ApplicationUser> userManager, IOptions<JwtSettings> jwtSettings, SignInManager<ApplicationUser> signInManager, IKafkaEventService kafkaEventService, IRedisContext redisContext) : BaseServices(userManager, kafkaEventService, redisContext), IAccountServicesApi
 {
     private readonly JwtSettings _jwtSettings = jwtSettings.Value;
     private readonly UserManager<ApplicationUser> _userManager = userManager;
+    private readonly IRedisSet<string> _refreshTokens = redisContext.Set<string>("refresh-tokens");
+    private readonly IRedisSet<string> _passwordResetCodes = redisContext.Set<string>("password-reset-codes");
 
     public async Task<LoginApiResponseDto> AuthenticateAsync(LoginDto login)
     {
@@ -24,25 +28,45 @@ public sealed class AccountServices(UserManager<ApplicationUser> userManager, IO
 
         if (currentUser == null)
         {
-            throw new UnauthorizedAccessException($"There is no user with this username: {login.UserName}, please try again.");
+            return new LoginApiResponseDto
+            {
+                HasError = true,
+                Errors = ["Invalid username or password."]
+            };
         }
 
         if (!currentUser.EmailConfirmed || currentUser.Status == GlobalStatus.Inactive)
         {
-            throw new InvalidOperationException($"The current user {login.UserName} is not activated. Please activate this user to start using our services.");
+            return new LoginApiResponseDto
+            {
+                HasError = true,
+                Errors = [$"The account '{login.UserName}' is not activated. Please verify your email to continue."]
+            };
         }
 
         var result = await signInManager.PasswordSignInAsync(login.UserName, login.Password, false, true);
 
         if (!result.Succeeded)
         {
-            throw new UnauthorizedAccessException("Authentication failed. Invalid username or password.");
+            return new LoginApiResponseDto
+            {
+                HasError = true,
+                Errors = ["Invalid username or password."]
+            };
         }
 
-        return await CreateSuccessResponse(currentUser);
+        var refreshToken = await GenerateAndStoreRefreshTokenAsync(currentUser.Id);
+        return await CreateSuccessResponse(currentUser, refreshToken);
     }
     
-    private async Task<LoginApiResponseDto> CreateSuccessResponse(ApplicationUser user)
+    private async Task<string> GenerateAndStoreRefreshTokenAsync(string userId)
+    {
+        var token = Guid.NewGuid().ToString("N") + Guid.NewGuid().ToString("N"); // 64-char opaque token
+        await _refreshTokens.SetAsync(userId, token, TimeSpan.FromDays(30));
+        return token;
+    }
+
+    private async Task<LoginApiResponseDto> CreateSuccessResponse(ApplicationUser user, string refreshToken)
     {
         var userToken = await GenerateJwtToken(user);
         var roles = await _userManager.GetRolesAsync(user);
@@ -57,11 +81,46 @@ public sealed class AccountServices(UserManager<ApplicationUser> userManager, IO
                 Email = user.Email,
                 Roles = roles.ToList(),
                 IsVerified = user.EmailConfirmed,
-                JwtToken = new JwtSecurityTokenHandler().WriteToken(userToken)
+                JwtToken = new JwtSecurityTokenHandler().WriteToken(userToken),
+                RefreshToken = refreshToken
             },
             HasError = false,
             Errors = []
         };
+    }
+
+    public async Task<RefreshTokenResponseDto> RefreshTokenAsync(RefreshTokenRequestDto request)
+    {
+        RefreshTokenResponseDto response = new() { JwtToken = "", RefreshToken = "", ExpiresAt = DateTime.UtcNow };
+
+        var user = await _userManager.FindByIdAsync(request.UserId);
+        if (user is null)
+        {
+            response.HasError = true;
+            response.Errors.Add("User not found.");
+            return response;
+        }
+
+        var storedToken = await _refreshTokens.GetAsync(request.UserId);
+        if (storedToken is null || storedToken != request.RefreshToken)
+        {
+            response.HasError = true;
+            response.Errors.Add("Invalid or expired refresh token.");
+            return response;
+        }
+
+        // Rotate — delete old token and issue a new one
+        await _refreshTokens.DeleteAsync(request.UserId);
+        var newRefreshToken = await GenerateAndStoreRefreshTokenAsync(request.UserId);
+
+        var jwtToken = await GenerateJwtToken(user);
+        var expiresAt = DateTime.UtcNow.AddMinutes(_jwtSettings.DurationInMinutes);
+
+        response.JwtToken = new JwtSecurityTokenHandler().WriteToken(jwtToken);
+        response.RefreshToken = newRefreshToken;
+        response.ExpiresAt = expiresAt;
+
+        return response;
     }
     
     
@@ -78,8 +137,21 @@ public sealed class AccountServices(UserManager<ApplicationUser> userManager, IO
             return response;
         }
 
-        var token = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(request.Token));
-        var result = await _userManager.ResetPasswordAsync(user, token, request.Password);
+        // Validate the OTP code from Redis
+        var storedCode = await _passwordResetCodes.GetAsync(request.Id);
+        if (storedCode is null || storedCode != request.Code)
+        {
+            response.HasError = true;
+            response.Errors.Add("Invalid or expired reset code. Please request a new one.");
+            return response;
+        }
+
+        // Invalidate the OTP — one-time use
+        await _passwordResetCodes.DeleteAsync(request.Id);
+
+        // Generate a fresh Identity reset token server-side and apply the new password
+        var identityToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+        var result = await _userManager.ResetPasswordAsync(user, identityToken, request.Password);
         if (!result.Succeeded)
         {
             response.HasError = true;

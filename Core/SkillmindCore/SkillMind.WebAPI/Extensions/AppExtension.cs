@@ -14,5 +14,6 @@ public static class AppExtension
                 opt.SwaggerEndpoint(url,name);
             }
         });
+
     }
 }

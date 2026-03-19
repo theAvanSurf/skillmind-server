@@ -18,7 +18,7 @@ public class ConfigureSwaggerOptions(IApiVersionDescriptionProvider provider) : 
                 Description = "API Systems",
                 Contact = new OpenApiContact
                 {
-                    Name = "Hermes Bank Systems",
+                    Name = "SkillMind API Systems",
                     Email = "therealsocialhubdotnet@gmail.com"
                 }
             });

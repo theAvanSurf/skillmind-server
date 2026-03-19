@@ -26,6 +26,9 @@ export class RequestLoggerMiddleware implements NestMiddleware {
     // Guardar requestId en el objeto request para usarlo después
     (req as any).requestId = requestId;
 
+    // Devolver el traceId en la respuesta para que el cliente pueda rastrearlo
+    res.setHeader('X-Request-ID', requestId);
+
     // Timestamp de inicio (para calcular duración)
     const startTime = Date.now();
 

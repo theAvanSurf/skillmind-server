@@ -50,4 +50,38 @@ export class UploaderService {
       Readable.from(file.buffer).pipe(uploadStream);
     });
   }
+  async listImages(): Promise<CloudinaryImage[]> {
+    const result = await cloudinary.api.resources({
+      resource_type: 'image',
+      type: 'upload',
+      max_results: 500,
+    });
+
+    return (result.resources as CloudinaryResourceItem[]).map((r) => ({
+      publicId: r.public_id,
+      url: r.url,
+      secureUrl: r.secure_url,
+      format: r.format,
+      bytes: r.bytes,
+      createdAt: r.created_at,
+    }));
+  }
+}
+
+export interface CloudinaryImage {
+  publicId: string;
+  url: string;
+  secureUrl: string;
+  format: string;
+  bytes: number;
+  createdAt: string;
+}
+
+interface CloudinaryResourceItem {
+  public_id: string;
+  url: string;
+  secure_url: string;
+  format: string;
+  bytes: number;
+  created_at: string;
 }

@@ -1,0 +1,4 @@
+api-gateway/node_modules
+api-gateway/dist
+notification-service/node_modules
+notification-service/dist
