@@ -1,8 +1,12 @@
 using Moq;
+using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using SkillMind.Core.Application.Dtos.Common;
+using SkillMind.Core.Domain.Enums;
 using SkillMind.Infrastructure.Identity.Entities;
 using SkillMind.Infrastructure.Identity.Services;
+using Xunit;
 
 namespace SkillMind.Infrastructure.Identity.Tests;
 
@@ -33,13 +37,28 @@ public class CredentialChangeServiceTests
         _passwordHasherMock = new Mock<IPasswordHasher<ApplicationUser>>();
         _service = new CredentialChangeService(_userManagerMock.Object, _passwordHasherMock.Object);
 
-        _testUser = new ApplicationUser
+        _testUser = BuildUser("user-123", "test@example.com", "testuser");
+        _testUser.PasswordHash = "hashed_password_123";
+        _testUser.SecurityStamp = Guid.NewGuid().ToString();
+    }
+
+    private static ApplicationUser BuildUser(string id, string email, string userName)
+    {
+        var now = DateTime.UtcNow;
+
+        return new ApplicationUser
         {
-            Id = "user-123",
-            UserName = "testuser",
-            Email = "test@example.com",
-            PasswordHash = "hashed_password_123",
-            SecurityStamp = Guid.NewGuid().ToString()
+            Id = id,
+            UserName = userName,
+            Email = email,
+            FirstName = "Test",
+            LastName = "User",
+            AccountTypes = AccountTypes.Free,
+            BirthDate = now.AddYears(-25),
+            Country = "DO",
+            Status = GlobalStatus.Active,
+            CreatedAt = now,
+            UpdatedAt = now
         };
     }
 
@@ -319,7 +338,7 @@ public class CredentialChangeServiceTests
         // Arrange
         const string userId = "user-123";
         const string takenEmail = "taken@example.com";
-        var existingUser = new ApplicationUser { Id = "other-user", Email = takenEmail };
+        var existingUser = BuildUser("other-user", takenEmail, "taken-user");
 
         _userManagerMock
             .Setup(x => x.FindByIdAsync(userId))
@@ -394,7 +413,7 @@ public class CredentialChangeServiceTests
     {
         // Arrange
         const string email = "existing@example.com";
-        var existingUser = new ApplicationUser { Email = email };
+        var existingUser = BuildUser("existing-user", email, "existing-user");
 
         _userManagerMock
             .Setup(x => x.FindByEmailAsync(email))
@@ -508,7 +527,15 @@ public class CredentialChangeServiceTests
             Id = userId,
             UserName = "testuser",
             Email = "test@example.com",
-            PasswordHash = "hashed_old_password"
+            PasswordHash = "hashed_old_password",
+            FirstName = "Test",
+            LastName = "User",
+            AccountTypes = AccountTypes.Free,
+            BirthDate = DateTime.UtcNow.AddYears(-25),
+            Country = "DO",
+            Status = GlobalStatus.Active,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
         };
 
         // First step: Validate current password
@@ -567,7 +594,15 @@ public class CredentialChangeServiceTests
             Id = userId,
             UserName = "testuser",
             Email = "old@example.com",
-            PasswordHash = "hashed_password"
+            PasswordHash = "hashed_password",
+            FirstName = "Test",
+            LastName = "User",
+            AccountTypes = AccountTypes.Free,
+            BirthDate = DateTime.UtcNow.AddYears(-25),
+            Country = "DO",
+            Status = GlobalStatus.Active,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
         };
 
         _userManagerMock

@@ -59,7 +59,7 @@ public class AuthController(IAccountServicesApi accountServiceForWebApi, Credent
             if (!ModelState.IsValid)
                 return BadRequest();
 
-            await accountServiceForWebApi.ConfirmAccountAsync(dto.UserId, dto.Token);
+            await accountServiceForWebApi.ConfirmAccountAsync(dto.UserId, dto.Code);
 
             return Ok("User has been successfully verified");
         }
