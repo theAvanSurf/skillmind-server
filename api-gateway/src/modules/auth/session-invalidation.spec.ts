@@ -9,7 +9,6 @@ import {
   ConfirmPasswordChangeDto,
   ConfirmEmailChangeDto,
 } from './auth.dto';
-import { CredentialChangeException } from './auth.exceptions';
 
 /**
  * Session Invalidation Tests - AC4.4
@@ -27,7 +26,6 @@ describe('Session Invalidation (AC4.4)', () => {
   let otpService: OTPService;
   let emailService: EmailService;
   let httpService: HttpService;
-  let configService: ConfigService;
 
   const userId = 'user-123';
   const userEmail = 'user@example.com';
@@ -77,7 +75,6 @@ describe('Session Invalidation (AC4.4)', () => {
     otpService = module.get<OTPService>(OTPService);
     emailService = module.get<EmailService>(EmailService);
     httpService = module.get<HttpService>(HttpService);
-    configService = module.get<ConfigService>(ConfigService);
   });
 
   afterEach(() => {
@@ -98,15 +95,15 @@ describe('Session Invalidation (AC4.4)', () => {
       jest.spyOn(otpService, 'verifyOTP').mockResolvedValue(true);
       jest
         .spyOn(httpService, 'post')
-        .mockImplementation((url: string, data: any, config: any) => {
+        .mockImplementation((url: string) => {
           if (url.includes('change-password')) {
-            return of({ data: { success: true }, status: 200 });
+            return of({ data: { success: true }, status: 200 } as any);
           }
           if (url.includes('invalidate-sessions')) {
             invalidateSessionsCall();
-            return of(invalidateSessionsResponse);
+            return of(invalidateSessionsResponse as any);
           }
-          return of({ data: {}, status: 200 });
+          return of({ data: {}, status: 200 } as any);
         });
       jest.spyOn(emailService, 'sendCredentialChangeConfirmation').mockResolvedValue(true);
 
@@ -132,7 +129,7 @@ describe('Session Invalidation (AC4.4)', () => {
       const testUserId = 'special-user-999';
 
       jest.spyOn(otpService, 'verifyOTP').mockResolvedValue(true);
-      jest.spyOn(httpService, 'post').mockReturnValue(of({ data: { success: true }, status: 200 }));
+      jest.spyOn(httpService, 'post').mockReturnValue(of({ data: { success: true }, status: 200 } as any));
       jest.spyOn(emailService, 'sendCredentialChangeConfirmation').mockResolvedValue(true);
 
       // Act
@@ -158,7 +155,7 @@ describe('Session Invalidation (AC4.4)', () => {
         if (url.includes('invalidate-sessions')) {
           return throwError(() => new Error('Session invalidation failed'));
         }
-        return of({ data: { success: true }, status: 200 });
+        return of({ data: { success: true }, status: 200 } as any);
       });
       jest.spyOn(emailService, 'sendCredentialChangeConfirmation').mockResolvedValue(true);
 
@@ -185,7 +182,7 @@ describe('Session Invalidation (AC4.4)', () => {
         if (url.includes('invalidate-sessions')) {
           return throwError(() => new Error('Connection timeout'));
         }
-        return of({ data: { success: true }, status: 200 });
+        return of({ data: { success: true }, status: 200 } as any);
       });
       jest.spyOn(emailService, 'sendCredentialChangeConfirmation').mockResolvedValue(true);
 
@@ -209,15 +206,15 @@ describe('Session Invalidation (AC4.4)', () => {
       const invalidateSessionsCall = jest.fn();
 
       jest.spyOn(otpService, 'verifyOTP').mockResolvedValue(true);
-      jest.spyOn(httpService, 'post').mockImplementation((url: string, data: any) => {
+      jest.spyOn(httpService, 'post').mockImplementation((url: string) => {
         if (url.includes('change-email')) {
-          return of({ data: { success: true }, status: 200 });
+          return of({ data: { success: true }, status: 200 } as any);
         }
         if (url.includes('invalidate-sessions')) {
           invalidateSessionsCall();
-          return of({ data: { success: true }, status: 200 });
+          return of({ data: { success: true }, status: 200 } as any);
         }
-        return of({ data: {}, status: 200 });
+        return of({ data: {}, status: 200 } as any);
       });
       jest.spyOn(emailService, 'sendCredentialChangeConfirmation').mockResolvedValue(true);
 
@@ -235,10 +232,10 @@ describe('Session Invalidation (AC4.4)', () => {
         verificationCode: '123456',
       };
 
-      const emailSendCalls: any[] = [];
+      const emailSendCalls: Array<{ email: string; type: 'password' | 'email' }> = [];
 
       jest.spyOn(otpService, 'verifyOTP').mockResolvedValue(true);
-      jest.spyOn(httpService, 'post').mockReturnValue(of({ data: { success: true }, status: 200 }));
+      jest.spyOn(httpService, 'post').mockReturnValue(of({ data: { success: true }, status: 200 } as any));
       jest.spyOn(emailService, 'sendCredentialChangeConfirmation').mockImplementation((email, type) => {
         emailSendCalls.push({ email, type });
         return Promise.resolve(true);
@@ -271,7 +268,7 @@ describe('Session Invalidation (AC4.4)', () => {
         if (url.includes('invalidate-sessions')) {
           return throwError(() => new Error('Request timeout'));
         }
-        return of({ data: { success: true }, status: 200 });
+        return of({ data: { success: true }, status: 200 } as any);
       });
       jest.spyOn(emailService, 'sendCredentialChangeConfirmation').mockResolvedValue(true);
 
@@ -293,7 +290,7 @@ describe('Session Invalidation (AC4.4)', () => {
         if (url.includes('invalidate-sessions')) {
           return throwError(() => new Error('ERR_NETWORK: Network error'));
         }
-        return of({ data: { success: true }, status: 200 });
+        return of({ data: { success: true }, status: 200 } as any);
       });
       jest.spyOn(emailService, 'sendCredentialChangeConfirmation').mockResolvedValue(true);
 
@@ -314,12 +311,13 @@ describe('Session Invalidation (AC4.4)', () => {
       const invalidationCalls: string[] = [];
 
       jest.spyOn(otpService, 'verifyOTP').mockResolvedValue(true);
-      jest.spyOn(httpService, 'post').mockImplementation((url: string, data: any) => {
+      jest.spyOn(httpService, 'post').mockImplementation((url: string, data: unknown) => {
         if (url.includes('invalidate-sessions')) {
-          invalidationCalls.push(data.userId);
-          return of({ data: { success: true }, status: 200 });
+          const payload = data as { userId: string };
+          invalidationCalls.push(payload.userId);
+          return of({ data: { success: true }, status: 200 } as any);
         }
-        return of({ data: { success: true }, status: 200 });
+        return of({ data: { success: true }, status: 200 } as any);
       });
       jest.spyOn(emailService, 'sendCredentialChangeConfirmation').mockResolvedValue(true);
 
@@ -346,7 +344,7 @@ describe('Session Invalidation (AC4.4)', () => {
       };
 
       jest.spyOn(otpService, 'verifyOTP').mockResolvedValue(true);
-      jest.spyOn(httpService, 'post').mockReturnValue(of({ data: { success: true }, status: 200 }));
+      jest.spyOn(httpService, 'post').mockReturnValue(of({ data: { success: true }, status: 200 } as any));
       jest.spyOn(emailService, 'sendCredentialChangeConfirmation').mockResolvedValue(true);
 
       // Act
@@ -367,7 +365,7 @@ describe('Session Invalidation (AC4.4)', () => {
       };
 
       jest.spyOn(otpService, 'verifyOTP').mockResolvedValue(true);
-      jest.spyOn(httpService, 'post').mockReturnValue(of({ data: { success: true }, status: 200 }));
+      jest.spyOn(httpService, 'post').mockReturnValue(of({ data: { success: true }, status: 200 } as any));
       jest.spyOn(emailService, 'sendCredentialChangeConfirmation').mockResolvedValue(true);
 
       // Act

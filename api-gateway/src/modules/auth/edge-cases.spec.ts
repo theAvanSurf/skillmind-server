@@ -391,7 +391,7 @@ describe('Edge Cases & Concurrent Requests', () => {
       jest.spyOn(otpService, 'verifyOTP').mockResolvedValue(true);
       // Mock successful password change
       jest.spyOn(httpService, 'post').mockReturnValue(
-        of({ data: { success: true }, status: 200 })
+        of({ data: { success: true }, status: 200 } as any)
       );
       jest.spyOn(emailService, 'sendCredentialChangeConfirmation').mockResolvedValue(true);
 
@@ -411,7 +411,7 @@ describe('Edge Cases & Concurrent Requests', () => {
 
       // Mock password validation as successful
       jest.spyOn(httpService, 'post').mockReturnValue(
-        of({ data: { success: true, isValid: true }, status: 200 })
+        of({ data: { success: true, isValid: true }, status: 200 } as any)
       );
       jest.spyOn(otpService, 'createOTP').mockResolvedValue({
         code: '123456',
@@ -470,7 +470,7 @@ describe('Edge Cases & Concurrent Requests', () => {
 
       jest.spyOn(otpService, 'verifyOTP').mockResolvedValue(true);
       jest.spyOn(httpService, 'post').mockReturnValue(
-        of({ data: { success: false, message: 'Password too short' }, status: 400 }),
+        of({ data: { success: false, message: 'Password too short' }, status: 400 } as any),
       );
 
       // Act & Assert

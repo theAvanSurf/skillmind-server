@@ -400,7 +400,7 @@ describe('E2E Credential Change Flows', () => {
             message: 'Bad request',
           }));
         }
-        return of({ data: { success: true }, status: 200 });
+        return of({ data: { success: true }, status: 200 } as any);
       });
 
       // Act & Assert
@@ -421,12 +421,12 @@ describe('E2E Credential Change Flows', () => {
       const invalidateCall = jest.fn();
 
       jest.spyOn(otpService, 'verifyOTP').mockResolvedValue(true);
-      jest.spyOn(httpService, 'post').mockImplementation((url: string, data: any) => {
+      jest.spyOn(httpService, 'post').mockImplementation((url: string) => {
         if (url.includes('invalidate-sessions')) {
           invalidateCall();
-          return of({ data: { success: true }, status: 200 });
+          return of({ data: { success: true }, status: 200 } as any);
         }
-        return of({ data: { success: true }, status: 200 });
+        return of({ data: { success: true }, status: 200 } as any);
       });
       jest.spyOn(emailService, 'sendCredentialChangeConfirmation').mockResolvedValue(true);
 
@@ -452,12 +452,12 @@ describe('E2E Credential Change Flows', () => {
       const invalidateCall = jest.fn();
 
       jest.spyOn(otpService, 'verifyOTP').mockResolvedValue(true);
-      jest.spyOn(httpService, 'post').mockImplementation((url: string, data: any) => {
+      jest.spyOn(httpService, 'post').mockImplementation((url: string) => {
         if (url.includes('invalidate-sessions')) {
           invalidateCall();
-          return of({ data: { success: true }, status: 200 });
+          return of({ data: { success: true }, status: 200 } as any);
         }
-        return of({ data: { success: true }, status: 200 });
+        return of({ data: { success: true }, status: 200 } as any);
       });
       jest.spyOn(emailService, 'sendCredentialChangeConfirmation').mockResolvedValue(true);
 

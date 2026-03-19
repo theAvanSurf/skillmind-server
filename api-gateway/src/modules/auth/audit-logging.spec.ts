@@ -223,6 +223,10 @@ describe('Audit Logging (AC4.3)', () => {
       const logCall = loggerLogSpy.mock.calls.find((call) =>
         call[0].includes('Email change initiated'),
       );
+      expect(logCall).toBeDefined();
+      if (!logCall) {
+        throw new Error('Expected audit log call to be present');
+      }
       expect(logCall[0]).toContain(userId);
       expect(logCall[0]).toContain(newEmail);
     });
@@ -347,9 +351,9 @@ describe('Audit Logging (AC4.3)', () => {
       jest.spyOn(otpService, 'verifyOTP').mockResolvedValue(true);
       jest.spyOn(httpService, 'post').mockImplementation((url: string) => {
         if (url.includes('change-password')) {
-          return of({ data: { success: false, message: 'Password does not meet requirements' }, status: 400 });
+          return of({ data: { success: false, message: 'Password does not meet requirements' }, status: 400 } as any);
         }
-        return of({ data: { success: true }, status: 200 });
+        return of({ data: { success: true }, status: 200 } as any);
       });
 
       // Act & Assert
