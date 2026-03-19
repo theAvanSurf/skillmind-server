@@ -174,3 +174,69 @@ export class ResetPasswordRequestApiDto {
     @MinLength(8)
     ConfirmPassword: string;
 }
+
+export interface CredentialSecuritySettingsDto {
+    maskedEmail: string;
+    canChangePassword: boolean;
+    canChangeEmail: boolean;
+}
+
+export class InitiatePasswordChangeRequestDto {
+    @ApiProperty({ example: 'CurrentP@ssw0rd!', description: 'Current account password' })
+    @IsString()
+    @IsNotEmpty()
+    CurrentPassword: string;
+}
+
+export class CompletePasswordChangeRequestDto {
+    @ApiProperty({ example: '847291', description: '6-digit OTP code sent to the registered email' })
+    @IsString()
+    @IsNotEmpty()
+    Code: string;
+
+    @ApiProperty({ example: 'NewP@ssw0rd!1', description: 'New password' })
+    @IsString()
+    @IsNotEmpty()
+    @MinLength(8)
+    NewPassword: string;
+
+    @ApiProperty({ example: 'NewP@ssw0rd!1', description: 'Confirm new password' })
+    @IsString()
+    @IsNotEmpty()
+    @MinLength(8)
+    ConfirmPassword: string;
+}
+
+export class InitiateEmailChangeRequestDto {
+    @ApiProperty({ example: 'CurrentP@ssw0rd!', description: 'Current account password' })
+    @IsString()
+    @IsNotEmpty()
+    CurrentPassword: string;
+
+    @ApiProperty({ example: 'new.email@domain.com', description: 'New email address' })
+    @IsEmail()
+    @IsNotEmpty()
+    NewEmail: string;
+}
+
+export class CompleteEmailChangeRequestDto {
+    @ApiProperty({ example: 'new.email@domain.com', description: 'Pending email to confirm' })
+    @IsEmail()
+    @IsNotEmpty()
+    NewEmail: string;
+
+    @ApiProperty({ example: '123456', description: 'Code sent to current email' })
+    @IsString()
+    @IsNotEmpty()
+    CurrentEmailCode: string;
+
+    @ApiProperty({ example: '654321', description: 'Code sent to new email' })
+    @IsString()
+    @IsNotEmpty()
+    NewEmailCode: string;
+}
+
+export interface CredentialChangeActionResponseDto {
+    status: string;
+    message: string;
+}

@@ -7,6 +7,11 @@ export const API_ENDPOINTS = {
         AUTH_RESET_PASSWORD: "/auth/account/reset-password",
         AUTH_REFRESH: "/auth/refresh",
         AUTH_VERIFY: "/auth/verify",
+        AUTH_SECURITY_SETTINGS: "/auth/account/security-settings",
+        AUTH_START_PASSWORD_CHANGE: "/auth/account/credentials/password/start",
+        AUTH_COMPLETE_PASSWORD_CHANGE: "/auth/account/credentials/password/complete",
+        AUTH_START_EMAIL_CHANGE: "/auth/account/credentials/email/start",
+        AUTH_COMPLETE_EMAIL_CHANGE: "/auth/account/credentials/email/complete",
 
         // Profiles
         PROFILES: "/profiles",

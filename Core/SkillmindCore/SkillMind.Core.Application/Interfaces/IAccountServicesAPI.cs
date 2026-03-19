@@ -13,4 +13,9 @@ public interface IAccountServicesApi
     Task<string> ConfirmAccountAsync(string userId, string userToken);
     Task<bool> ActivateOrDesactivateUser(string userId, string origin, bool? isApi = false);
     Task<RefreshTokenResponseDto> RefreshTokenAsync(RefreshTokenRequestDto request);
+    Task<CredentialSecuritySettingsDto> GetCredentialSecuritySettingsAsync(string userId);
+    Task<CredentialChangeActionResponseDto> InitiatePasswordChangeAsync(string userId, InitiatePasswordChangeRequestDto request, string ipAddress);
+    Task<CredentialChangeActionResponseDto> CompletePasswordChangeAsync(string userId, CompletePasswordChangeRequestDto request, string ipAddress);
+    Task<CredentialChangeActionResponseDto> InitiateEmailChangeAsync(string userId, InitiateEmailChangeRequestDto request, string ipAddress);
+    Task<CredentialChangeActionResponseDto> CompleteEmailChangeAsync(string userId, CompleteEmailChangeRequestDto request, string ipAddress);
 }

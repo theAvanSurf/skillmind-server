@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using SkillMind.Core.Application.Dtos.Common;
 using SkillMind.Core.Application.Dtos.Sessions;
 using SkillMind.Core.Application.Interfaces;
@@ -160,4 +161,82 @@ public class AuthController(IAccountServicesApi accountServiceForWebApi, ISessio
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public IActionResult VerifyToken() => Ok();
+
+    [Authorize]
+    [HttpGet("account/security-settings")]
+    [ProducesResponseType(typeof(CredentialSecuritySettingsDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> GetCredentialSecuritySettings()
+    {
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(userIdClaim))
+            return Unauthorized("User identity could not be determined.");
+
+        var result = await accountServiceForWebApi.GetCredentialSecuritySettingsAsync(userIdClaim);
+        return Ok(result);
+    }
+
+    [Authorize]
+    [HttpPost("account/credentials/password/start")]
+    [ProducesResponseType(typeof(CredentialChangeActionResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> StartPasswordCredentialChange([FromBody] InitiatePasswordChangeRequestDto dto)
+    {
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(userIdClaim))
+            return Unauthorized("User identity could not be determined.");
+
+        var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        var result = await accountServiceForWebApi.InitiatePasswordChangeAsync(userIdClaim, dto, ip);
+        return result.Status == "CODE_SENT" ? Ok(result) : BadRequest(result);
+    }
+
+    [Authorize]
+    [HttpPost("account/credentials/password/complete")]
+    [ProducesResponseType(typeof(CredentialChangeActionResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> CompletePasswordCredentialChange([FromBody] CompletePasswordChangeRequestDto dto)
+    {
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(userIdClaim))
+            return Unauthorized("User identity could not be determined.");
+
+        var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        var result = await accountServiceForWebApi.CompletePasswordChangeAsync(userIdClaim, dto, ip);
+        return result.Status == "SUCCESS" ? Ok(result) : BadRequest(result);
+    }
+
+    [Authorize]
+    [HttpPost("account/credentials/email/start")]
+    [ProducesResponseType(typeof(CredentialChangeActionResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> StartEmailCredentialChange([FromBody] InitiateEmailChangeRequestDto dto)
+    {
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(userIdClaim))
+            return Unauthorized("User identity could not be determined.");
+
+        var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        var result = await accountServiceForWebApi.InitiateEmailChangeAsync(userIdClaim, dto, ip);
+        return result.Status == "CODE_SENT" ? Ok(result) : BadRequest(result);
+    }
+
+    [Authorize]
+    [HttpPost("account/credentials/email/complete")]
+    [ProducesResponseType(typeof(CredentialChangeActionResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> CompleteEmailCredentialChange([FromBody] CompleteEmailChangeRequestDto dto)
+    {
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(userIdClaim))
+            return Unauthorized("User identity could not be determined.");
+
+        var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        var result = await accountServiceForWebApi.CompleteEmailChangeAsync(userIdClaim, dto, ip);
+        return result.Status == "SUCCESS" ? Ok(result) : BadRequest(result);
+    }
 }
