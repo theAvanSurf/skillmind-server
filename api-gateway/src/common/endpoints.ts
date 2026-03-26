@@ -31,5 +31,13 @@ export const API_ENDPOINTS = {
         PAYMENT_CREATE_PORTAL_SESSION: "/payment/create-portal-session",
         PAYMENT_SUBSCRIPTION: "/payment/subscription",
         PAYMENT_WEBHOOK: "/payment/webhook",
+
+        // Courses
+        COURSES: "/courses",
+        COURSES_BY_ID: (id: string) => `/courses/${id}`,
+        COURSES_RELATED: (id: string) => `/courses/${id}/related`,
+        COURSES_PROGRESS: (id: string) => `/courses/${id}/progress`,
+        COURSES_SEASONS: "/courses/seasons",
+        COURSES_LESSONS: "/courses/lessons",
     }
 }
