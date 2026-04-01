@@ -156,10 +156,14 @@ public static class ServicesRegistration
     }
 
     private static async Task SeedAsync(RoleManager<IdentityRole> roles)
+{
+    string[] defaultRoles = [nameof(Roles.Admin), nameof(Roles.Professor), nameof(Roles.Student)];
+
+    foreach (var role in defaultRoles)
     {
-       await roles.CreateAsync(new IdentityRole(nameof(Roles.Admin)));
-       await roles.CreateAsync(new IdentityRole(nameof(Roles.Professor)));
-       await roles.CreateAsync(new IdentityRole(nameof(Roles.Student)));
+        if (!await roles.RoleExistsAsync(role))
+            await roles.CreateAsync(new IdentityRole(role));
     }
+}
     
 }

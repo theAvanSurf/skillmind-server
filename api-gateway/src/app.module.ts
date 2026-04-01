@@ -10,6 +10,8 @@ import { AuthModule } from "./modules/auth/auth.module";
 import { ProfilesModule } from "./modules/profiles/profiles.module";
 import { SessionsModule } from "./modules/sessions/sessions.module";
 import { PaymentModule } from "./modules/payment/payment.module";
+import { CoursesModule } from "./modules/courses/courses.module";
+
 
 @Module({
     imports: [
@@ -23,6 +25,7 @@ import { PaymentModule } from "./modules/payment/payment.module";
         ProfilesModule,
         SessionsModule,
         PaymentModule,
+        CoursesModule
     ]
 })
 
