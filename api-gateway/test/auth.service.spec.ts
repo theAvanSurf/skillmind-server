@@ -1,6 +1,6 @@
-import AuthService from '../../modules/auth/auth.service';
-import httpClient from '../../config/baseHttpClient';
-import { API_ENDPOINTS } from '../../common/endpoints';
+import AuthService from '../src/modules/auth/auth.service';
+import httpClient from '../src/config/baseHttpClient';
+import { API_ENDPOINTS } from '../src/common/endpoints';
 import {
     AuthenticateUserDto,
     CreateUserDto,
@@ -12,10 +12,10 @@ import {
     CompletePasswordChangeRequestDto,
     InitiateEmailChangeRequestDto,
     CompleteEmailChangeRequestDto,
-} from '../../modules/auth/auth.dto';
+} from '../src/modules/auth/auth.dto';
 
 // Mock httpClient
-jest.mock('../../config/baseHttpClient', () => ({
+jest.mock('../src/config/baseHttpClient', () => ({
     __esModule: true,
     default: {
         post: jest.fn(),
