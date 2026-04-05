@@ -55,6 +55,11 @@ services:
       - JwtSettings__Issuer=${JWT_ISSUER}
       - JwtSettings__Audience=${JWT_AUDIENCE}
       - JwtSettings__DurationInMinutes=${JWT_DURATION_MINUTES}
+      - FRONTEND_URL=${FRONTEND_URL}
+      - PAYMENT_DEFAULT_LOOKUP_KEY=${PAYMENT_DEFAULT_LOOKUP_KEY:-Skillmind_Premium_Plan-42a1204}
+      - Stripe__SecretKey=${STRIPE_SECRET_KEY}
+      - Stripe__PublishableKey=${STRIPE_PUBLISHABLE_KEY:-}
+      - Stripe__WebhookSecret=${STRIPE_WEBHOOK_SECRET}
       - EmailSettings__Host=${EMAILER_HOST}
       - EmailSettings__Port=${EMAILER_PORT}
       - EmailSettings__User=${EMAILER_USER}
@@ -87,6 +92,7 @@ services:
       EMAILER_PORT: ${EMAILER_PORT}
       EMAILER_USER: ${EMAILER_USER}
       EMAILER_PASS: ${EMAILER_PASS}
+      PAYMENT_DEFAULT_LOOKUP_KEY: ${PAYMENT_DEFAULT_LOOKUP_KEY:-Skillmind_Premium_Plan-42a1204}
       CORE_SERVICE_URL: http://core:8080
       API_VERSION: ${API_VERSION}
     volumes:
