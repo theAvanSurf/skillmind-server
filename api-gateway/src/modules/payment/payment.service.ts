@@ -5,18 +5,38 @@ import { CreateCheckoutSessionDto, CreatePortalSessionDto, SessionStatusDto, Sub
 
 @Injectable()
 export class PaymentService {
+    private resolveLookupKey(lookupKey?: string): string {
+        if (lookupKey?.trim()) return lookupKey.trim();
+
+        return (
+            process.env.PAYMENT_DEFAULT_LOOKUP_KEY?.trim() ||
+            process.env.STRIPE_DEFAULT_LOOKUP_KEY?.trim() ||
+            'Skillmind_Premium_Plan-42a1204'
+        );
+    }
+
     async createCheckoutSession(dto: CreateCheckoutSessionDto, token: string): Promise<{ clientSecret: string }> {
+        const payload: CreateCheckoutSessionDto = {
+            ...dto,
+            lookupKey: this.resolveLookupKey(dto.lookupKey),
+        };
+
         return await httpClient.post<{ clientSecret: string }>(
             API_ENDPOINTS.CORE.PAYMENT_CREATE_CHECKOUT_SESSION,
-            dto,
+            payload,
             { headers: { Authorization: token } }
         ) as unknown as { clientSecret: string };
     }
 
     async createSubscription(dto: CreateCheckoutSessionDto, token: string): Promise<SubscriptionClientSecretDto> {
+        const payload: CreateCheckoutSessionDto = {
+            ...dto,
+            lookupKey: this.resolveLookupKey(dto.lookupKey),
+        };
+
         return await httpClient.post<SubscriptionClientSecretDto>(
             API_ENDPOINTS.CORE.PAYMENT_CREATE_SUBSCRIPTION,
-            dto,
+            payload,
             { headers: { Authorization: token } }
         ) as unknown as SubscriptionClientSecretDto;
     }
