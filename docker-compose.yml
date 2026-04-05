@@ -42,11 +42,11 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
     healthcheck:
-      test: [ "CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092" ]
+      test: [ "CMD", "sh", "-c", "nc -z 127.0.0.1 9092" ]
       interval: 10s
-      timeout: 10s
-      retries: 24
-      start_period: 60s
+      timeout: 5s
+      retries: 30
+      start_period: 90s
     restart: always
 
   core:
@@ -132,9 +132,9 @@ services:
       SMTP_PORT: ${EMAILER_PORT}
       SMTP_USER: ${EMAILER_USER}
       SMTP_PASS: ${EMAILER_PASS}
-      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID}
-      FIREBASE_CLIENT_EMAIL: ${FIREBASE_CLIENT_EMAIL}
-      FIREBASE_PRIVATE_KEY: ${FIREBASE_PRIVATE_KEY}
+      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID:-}
+      FIREBASE_CLIENT_EMAIL: ${FIREBASE_CLIENT_EMAIL:-}
+      FIREBASE_PRIVATE_KEY: ${FIREBASE_PRIVATE_KEY:-}
     depends_on:
       kafka:
         condition: service_healthy
