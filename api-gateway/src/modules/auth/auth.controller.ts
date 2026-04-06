@@ -44,6 +44,8 @@ export class AuthController {
             email: response.data.email,
             roles: response.data.roles,
             isVerified: response.data.isVerified,
+            hasProfiles: response.data.hasProfiles,
+            profilesCount: response.data.profilesCount,
             jwtToken: response.data.jwtToken,
             refreshToken: response.data.refreshToken
         };
