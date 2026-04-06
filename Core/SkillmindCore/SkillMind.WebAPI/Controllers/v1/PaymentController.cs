@@ -129,10 +129,22 @@ public class PaymentController(StripeServices stripeServices) : BaseController
 
     [Authorize]
     [HttpGet("subscription")]
+    [ProducesResponseType(typeof(SubscriptionDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public IActionResult GetSubscription()
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> GetSubscription()
     {
-        return NotFound(new { message = "No subscription found" });
+        var customerEmail = User.FindFirstValue(ClaimTypes.Email) ?? User.FindFirstValue("email");
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+
+        if (string.IsNullOrWhiteSpace(customerEmail) || string.IsNullOrWhiteSpace(userId))
+            return Unauthorized("User identity claims are required.");
+
+        var subscription = await stripeServices.GetSubscription(customerEmail, userId);
+        if (subscription is null)
+            return NotFound(new { message = "No subscription found" });
+
+        return Ok(subscription);
     }
 
     [AllowAnonymous]

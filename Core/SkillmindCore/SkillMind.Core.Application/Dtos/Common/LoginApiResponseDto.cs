@@ -17,5 +17,7 @@ namespace SkillMind.Core.Application.Dtos.Common
         public bool IsVerified { get; set; }
         public required string JwtToken { get; set; }
         public string? RefreshToken { get; set; }
+        public bool HasProfiles { get; set; }
+        public int ProfilesCount { get; set; }
     }
 }

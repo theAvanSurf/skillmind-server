@@ -59,6 +59,89 @@ public class StripeServices(IOptions<StripeConfigurations> configurations, Price
         return null;
     }
 
+    private static DateTimeOffset? TryReadUnixDate(JsonElement root, string propertyName)
+    {
+        if (!root.TryGetProperty(propertyName, out var value))
+            return null;
+
+        if (value.ValueKind != JsonValueKind.Number || !value.TryGetInt64(out var unix))
+            return null;
+
+        if (unix <= 0)
+            return null;
+
+        return DateTimeOffset.FromUnixTimeSeconds(unix);
+    }
+
+    private static (string Plan, DateTimeOffset? CurrentPeriodEnd) ExtractPlanAndPeriodEnd(Subscription subscription)
+    {
+        var plan = "unknown";
+        DateTimeOffset? currentPeriodEnd = null;
+
+        var rawJson = subscription.StripeResponse?.Content;
+        if (string.IsNullOrWhiteSpace(rawJson))
+            return (plan, currentPeriodEnd);
+
+        using var doc = JsonDocument.Parse(rawJson);
+        var root = doc.RootElement;
+
+        if (root.TryGetProperty("items", out var items) &&
+            items.TryGetProperty("data", out var data) &&
+            data.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var item in data.EnumerateArray())
+            {
+                if (!item.TryGetProperty("price", out var price) || price.ValueKind != JsonValueKind.Object)
+                    continue;
+
+                if (price.TryGetProperty("lookup_key", out var lookupKey) && lookupKey.ValueKind == JsonValueKind.String)
+                {
+                    var lookupValue = lookupKey.GetString();
+                    if (!string.IsNullOrWhiteSpace(lookupValue))
+                    {
+                        plan = lookupValue;
+                        break;
+                    }
+                }
+
+                if (price.TryGetProperty("id", out var priceId) && priceId.ValueKind == JsonValueKind.String)
+                {
+                    var priceValue = priceId.GetString();
+                    if (!string.IsNullOrWhiteSpace(priceValue))
+                    {
+                        plan = priceValue;
+                        break;
+                    }
+                }
+            }
+        }
+
+        currentPeriodEnd = TryReadUnixDate(root, "current_period_end");
+        return (plan, currentPeriodEnd);
+    }
+
+    private async Task<string> ExtractClientSecretFromInvoiceId(string invoiceId)
+    {
+        if (string.IsNullOrWhiteSpace(invoiceId))
+            throw new InvalidOperationException("Stripe did not return a latest invoice for this subscription.");
+
+        var invoiceService = new InvoiceService();
+        var invoice = await invoiceService.GetAsync(invoiceId, new InvoiceGetOptions
+        {
+            Expand = new List<string>
+            {
+                "payment_intent",
+                "confirmation_secret",
+            },
+        });
+
+        var clientSecret = ExtractClientSecretFromInvoiceJson(invoice.StripeResponse?.Content);
+        if (string.IsNullOrWhiteSpace(clientSecret))
+            throw new InvalidOperationException("Stripe did not return a payment intent client secret for this subscription.");
+
+        return clientSecret;
+    }
+
     public async Task<string> CreateSession(string lookupKey, string origin)
     {
         if (string.IsNullOrWhiteSpace(lookupKey))
@@ -115,6 +198,30 @@ public class StripeServices(IOptions<StripeConfigurations> configurations, Price
         }
 
         var subscriptionService = new SubscriptionService();
+
+        var existingSubscriptions = await subscriptionService.ListAsync(new SubscriptionListOptions
+        {
+            Customer = customer.Id,
+            Status = "all",
+            Limit = 20,
+        });
+
+        var activeSubscription = existingSubscriptions.Data?.FirstOrDefault(s =>
+            s.Status == "active" || s.Status == "trialing");
+
+        if (activeSubscription is not null)
+            throw new InvalidOperationException("An active subscription already exists for this account.");
+
+        var resumableSubscription = existingSubscriptions.Data?.FirstOrDefault(s =>
+            (s.Status == "incomplete" || s.Status == "past_due") &&
+            !string.IsNullOrWhiteSpace(s.LatestInvoiceId));
+
+        if (resumableSubscription is not null)
+        {
+            var existingClientSecret = await ExtractClientSecretFromInvoiceId(resumableSubscription.LatestInvoiceId);
+            return (existingClientSecret, resumableSubscription.Id);
+        }
+
         var subscription = await subscriptionService.CreateAsync(new SubscriptionCreateOptions
         {
             Customer = customer.Id,
@@ -137,26 +244,57 @@ public class StripeServices(IOptions<StripeConfigurations> configurations, Price
             },
         });
 
-        var invoiceId = subscription.LatestInvoiceId;
-        if (string.IsNullOrWhiteSpace(invoiceId))
-            throw new InvalidOperationException("Stripe did not return a latest invoice for this subscription.");
-
-        var invoiceService = new InvoiceService();
-        var invoice = await invoiceService.GetAsync(invoiceId, new InvoiceGetOptions
-        {
-            Expand = new List<string>
-            {
-                "payment_intent",
-                "confirmation_secret",
-            },
-        });
-
-        var clientSecret = ExtractClientSecretFromInvoiceJson(invoice.StripeResponse?.Content);
-
-        if (string.IsNullOrWhiteSpace(clientSecret))
-            throw new InvalidOperationException("Stripe did not return a payment intent client secret for this subscription.");
+        var clientSecret = await ExtractClientSecretFromInvoiceId(subscription.LatestInvoiceId);
 
         return (clientSecret, subscription.Id);
+    }
+
+    public async Task<SubscriptionDto?> GetSubscription(string customerEmail, string userId)
+    {
+        if (string.IsNullOrWhiteSpace(customerEmail))
+            throw new ArgumentException("customerEmail is required.", nameof(customerEmail));
+
+        var customerService = new CustomerService();
+        var customers = await customerService.ListAsync(new CustomerListOptions
+        {
+            Email = customerEmail,
+            Limit = 1,
+        });
+
+        var customer = customers.Data?.FirstOrDefault();
+        if (customer is null)
+            return null;
+
+        var subscriptionService = new SubscriptionService();
+        var subscriptions = await subscriptionService.ListAsync(new SubscriptionListOptions
+        {
+            Customer = customer.Id,
+            Status = "all",
+            Limit = 20,
+        });
+
+        var selected = subscriptions.Data?.FirstOrDefault(s => s.Status == "active" || s.Status == "trialing")
+            ?? subscriptions.Data?.FirstOrDefault(s => s.Status == "incomplete" || s.Status == "past_due")
+            ?? subscriptions.Data?.FirstOrDefault();
+
+        if (selected is null)
+            return null;
+
+        var (plan, currentPeriodEnd) = ExtractPlanAndPeriodEnd(selected);
+        var isInGracePeriod = selected.Status == "past_due";
+
+        return new SubscriptionDto
+        {
+            Id = selected.Id,
+            UserId = userId,
+            StripeSubscriptionId = selected.Id,
+            Plan = plan,
+            SubscriptionStatus = selected.Status,
+            CurrentPeriodEnd = (currentPeriodEnd ?? DateTimeOffset.UtcNow).ToString("O"),
+            IsInGracePeriod = isInGracePeriod,
+            GracePeriodEnd = isInGracePeriod ? (currentPeriodEnd ?? DateTimeOffset.UtcNow).ToString("O") : null,
+            IntendedPlan = selected.Status == "incomplete" || selected.Status == "past_due" ? plan : null,
+        };
     }
 
     public async Task<SessionStatusDto> GetSessionStatus(string sessionId)
