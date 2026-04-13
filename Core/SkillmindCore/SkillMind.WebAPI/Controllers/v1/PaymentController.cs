@@ -118,12 +118,32 @@ public class PaymentController(StripeServices stripeServices) : BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreatePortalSession([FromBody] CreatePortalSessionDto dto)
     {
-        if (!ModelState.IsValid || string.IsNullOrWhiteSpace(dto.SessionId))
-            return BadRequest("SessionId is required.");
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
 
         var origin = ResolveOrigin();
+        string url;
 
-        var url = await stripeServices.CreatePortalSession(dto.SessionId, origin);
+        if (!string.IsNullOrWhiteSpace(dto.SessionId))
+        {
+            url = await stripeServices.CreatePortalSession(dto.SessionId, origin);
+        }
+        else
+        {
+            var customerEmail = User.FindFirstValue(ClaimTypes.Email) ?? User.FindFirstValue("email");
+            if (string.IsNullOrWhiteSpace(customerEmail))
+                return Unauthorized("User email claim is required.");
+
+            try
+            {
+                url = await stripeServices.CreatePortalSessionByCustomerEmail(customerEmail, origin);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         return Ok(new { url });
     }
 
