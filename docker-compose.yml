@@ -52,6 +52,7 @@ services:
     restart: always
 
   core:
+    image: joshuaenc/skillmind-core:latest
     build:
       context: ./Core/SkillmindCore
       dockerfile: Dockerfile
@@ -85,6 +86,7 @@ services:
     restart: always
 
   api-gateway:
+    image: joshuaenc/skillmind-api-gateway:latest
     build:
       context: .
       dockerfile: api-gateway/Dockerfile
@@ -122,6 +124,7 @@ services:
     restart: always
 
   notification-service:
+    image: joshuaenc/skillmind-notification:latest
     build:
       context: ./notification-service
       dockerfile: Dockerfile
@@ -144,6 +147,7 @@ services:
     restart: always
 
   recommendation-service:
+    image: joshuaenc/skillmind-recommendation:latest
     build:
       context: ./recommendation-service
       dockerfile: Dockerfile
