@@ -78,45 +78,73 @@ public class StripeServices(IOptions<StripeConfigurations> configurations, Price
         var plan = "unknown";
         DateTimeOffset? currentPeriodEnd = null;
 
-        var rawJson = subscription.StripeResponse?.Content;
-        if (string.IsNullOrWhiteSpace(rawJson))
-            return (plan, currentPeriodEnd);
-
-        using var doc = JsonDocument.Parse(rawJson);
-        var root = doc.RootElement;
-
-        if (root.TryGetProperty("items", out var items) &&
-            items.TryGetProperty("data", out var data) &&
-            data.ValueKind == JsonValueKind.Array)
+        if (subscription.Items?.Data != null)
         {
-            foreach (var item in data.EnumerateArray())
+            foreach (var item in subscription.Items.Data)
             {
-                if (!item.TryGetProperty("price", out var price) || price.ValueKind != JsonValueKind.Object)
-                    continue;
-
-                if (price.TryGetProperty("lookup_key", out var lookupKey) && lookupKey.ValueKind == JsonValueKind.String)
+                if (item.Price != null)
                 {
-                    var lookupValue = lookupKey.GetString();
-                    if (!string.IsNullOrWhiteSpace(lookupValue))
+                    if (!string.IsNullOrWhiteSpace(item.Price.LookupKey))
                     {
-                        plan = lookupValue;
+                        plan = item.Price.LookupKey;
                         break;
                     }
-                }
 
-                if (price.TryGetProperty("id", out var priceId) && priceId.ValueKind == JsonValueKind.String)
-                {
-                    var priceValue = priceId.GetString();
-                    if (!string.IsNullOrWhiteSpace(priceValue))
+                    if (!string.IsNullOrWhiteSpace(item.Price.Id))
                     {
-                        plan = priceValue;
+                        plan = item.Price.Id;
                         break;
                     }
                 }
             }
         }
 
-        currentPeriodEnd = TryReadUnixDate(root, "current_period_end");
+        var rawJson = subscription.StripeResponse?.Content;
+        if (!string.IsNullOrWhiteSpace(rawJson))
+        {
+            using var doc = JsonDocument.Parse(rawJson);
+            var root = doc.RootElement;
+
+            if (plan == "unknown")
+            {
+                if (root.TryGetProperty("items", out var items) &&
+                    items.TryGetProperty("data", out var data) &&
+                    data.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (var item in data.EnumerateArray())
+                    {
+                        if (!item.TryGetProperty("price", out var price) || price.ValueKind != JsonValueKind.Object)
+                            continue;
+
+                        if (price.TryGetProperty("lookup_key", out var lookupKey) && lookupKey.ValueKind == JsonValueKind.String)
+                        {
+                            var lookupValue = lookupKey.GetString();
+                            if (!string.IsNullOrWhiteSpace(lookupValue))
+                            {
+                                plan = lookupValue;
+                                break;
+                            }
+                        }
+
+                        if (price.TryGetProperty("id", out var priceId) && priceId.ValueKind == JsonValueKind.String)
+                        {
+                            var priceValue = priceId.GetString();
+                            if (!string.IsNullOrWhiteSpace(priceValue))
+                            {
+                                plan = priceValue;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (currentPeriodEnd == null)
+            {
+                currentPeriodEnd = TryReadUnixDate(root, "current_period_end");
+            }
+        }
+
         return (plan, currentPeriodEnd);
     }
 
