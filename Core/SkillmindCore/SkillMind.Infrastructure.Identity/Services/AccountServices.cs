@@ -25,6 +25,7 @@ public sealed class AccountServices(
     IKafkaEventService kafkaEventService,
     IRedisContext redisContext,
     ISessionManager sessionManager,
+    IProfilesServices profilesServices,
     ILogger<AccountServices> logger) : BaseServices(userManager, kafkaEventService, redisContext), IAccountServicesApi
 {
     private readonly JwtSettings _jwtSettings = jwtSettings.Value;
@@ -32,6 +33,7 @@ public sealed class AccountServices(
     private readonly UserManager<ApplicationUser> _userManager = userManager;
     private readonly IKafkaEventService _kafkaEventService = kafkaEventService;
     private readonly ISessionManager _sessionManager = sessionManager;
+    private readonly IProfilesServices _profilesServices = profilesServices;
     private readonly ILogger<AccountServices> _logger = logger;
     private readonly IRedisSet<string> _refreshTokens = redisContext.Set<string>("refresh-tokens");
     private readonly IRedisSet<string> _passwordResetCodes = redisContext.Set<string>("password-reset-codes");
@@ -308,6 +310,15 @@ public sealed class AccountServices(
     {
         var userToken = await GenerateJwtToken(user);
         var roles = await _userManager.GetRolesAsync(user);
+        var hasProfiles = false;
+        var profilesCount = 0;
+
+        if (Guid.TryParse(user.Id, out var userGuid))
+        {
+            var profiles = await _profilesServices.GetAllProfilesAsync(userGuid);
+            profilesCount = profiles.Count;
+            hasProfiles = profilesCount > 0;
+        }
 
         return new LoginApiResponseDto
         {
@@ -319,6 +330,8 @@ public sealed class AccountServices(
                 Email = user.Email,
                 Roles = roles.ToList(),
                 IsVerified = user.EmailConfirmed,
+                HasProfiles = hasProfiles,
+                ProfilesCount = profilesCount,
                 JwtToken = new JwtSecurityTokenHandler().WriteToken(userToken),
                 RefreshToken = refreshToken
             },

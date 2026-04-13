@@ -1,11 +1,11 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateCheckoutSessionDto {
-    @ApiProperty({ example: 'pro_monthly', description: 'Stripe price lookup key' })
+    @ApiProperty({ example: 'Skillmind_Premium_Plan-42a1204', description: 'Stripe price lookup key', required: false })
+    @IsOptional()
     @IsString()
-    @IsNotEmpty()
-    lookupKey: string;
+    lookupKey?: string;
 }
 
 export class SubscriptionClientSecretDto {

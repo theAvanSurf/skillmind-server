@@ -17,6 +17,12 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    healthcheck:
+      test: [ "CMD", "sh", "-c", "nc -z 127.0.0.1 2181" ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
     restart: always
 
   kafka:
@@ -24,7 +30,8 @@ services:
     hostname: kafka
     container_name: skillmind-kafka
     depends_on:
-      - zookeeper
+      zookeeper:
+        condition: service_healthy
     ports:
       - "9092:9092"
     environment:
@@ -37,10 +44,11 @@ services:
       KAFKA_ZOOKEEPER_SESSION_TIMEOUT_MS: 60000
       KAFKA_ZOOKEEPER_CONNECTION_TIMEOUT_MS: 60000
     healthcheck:
-      test: [ "CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092" ]
+      test: [ "CMD", "sh", "-c", "nc -z 127.0.0.1 9092" ]
       interval: 10s
-      timeout: 10s
-      retries: 10
+      timeout: 5s
+      retries: 30
+      start_period: 90s
     restart: always
 
   core:
@@ -59,6 +67,11 @@ services:
       - JwtSettings__Issuer=${JWT_ISSUER}
       - JwtSettings__Audience=${JWT_AUDIENCE}
       - JwtSettings__DurationInMinutes=${JWT_DURATION_MINUTES}
+      - FRONTEND_URL=${FRONTEND_URL}
+      - PAYMENT_DEFAULT_LOOKUP_KEY=${PAYMENT_DEFAULT_LOOKUP_KEY:-Skillmind_Premium_Plan-42a1204}
+      - Stripe__SecretKey=${STRIPE_SECRET_KEY}
+      - Stripe__PublishableKey=${STRIPE_PUBLISHABLE_KEY:-}
+      - Stripe__WebhookSecret=${STRIPE_WEBHOOK_SECRET}
       - EmailSettings__Host=${EMAILER_HOST}
       - EmailSettings__Port=${EMAILER_PORT}
       - EmailSettings__User=${EMAILER_USER}
@@ -69,7 +82,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
-    restart: on-failure
+    restart: always
 
   api-gateway:
     build:
@@ -91,6 +104,7 @@ services:
       EMAILER_PORT: ${EMAILER_PORT}
       EMAILER_USER: ${EMAILER_USER}
       EMAILER_PASS: ${EMAILER_PASS}
+      PAYMENT_DEFAULT_LOOKUP_KEY: ${PAYMENT_DEFAULT_LOOKUP_KEY:-Skillmind_Premium_Plan-42a1204}
       CORE_SERVICE_URL: http://core:8080
       API_VERSION: ${API_VERSION}
       RECOMMENDATION_SERVICE_URL: http://recommendation-service:8000
@@ -105,7 +119,7 @@ services:
         condition: service_started
       core:
         condition: service_started
-    restart: on-failure
+    restart: always
 
   notification-service:
     build:
@@ -121,9 +135,9 @@ services:
       SMTP_PORT: ${EMAILER_PORT}
       SMTP_USER: ${EMAILER_USER}
       SMTP_PASS: ${EMAILER_PASS}
-      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID}
-      FIREBASE_CLIENT_EMAIL: ${FIREBASE_CLIENT_EMAIL}
-      FIREBASE_PRIVATE_KEY: ${FIREBASE_PRIVATE_KEY}
+      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID:-}
+      FIREBASE_CLIENT_EMAIL: ${FIREBASE_CLIENT_EMAIL:-}
+      FIREBASE_PRIVATE_KEY: ${FIREBASE_PRIVATE_KEY:-}
     depends_on:
       kafka:
         condition: service_healthy

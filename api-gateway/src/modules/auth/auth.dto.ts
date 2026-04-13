@@ -91,6 +91,8 @@ export interface LoginUserData {
     email: string
     roles: string[]
     isVerified: string
+    hasProfiles: boolean
+    profilesCount: number
     jwtToken: string
     refreshToken?: string
 }

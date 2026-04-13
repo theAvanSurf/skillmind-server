@@ -6,6 +6,9 @@ using SkillMind.Application.Interfaces;
 using SkillMind.Core.Domain.Interfaces;
 using SkillMind.Core.Domain.Settings;
 using SkillMind.Infrastructure.Shared.Contexts;
+using SkillMind.Infrastructure.Shared.Services;
+using Stripe;
+using Stripe.Checkout;
 
 namespace SkillMind.Infrastructure.Shared;
 
@@ -18,6 +21,13 @@ public static class SharedLayerInjection
 
         services.Configure<KafkaSettings>(configuration.GetSection("Kafka"));
         services.Configure<StripeConfigurations>(configuration.GetSection("Stripe"));
+
+        var stripeSection = configuration.GetSection("Stripe");
+        var stripeSecret = stripeSection["SecretKey"]
+            ?? stripeSection["Secret_Key"]
+            ?? Environment.GetEnvironmentVariable("STRIPE_SECRET_KEY");
+        if (!string.IsNullOrWhiteSpace(stripeSecret))
+            StripeConfiguration.ApiKey = stripeSecret;
 
         services.AddSingleton<IProducer<string, string>>(sp =>
         {
@@ -34,5 +44,8 @@ public static class SharedLayerInjection
         });
 
         services.AddSingleton<IKafkaEventService, KafkaEventService>();
+        services.AddScoped<PriceService>();
+        services.AddScoped<SessionService>();
+        services.AddScoped<StripeServices>();
     }
 }
