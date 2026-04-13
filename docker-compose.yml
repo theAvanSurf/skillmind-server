@@ -17,6 +17,7 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    restart: always
 
   kafka:
     image: confluentinc/cp-kafka:7.5.0
@@ -33,11 +34,14 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_ZOOKEEPER_SESSION_TIMEOUT_MS: 60000
+      KAFKA_ZOOKEEPER_CONNECTION_TIMEOUT_MS: 60000
     healthcheck:
       test: [ "CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092" ]
       interval: 10s
       timeout: 10s
       retries: 10
+    restart: always
 
   core:
     build:
@@ -89,6 +93,7 @@ services:
       EMAILER_PASS: ${EMAILER_PASS}
       CORE_SERVICE_URL: http://core:8080
       API_VERSION: ${API_VERSION}
+      RECOMMENDATION_SERVICE_URL: http://recommendation-service:8000
     volumes:
       - ./api-gateway/src:/usr/src/app/src
       - ./api-gateway/tsconfig.json:/usr/src/app/tsconfig.json
@@ -123,6 +128,25 @@ services:
       kafka:
         condition: service_healthy
     restart: always
+
+  recommendation-service:
+    build:
+      context: ./recommendation-service
+      dockerfile: Dockerfile
+    container_name: skillmind-recommendations
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: ${POSTGRES_URL_ASYNC}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      KAFKA_BROKER: kafka:29092
+    depends_on:
+      kafka:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    restart: on-failure
 
 volumes:
   redis-data:
