@@ -1,4 +1,5 @@
 import uuid
+from typing import Optional
 from datetime import datetime
 from sqlalchemy import String, Integer, DateTime, ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column
@@ -10,8 +11,8 @@ class Course(Base):
     Title: Mapped[str]           = mapped_column(String(200))
     Description: Mapped[str]     = mapped_column(Text)
     ThumbnailUrl: Mapped[str]    = mapped_column(String)
-    Category: Mapped[str | None] = mapped_column(String(100))
-    Tags: Mapped[str | None]     = mapped_column(String(500))
+    Category: Mapped[Optional[str]] = mapped_column(String(100))
+    Tags: Mapped[Optional[str]]     = mapped_column(String(500))
     Status: Mapped[int]          = mapped_column(Integer)
     CreatedOn: Mapped[datetime]  = mapped_column(DateTime)
 
@@ -21,9 +22,9 @@ class UserInteractionEvent(Base):
     profile_id: Mapped[uuid.UUID]    = mapped_column()
     course_id: Mapped[uuid.UUID]     = mapped_column(ForeignKey("Course.Id", ondelete="CASCADE"))
     event_type: Mapped[str]          = mapped_column(String(50))
-    category: Mapped[str | None]     = mapped_column(String(100))
-    tags: Mapped[str | None]         = mapped_column(String(500))
-    search_query: Mapped[str | None] = mapped_column(String(300))
+    category: Mapped[Optional[str]]  = mapped_column(String(100))
+    tags: Mapped[Optional[str]]      = mapped_column(String(500))
+    search_query: Mapped[Optional[str]] = mapped_column(String(300))
     engagement_seconds: Mapped[int]  = mapped_column(Integer, default=0)
     created_at: Mapped[datetime]     = mapped_column(DateTime, default=datetime.utcnow)
 
