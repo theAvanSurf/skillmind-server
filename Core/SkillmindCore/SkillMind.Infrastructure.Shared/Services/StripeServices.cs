@@ -322,6 +322,30 @@ public class StripeServices(IOptions<StripeConfigurations> configurations, Price
         return session.Url;
     }
 
+    public async Task<string> CreatePortalSessionByCustomerEmail(string customerEmail, string origin)
+    {
+        var customerService = new CustomerService();
+        var customers = await customerService.ListAsync(new CustomerListOptions
+        {
+            Email = customerEmail,
+            Limit = 1,
+        });
+
+        var customer = customers.Data?.FirstOrDefault();
+        if (customer is null)
+            throw new InvalidOperationException("No Stripe customer found for this account.");
+
+        var options = new Stripe.BillingPortal.SessionCreateOptions
+        {
+            Customer = customer.Id,
+            ReturnUrl = origin,
+        };
+
+        var portalService = new Stripe.BillingPortal.SessionService();
+        var session = await portalService.CreateAsync(options);
+        return session.Url;
+    }
+
     public Task<bool> HandleWebhook(string json, string stripeSignature)
     {
         try

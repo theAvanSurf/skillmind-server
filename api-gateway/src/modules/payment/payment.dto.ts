@@ -14,10 +14,10 @@ export class SubscriptionClientSecretDto {
 }
 
 export class CreatePortalSessionDto {
-    @ApiProperty({ example: 'cs_test_xxx', description: 'Stripe Checkout Session ID' })
+    @ApiProperty({ example: 'cs_test_xxx', description: 'Stripe Checkout Session ID', required: false })
     @IsString()
-    @IsNotEmpty()
-    sessionId: string;
+    @IsOptional()
+    sessionId?: string;
 }
 
 export class SessionStatusDto {
