@@ -41,6 +41,8 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_ZOOKEEPER_SESSION_TIMEOUT_MS: 60000
+      KAFKA_ZOOKEEPER_CONNECTION_TIMEOUT_MS: 60000
     healthcheck:
       test: [ "CMD", "sh", "-c", "nc -z 127.0.0.1 9092" ]
       interval: 10s
@@ -105,6 +107,7 @@ services:
       PAYMENT_DEFAULT_LOOKUP_KEY: ${PAYMENT_DEFAULT_LOOKUP_KEY:-Skillmind_Premium_Plan-42a1204}
       CORE_SERVICE_URL: http://core:8080
       API_VERSION: ${API_VERSION}
+      RECOMMENDATION_SERVICE_URL: http://recommendation-service:8000
     volumes:
       - ./api-gateway/src:/usr/src/app/src
       - ./api-gateway/tsconfig.json:/usr/src/app/tsconfig.json
@@ -139,6 +142,25 @@ services:
       kafka:
         condition: service_healthy
     restart: always
+
+  recommendation-service:
+    build:
+      context: ./recommendation-service
+      dockerfile: Dockerfile
+    container_name: skillmind-recommendations
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: ${POSTGRES_URL_ASYNC}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      KAFKA_BROKER: kafka:29092
+    depends_on:
+      kafka:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    restart: on-failure
 
 volumes:
   redis-data:

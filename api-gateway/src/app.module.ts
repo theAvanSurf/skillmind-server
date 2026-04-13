@@ -11,6 +11,7 @@ import { ProfilesModule } from "./modules/profiles/profiles.module";
 import { SessionsModule } from "./modules/sessions/sessions.module";
 import { PaymentModule } from "./modules/payment/payment.module";
 import { CoursesModule } from "./modules/courses/courses.module";
+import { RecommendationsModule } from "./modules/recommendations/recommendations.module";
 
 
 @Module({
@@ -25,7 +26,8 @@ import { CoursesModule } from "./modules/courses/courses.module";
         ProfilesModule,
         SessionsModule,
         PaymentModule,
-        CoursesModule
+        CoursesModule,
+        RecommendationsModule
     ]
 })
 
