@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SkillMind.Core.Application.Interfaces;
@@ -30,6 +30,13 @@ public static class ServicesInjection
         services.AddTransient(typeof(IGenericRepository<>), typeof(GenericRepository<>));
         services.AddTransient<IProfilesRepository, ProfilesRepository>();
         services.AddTransient<ICourseRepository, CourseRepository>();
+        
+        // Professor Features
+        services.AddTransient<IProfessorRepository, ProfessorRepository>();
+        services.AddTransient<IExamRepository, ExamRepository>();
+        services.AddTransient<ICertificateRepository, CertificateRepository>();
+        services.AddTransient<ILiveSessionRepository, LiveSessionRepository>();
+
         services.AddTransient<IPaginationService, PaginationService>();
 
         #endregion
