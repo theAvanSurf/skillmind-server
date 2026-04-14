@@ -71,10 +71,10 @@ export class CreateUserDto {
     @IsNotEmpty()
     Country: string;
 
-    @ApiProperty({ example: 1, description: 'Account type (e.g. 1 = Personal, 2 = Business)' })
+    @ApiProperty({ example: 0, description: 'Account type (0 = Free, 1 = Premium)' })
     @IsNumber()
-    @Min(1)
-    @Max(10)
+    @Min(0)
+    @Max(1)
     AccountTypes: number;
 
     @ApiProperty({ example: 1, description: 'Role assigned to the user (e.g.0 = Professor 1 = Admin, 2 = User)' })
