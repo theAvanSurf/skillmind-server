@@ -48,4 +48,28 @@ public class CourseRepository(SkillMindDbContext context)
         await context.SaveChangesAsync();
         return existing ?? progress;
     }
+
+    public async Task<List<Course>> GetByProfessorIdAsync(Guid professorId)
+    {
+        return await context.Courses
+            .Include(c => c.Seasons.OrderBy(s => s.Order))
+                .ThenInclude(s => s.Lessons.OrderBy(l => l.Order))
+            .Where(c => c.ProfessorId == professorId)
+            .OrderByDescending(c => c.CreatedOn)
+            .ToListAsync();
+    }
+
+    public async Task<Season> CreateSeasonAsync(Season season)
+    {
+        await context.Seasons.AddAsync(season);
+        await context.SaveChangesAsync();
+        return season;
+    }
+
+    public async Task<Lesson> CreateLessonAsync(Lesson lesson)
+    {
+        await context.Lessons.AddAsync(lesson);
+        await context.SaveChangesAsync();
+        return lesson;
+    }
 }

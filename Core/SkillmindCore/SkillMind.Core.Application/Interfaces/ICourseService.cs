@@ -10,4 +10,6 @@ public interface ICourseService
     Task<CourseDto?> CreateCourseAsync(CreateCourseDto dto);
     Task<SeasonDto?> CreateSeasonAsync(CreateSeasonDto dto);
     Task<LessonDto?> CreateLessonAsync(CreateLessonDto dto);
+    Task<List<CourseDto>> GetByProfessorAsync(Guid professorId);
+    Task<CourseDto?> CreateCourseForProfessorAsync(CreateCourseDto dto, Guid professorId);
 }

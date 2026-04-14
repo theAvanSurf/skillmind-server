@@ -15,9 +15,12 @@ public static class ServicesInjection
     {
         #region Context
 
+        var rawConnectionString = configuration.GetConnectionString("DatabaseUrl") ?? "";
+        var connectionString = ParsePostgresUri(rawConnectionString);
+
         services.AddDbContext<SkillMindDbContext>(options =>
         {
-            options.UseNpgsql(configuration.GetConnectionString("DatabaseUrl"), sqlOptions =>
+            options.UseNpgsql(connectionString, sqlOptions =>
             {
                 sqlOptions.MigrationsAssembly(typeof(SkillMindDbContext).Assembly.FullName);
             });
@@ -40,5 +43,26 @@ public static class ServicesInjection
         services.AddTransient<IPaginationService, PaginationService>();
 
         #endregion
+    }
+
+    /// <summary>
+    /// Converts a postgres:// or postgresql:// URI to a Npgsql key=value connection string.
+    /// Returns the string unchanged if it is already in key=value format.
+    /// </summary>
+    private static string ParsePostgresUri(string connectionString)
+    {
+        if (string.IsNullOrWhiteSpace(connectionString)) return connectionString;
+        if (!connectionString.StartsWith("postgresql://") && !connectionString.StartsWith("postgres://"))
+            return connectionString;
+
+        var uri = new Uri(connectionString);
+        var userInfo = uri.UserInfo.Split(':');
+        var username = Uri.UnescapeDataString(userInfo[0]);
+        var password = userInfo.Length > 1 ? Uri.UnescapeDataString(userInfo[1]) : string.Empty;
+        var host = uri.Host;
+        var port = uri.Port > 0 ? uri.Port : 5432;
+        var database = uri.AbsolutePath.TrimStart('/');
+
+        return $"Host={host};Port={port};Database={database};Username={username};Password={password};SSL Mode=Require;Trust Server Certificate=true";
     }
 }

@@ -12,6 +12,7 @@ import { SessionsModule } from "./modules/sessions/sessions.module";
 import { PaymentModule } from "./modules/payment/payment.module";
 import { CoursesModule } from "./modules/courses/courses.module";
 import { RecommendationsModule } from "./modules/recommendations/recommendations.module";
+import { ProfessorModule } from "./modules/professor/professor.module";
 
 
 @Module({
@@ -27,7 +28,8 @@ import { RecommendationsModule } from "./modules/recommendations/recommendations
         SessionsModule,
         PaymentModule,
         CoursesModule,
-        RecommendationsModule
+        RecommendationsModule,
+        ProfessorModule,
     ]
 })
 

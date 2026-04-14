@@ -138,12 +138,32 @@ public static class ServicesRegistration
 
     private static void GeneralContextConfiguration(IServiceCollection services, IConfiguration configuration)
     {
+        var rawConnectionString = configuration.GetConnectionString("DatabaseUrl") ?? "";
+        var connectionString = ParsePostgresUri(rawConnectionString);
+
         services.AddDbContext<IdentityDatabaseContext>(options =>
             options.UseNpgsql(
-                configuration.GetConnectionString("DatabaseUrl"),
+                connectionString,
                 sqlOptions => sqlOptions.MigrationsAssembly(typeof(IdentityDatabaseContext).Assembly.FullName)
             )
         );
+    }
+
+    private static string ParsePostgresUri(string connectionString)
+    {
+        if (string.IsNullOrWhiteSpace(connectionString)) return connectionString;
+        if (!connectionString.StartsWith("postgresql://") && !connectionString.StartsWith("postgres://"))
+            return connectionString;
+
+        var uri = new Uri(connectionString);
+        var userInfo = uri.UserInfo.Split(':');
+        var username = Uri.UnescapeDataString(userInfo[0]);
+        var password = userInfo.Length > 1 ? Uri.UnescapeDataString(userInfo[1]) : string.Empty;
+        var host = uri.Host;
+        var port = uri.Port > 0 ? uri.Port : 5432;
+        var database = uri.AbsolutePath.TrimStart('/');
+
+        return $"Host={host};Port={port};Database={database};Username={username};Password={password};SSL Mode=Require;Trust Server Certificate=true";
     }
     
     public static async Task SeedDatabaseAsync(this IServiceProvider services)

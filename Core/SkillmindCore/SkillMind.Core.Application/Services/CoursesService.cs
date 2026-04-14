@@ -6,7 +6,7 @@ using SkillMind.Core.Domain.Interfaces;
 
 namespace SkillMind.Core.Application.Services;
 
-public class CoursesService(ICourseRepository courseRepository, IMapper mapper) : ICourseService
+public class CoursesService(ICourseRepository courseRepository, IMapper mapper, ICertificateService certificateService) : ICourseService
 {
     public async Task<CourseDto?> GetCourseDetailsAsync(Guid courseId)
     {
@@ -49,6 +49,10 @@ public class CoursesService(ICourseRepository courseRepository, IMapper mapper) 
         progress.UpdatedOn = DateTime.UtcNow;
 
         var saved = await courseRepository.UpsertProgressAsync(progress);
+
+        // Auto-issue certificate if threshold reached
+        await certificateService.TryAutoIssueAsync(profileId, courseId, progress.ProgressPercent);
+
         return mapper.Map<CourseProgressDto>(saved);
     }
 
@@ -62,12 +66,28 @@ public class CoursesService(ICourseRepository courseRepository, IMapper mapper) 
     public async Task<SeasonDto?> CreateSeasonAsync(CreateSeasonDto dto)
     {
         var season = mapper.Map<Season>(dto);
-        return mapper.Map<SeasonDto>(season);
+        var saved = await courseRepository.CreateSeasonAsync(season);
+        return mapper.Map<SeasonDto>(saved);
     }
 
     public async Task<LessonDto?> CreateLessonAsync(CreateLessonDto dto)
     {
         var lesson = mapper.Map<Lesson>(dto);
-        return mapper.Map<LessonDto>(lesson);
+        var saved = await courseRepository.CreateLessonAsync(lesson);
+        return mapper.Map<LessonDto>(saved);
+    }
+
+    public async Task<List<CourseDto>> GetByProfessorAsync(Guid professorId)
+    {
+        var courses = await courseRepository.GetByProfessorIdAsync(professorId);
+        return mapper.Map<List<CourseDto>>(courses);
+    }
+
+    public async Task<CourseDto?> CreateCourseForProfessorAsync(CreateCourseDto dto, Guid professorId)
+    {
+        var course = mapper.Map<Course>(dto);
+        course.ProfessorId = professorId;
+        var created = await courseRepository.CreateAsync(course);
+        return mapper.Map<CourseDto>(created);
     }
 }

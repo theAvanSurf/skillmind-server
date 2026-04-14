@@ -39,5 +39,27 @@ export const API_ENDPOINTS = {
         COURSES_PROGRESS: (id: string) => `/courses/${id}/progress`,
         COURSES_SEASONS: "/courses/seasons",
         COURSES_LESSONS: "/courses/lessons",
+
+        // Professor
+        PROFESSOR_PROFILE: "/professor/profile",
+        PROFESSOR_DASHBOARD: "/professor/dashboard",
+        PROFESSOR_EARNINGS: "/professor/earnings",
+        PROFESSOR_STUDENTS: "/professor/students",
+        PROFESSOR_STRIPE_CONNECT: "/professor/stripe/connect",
+        PROFESSOR_STRIPE_STATUS: "/professor/stripe/status",
+        PROFESSOR_EXAMS: "/professor/exams",
+        PROFESSOR_EXAM_BY_ID: (id: string) => `/professor/exams/${id}`,
+        PROFESSOR_EXAMS_BY_COURSE: (courseId: string) => `/professor/exams/course/${courseId}`,
+        PROFESSOR_EXAM_PUBLISH: (id: string) => `/professor/exams/${id}/publish`,
+        PROFESSOR_EXAM_QUESTIONS: (id: string) => `/professor/exams/${id}/questions`,
+        PROFESSOR_EXAM_ATTEMPTS: (id: string) => `/professor/exams/${id}/attempts`,
+        PROFESSOR_EXAMS_SUBMIT: "/professor/exams/submit",
+        PROFESSOR_EXAMS_GRADE: "/professor/exams/attempts/grade",
+        PROFESSOR_CERT_TEMPLATES: "/professor/certificates/templates",
+        PROFESSOR_CERT_TEMPLATE_BY_ID: (id: string) => `/professor/certificates/templates/${id}`,
+        PROFESSOR_CERT_ISSUE: "/professor/certificates/issue",
+        PROFESSOR_CERTS_BY_COURSE: (courseId: string) => `/professor/certificates/course/${courseId}`,
+        PROFESSOR_COURSES: "/professor/courses",
+        PROFESSOR_COURSE_BY_ID: (id: string) => `/professor/courses/${id}`,
     }
 }

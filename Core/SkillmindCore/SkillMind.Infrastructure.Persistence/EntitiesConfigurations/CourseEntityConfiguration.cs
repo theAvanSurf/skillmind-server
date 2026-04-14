@@ -10,11 +10,13 @@ public class CourseEntityConfiguration : IEntityTypeConfiguration<Course>
     {
         builder.ToTable(nameof(Course));
         builder.HasKey(x => x.Id);
+        builder.Property(x => x.ProfessorId).IsRequired();
         builder.Property(x => x.Title).IsRequired().HasMaxLength(200);
         builder.Property(x => x.Description).IsRequired();
         builder.Property(x => x.ThumbnailUrl).IsRequired();
         builder.Property(x => x.Category).HasMaxLength(100);
         builder.Property(x => x.Tags).HasMaxLength(500);
+        builder.Property(x => x.Price).HasPrecision(18, 2);
         builder.Property(x => x.Status).IsRequired();
         builder.Property(x => x.CreatedOn).IsRequired();
 
