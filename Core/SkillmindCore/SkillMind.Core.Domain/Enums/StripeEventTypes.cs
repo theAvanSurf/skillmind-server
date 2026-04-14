@@ -7,5 +7,7 @@ public enum StripeEventType
     CustomerSubscriptionCreated,
     CustomerSubscriptionTrialWillEnd,
     ActiveEntitlementSummaryUpdated,
+    PaymentIntentSucceeded,
+    AccountUpdated,
     Unknown
 }

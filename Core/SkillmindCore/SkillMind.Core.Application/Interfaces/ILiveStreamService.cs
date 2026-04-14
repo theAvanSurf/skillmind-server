@@ -15,4 +15,6 @@ public interface ILiveStreamService
     Task<LiveSessionDto?> GetSessionAsync(Guid sessionId);
     Task<List<LiveSessionDto>> GetSessionsByProfessorAsync(Guid professorId);
     Task<LiveSessionDto?> GetActiveSessionByCourseAsync(Guid courseId);
+    Task<string> GetStreamKeyAsync(Guid sessionId, Guid professorId);
 }
+

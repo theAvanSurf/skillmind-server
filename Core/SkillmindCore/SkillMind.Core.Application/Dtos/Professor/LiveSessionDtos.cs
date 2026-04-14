@@ -4,9 +4,9 @@ namespace SkillMind.Core.Application.Dtos.Professor;
 
 public class CreateLiveSessionDto
 {
-    public required Guid CourseId { get; set; }
-    public required Guid ProfessorId { get; set; }
-    public required string Title { get; set; }
+    public Guid CourseId { get; set; }
+    public Guid ProfessorId { get; set; }
+    public string Title { get; set; } = string.Empty;
     public string? Description { get; set; }
     public string Visibility { get; set; } = "Unlisted";
     public DateTime? ScheduledAt { get; set; }
@@ -39,4 +39,14 @@ public class LiveSessionCreatedDto : LiveSessionDto
 public class YouTubeOAuthUrlDto
 {
     public string AuthorizationUrl { get; set; } = string.Empty;
+}
+
+public class ExchangeOAuthCodeDto
+{
+    public required string Code { get; set; }
+}
+
+public class YouTubeStatusDto
+{
+    public bool IsConnected { get; set; }
 }

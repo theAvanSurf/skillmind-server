@@ -18,6 +18,8 @@ public class CertificateService(ICertificateRepository certificateRepository) : 
             CourseId = dto.CourseId,
             Title = dto.Title,
             Description = dto.Description,
+            BodyHtml = dto.BodyHtml,
+            IsDefault = dto.IsDefault,
             SignatureUrl = dto.SignatureUrl,
             LogoUrl = dto.LogoUrl,
             CompletionThresholdPercent = dto.CompletionThresholdPercent,
@@ -52,6 +54,8 @@ public class CertificateService(ICertificateRepository certificateRepository) : 
 
         if (dto.Title is not null) template.Title = dto.Title;
         if (dto.Description is not null) template.Description = dto.Description;
+        if (dto.BodyHtml is not null) template.BodyHtml = dto.BodyHtml;
+        if (dto.IsDefault.HasValue) template.IsDefault = dto.IsDefault.Value;
         if (dto.SignatureUrl is not null) template.SignatureUrl = dto.SignatureUrl;
         if (dto.LogoUrl is not null) template.LogoUrl = dto.LogoUrl;
         if (dto.CompletionThresholdPercent.HasValue)
@@ -141,6 +145,8 @@ public class CertificateService(ICertificateRepository certificateRepository) : 
         Id = t.Id,
         CourseId = t.CourseId,
         CourseTitle = t.Course?.Title ?? string.Empty,
+        BodyHtml = t.BodyHtml,
+        IsDefault = t.IsDefault,
         Title = t.Title,
         Description = t.Description,
         SignatureUrl = t.SignatureUrl,

@@ -4,6 +4,8 @@ using System.Security.Claims;
 using SkillMind.Core.Application.Dtos.Professor;
 using SkillMind.Core.Application.Dtos.Courses;
 using SkillMind.Core.Application.Interfaces;
+using SkillMind.Core.Domain.Enums;
+using SkillMind.Infrastructure.Shared.Services;
 
 namespace SkillMind.WebAPI.Controllers.v1;
 
@@ -12,18 +14,24 @@ public class ProfessorController(
     IProfessorService professorService,
     IExamService examService,
     ICertificateService certificateService,
-    ICourseService courseService) : BaseController
+    ICourseService courseService,
+    StripeServices stripeServices) : BaseController
 {
     // ── Profile ───────────────────────────────────────────────────────────────
 
     [HttpPost("profile")]
     [AllowAnonymous] // Called right after email verification, before auth token is stable
     [ProducesResponseType(typeof(ProfessorProfileDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ProfessorProfileDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateProfile([FromBody] CreateProfessorProfileDto dto)
     {
         try
         {
+            var existing = await professorService.GetProfileByUserIdAsync(dto.UserId);
+            if (existing is not null)
+                return Ok(existing);
+
             var result = await professorService.CreateProfileAsync(dto);
             return Created(string.Empty, result);
         }
@@ -69,17 +77,6 @@ public class ProfessorController(
         return Ok(dashboard);
     }
 
-    [HttpGet("earnings")]
-    [ProducesResponseType(typeof(EarningsSummaryDto), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetEarnings()
-    {
-        var profile = await GetCurrentProfileAsync();
-        if (profile is null) return NotFound("Professor profile not found.");
-
-        var earnings = await professorService.GetEarningsSummaryAsync(profile.Id);
-        return Ok(earnings);
-    }
-
     [HttpGet("students")]
     [ProducesResponseType(typeof(List<EnrolledStudentDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetEnrolledStudents()
@@ -100,8 +97,22 @@ public class ProfessorController(
         var profile = await GetCurrentProfileAsync();
         if (profile is null) return NotFound("Professor profile not found.");
 
-        var result = await professorService.CreateStripeConnectAccountAsync(profile.Id, returnUrl);
-        return Ok(result);
+        try
+        {
+            var refreshUrl = returnUrl + "?refresh=1";
+            var (accountId, onboardingUrl) = await stripeServices.CreateConnectAccountAsync(
+                profile.HasStripeConnect ? await professorService.GetStripeAccountIdAsync(profile.Id) : null,
+                returnUrl,
+                refreshUrl);
+
+            await professorService.SaveStripeAccountAsync(profile.Id, accountId, PayoutStatus.Pending);
+
+            return Ok(new StripeConnectOnboardingDto { OnboardingUrl = onboardingUrl });
+        }
+        catch (Stripe.StripeException ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
     }
 
     [HttpGet("stripe/status")]
@@ -111,8 +122,98 @@ public class ProfessorController(
         var profile = await GetCurrentProfileAsync();
         if (profile is null) return NotFound("Professor profile not found.");
 
-        var result = await professorService.GetStripeConnectStatusAsync(profile.Id);
-        return Ok(result);
+        var accountId = await professorService.GetStripeAccountIdAsync(profile.Id);
+        if (string.IsNullOrEmpty(accountId))
+        {
+            return Ok(new StripeConnectStatusDto
+            {
+                PayoutStatus = PayoutStatus.NotConfigured.ToString(),
+                ChargesEnabled = false,
+                PayoutsEnabled = false,
+                StripeAccountId = null
+            });
+        }
+
+        try
+        {
+            var (chargesEnabled, payoutsEnabled) = await stripeServices.GetConnectAccountStatusAsync(accountId);
+            var status = chargesEnabled && payoutsEnabled ? PayoutStatus.Active
+                : accountId is not null ? PayoutStatus.Pending
+                : PayoutStatus.NotConfigured;
+
+            // Persist updated status
+            await professorService.SaveStripeAccountAsync(profile.Id, accountId, status);
+
+            return Ok(new StripeConnectStatusDto
+            {
+                PayoutStatus = status.ToString(),
+                ChargesEnabled = chargesEnabled,
+                PayoutsEnabled = payoutsEnabled,
+                StripeAccountId = accountId
+            });
+        }
+        catch (Stripe.StripeException ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
+    }
+
+    [HttpGet("earnings")]
+    [ProducesResponseType(typeof(EarningsSummaryDto), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetEarningsFull()
+    {
+        var profile = await GetCurrentProfileAsync();
+        if (profile is null) return NotFound("Professor profile not found.");
+
+        var earnings = await professorService.GetEarningsSummaryAsync(profile.Id);
+
+        // Enrich with real pending payout from Stripe if connected
+        var accountId = await professorService.GetStripeAccountIdAsync(profile.Id);
+        if (!string.IsNullOrEmpty(accountId))
+        {
+            try
+            {
+                earnings.PendingPayout = await stripeServices.GetConnectPendingBalanceAsync(accountId);
+            }
+            catch (Stripe.StripeException)
+            {
+                // Non-fatal: keep 0 if Stripe call fails
+            }
+        }
+
+        return Ok(earnings);
+    }
+
+    [HttpPost("stripe/webhook")]
+    [AllowAnonymous]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> StripeConnectWebhook()
+    {
+        var stripeSignature = Request.Headers["Stripe-Signature"].FirstOrDefault();
+        if (string.IsNullOrWhiteSpace(stripeSignature))
+            return BadRequest("Missing Stripe-Signature header.");
+
+        using var reader = new StreamReader(Request.Body);
+        var payload = await reader.ReadToEndAsync();
+
+        try
+        {
+            var stripeEvent = stripeServices.ConstructConnectEvent(payload, stripeSignature);
+
+            if (stripeEvent.Type == "account.updated")
+            {
+                var account = stripeEvent.Data.Object as Stripe.Account;
+                if (account is not null)
+                    await professorService.SyncStripeConnectStatusAsync(account.Id);
+            }
+
+            return Ok();
+        }
+        catch (Stripe.StripeException ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
     }
 
     // ── Certificate Templates ─────────────────────────────────────────────────
@@ -257,6 +358,24 @@ public class ProfessorController(
 
         var course = await courseService.CreateCourseForProfessorAsync(dto, profile.Id);
         return Created(string.Empty, course);
+    }
+
+    [HttpPost("courses/{courseId:guid}/publish")]
+    [ProducesResponseType(typeof(CourseDto), StatusCodes.Status200OK)]
+    public async Task<IActionResult> PublishCourse(Guid courseId)
+    {
+        var profile = await GetCurrentProfileAsync();
+        if (profile is null) return NotFound("Professor profile not found.");
+
+        try
+        {
+            var course = await courseService.PublishCourseAsync(courseId, profile.Id);
+            return Ok(course);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Forbid();
+        }
     }
 
     // ── Private helpers ───────────────────────────────────────────────────────

@@ -1,5 +1,6 @@
 import { Controller, Get, Post, Put, Param, Body, Headers, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import sanitizeHtml from 'sanitize-html';
 import { ProfessorService } from './professor.service';
 import {
     CreateProfessorProfileDto, UpdateProfessorProfileDto,
@@ -114,6 +115,11 @@ export class ProfessorController {
         return this.professorService.createCourse(dto, token);
     }
 
+    @Post('courses/:courseId/publish')
+    publishCourse(@Param('courseId') courseId: string, @Headers('authorization') token: string) {
+        return this.professorService.publishCourse(courseId, token);
+    }
+
     // ── Certificates ──────────────────────────────────────────────────────────
     @Get('certificates/templates')
     getCertTemplates(@Headers('authorization') token: string) {
@@ -122,11 +128,29 @@ export class ProfessorController {
 
     @Post('certificates/templates')
     createCertTemplate(@Body() dto: CreateCertificateTemplateDto, @Headers('authorization') token: string) {
+        if (dto.bodyHtml) {
+            dto.bodyHtml = sanitizeHtml(dto.bodyHtml, {
+                allowedTags: sanitizeHtml.defaults.allowedTags.concat(['h1', 'h2', 'img']),
+                allowedAttributes: {
+                    ...sanitizeHtml.defaults.allowedAttributes,
+                    '*': ['style', 'class']
+                }
+            });
+        }
         return this.professorService.createCertificateTemplate(dto, token);
     }
 
     @Put('certificates/templates/:templateId')
     updateCertTemplate(@Param('templateId') id: string, @Body() dto: UpdateCertificateTemplateDto, @Headers('authorization') token: string) {
+        if (dto.bodyHtml) {
+            dto.bodyHtml = sanitizeHtml(dto.bodyHtml, {
+                allowedTags: sanitizeHtml.defaults.allowedTags.concat(['h1', 'h2', 'img']),
+                allowedAttributes: {
+                    ...sanitizeHtml.defaults.allowedAttributes,
+                    '*': ['style', 'class']
+                }
+            });
+        }
         return this.professorService.updateCertificateTemplate(id, dto, token);
     }
 
@@ -138,5 +162,56 @@ export class ProfessorController {
     @Get('certificates/course/:courseId')
     getCertsByCourse(@Param('courseId') courseId: string, @Headers('authorization') token: string) {
         return this.professorService.getCertsByCourse(courseId, token);
+    }
+
+    // ── Live Streams ──────────────────────────────────────────────────────────
+    @Get('livestreams')
+    getLiveStreams(@Headers('authorization') token: string) {
+        return this.professorService.getLiveStreams(token);
+    }
+
+    @Get('livestreams/youtube-status')
+    getYouTubeStatus(@Headers('authorization') token: string) {
+        return this.professorService.getYouTubeStatus(token);
+    }
+
+    @Get('livestreams/oauth/url')
+    getYouTubeOAuthUrl(@Headers('authorization') token: string) {
+        return this.professorService.getYouTubeOAuthUrl(token);
+    }
+
+    @Post('livestreams/oauth/exchange')
+    exchangeYouTubeCode(@Body() body: { code: string }, @Headers('authorization') token: string) {
+        return this.professorService.exchangeYouTubeCode(body, token);
+    }
+
+    @Get('livestreams/course/:courseId/active')
+    getActiveCourseSession(@Param('courseId') courseId: string, @Headers('authorization') token: string) {
+        return this.professorService.getActiveCourseSession(courseId, token);
+    }
+
+    @Get('livestreams/:id/stream-key')
+    getStreamKey(@Param('id') id: string, @Headers('authorization') token: string) {
+        return this.professorService.getStreamKey(id, token);
+    }
+
+    @Get('livestreams/:id')
+    getLiveStream(@Param('id') id: string, @Headers('authorization') token: string) {
+        return this.professorService.getLiveStream(id, token);
+    }
+
+    @Post('livestreams')
+    createLiveStream(@Body() body: any, @Headers('authorization') token: string) {
+        return this.professorService.createLiveStream(body, token);
+    }
+
+    @Post('livestreams/:id/start')
+    startLiveStream(@Param('id') id: string, @Headers('authorization') token: string) {
+        return this.professorService.startLiveStream(id, token);
+    }
+
+    @Post('livestreams/:id/end')
+    endLiveStream(@Param('id') id: string, @Headers('authorization') token: string) {
+        return this.professorService.endLiveStream(id, token);
     }
 }

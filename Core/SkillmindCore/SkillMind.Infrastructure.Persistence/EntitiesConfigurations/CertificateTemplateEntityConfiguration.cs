@@ -16,11 +16,12 @@ public class CertificateTemplateEntityConfiguration : IEntityTypeConfiguration<C
         builder.Property(x => x.SignatureUrl).HasMaxLength(1000);
         builder.Property(x => x.LogoUrl).HasMaxLength(1000);
         builder.Property(x => x.CompletionThresholdPercent).IsRequired();
+        builder.Property(x => x.IsDefault).HasDefaultValue(false);
 
         builder.HasOne(x => x.Course)
             .WithMany(c => c.CertificateTemplates)
             .HasForeignKey(x => x.CourseId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.SetNull);
 
         builder.HasOne(x => x.Professor)
             .WithMany()

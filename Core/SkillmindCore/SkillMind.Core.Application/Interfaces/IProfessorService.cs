@@ -1,4 +1,5 @@
 using SkillMind.Core.Application.Dtos.Professor;
+using SkillMind.Core.Domain.Enums;
 
 namespace SkillMind.Core.Application.Interfaces;
 
@@ -16,7 +17,7 @@ public interface IProfessorService
     Task<List<EnrolledStudentDto>> GetEnrolledStudentsAsync(Guid professorId);
 
     // Stripe Connect
-    Task<StripeConnectOnboardingDto> CreateStripeConnectAccountAsync(Guid professorId, string returnUrl);
-    Task<StripeConnectStatusDto> GetStripeConnectStatusAsync(Guid professorId);
+    Task<string?> GetStripeAccountIdAsync(Guid professorId);
+    Task SaveStripeAccountAsync(Guid professorId, string stripeAccountId, PayoutStatus status);
     Task SyncStripeConnectStatusAsync(string stripeAccountId);
 }

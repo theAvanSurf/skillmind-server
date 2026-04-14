@@ -4,10 +4,12 @@ namespace SkillMind.Core.Application.Dtos.Professor;
 
 public record CreateCertificateTemplateDto
 {
-    public required Guid CourseId { get; set; }
-    public required Guid ProfessorId { get; set; }
+    public Guid? CourseId { get; set; }
+    public Guid ProfessorId { get; set; }
     public required string Title { get; set; }
     public string? Description { get; set; }
+    public string? BodyHtml { get; set; }
+    public bool IsDefault { get; set; }
     public string? SignatureUrl { get; set; }
     public string? LogoUrl { get; set; }
     public int CompletionThresholdPercent { get; set; } = 100;
@@ -17,6 +19,8 @@ public class UpdateCertificateTemplateDto
 {
     public string? Title { get; set; }
     public string? Description { get; set; }
+    public string? BodyHtml { get; set; }
+    public bool? IsDefault { get; set; }
     public string? SignatureUrl { get; set; }
     public string? LogoUrl { get; set; }
     public int? CompletionThresholdPercent { get; set; }
@@ -25,10 +29,12 @@ public class UpdateCertificateTemplateDto
 public class CertificateTemplateDto
 {
     public Guid Id { get; set; }
-    public Guid CourseId { get; set; }
+    public Guid? CourseId { get; set; }
     public string CourseTitle { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
     public string? Description { get; set; }
+    public string? BodyHtml { get; set; }
+    public bool IsDefault { get; set; }
     public string? SignatureUrl { get; set; }
     public string? LogoUrl { get; set; }
     public int CompletionThresholdPercent { get; set; }

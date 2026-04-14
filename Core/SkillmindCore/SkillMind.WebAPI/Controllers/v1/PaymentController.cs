@@ -2,12 +2,14 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using Stripe;
+using SkillMind.Core.Application.Dtos.Courses;
 using SkillMind.Core.Application.Dtos.Stripe;
+using SkillMind.Core.Application.Interfaces;
 using SkillMind.Infrastructure.Shared.Services;
 
 namespace SkillMind.WebAPI.Controllers.v1;
 
-public class PaymentController(StripeServices stripeServices) : BaseController
+public class PaymentController(StripeServices stripeServices, ICourseService courseService) : BaseController
 {
     private string ResolveOrigin()
     {
@@ -180,7 +182,43 @@ public class PaymentController(StripeServices stripeServices) : BaseController
         using var reader = new StreamReader(Request.Body);
         var payload = await reader.ReadToEndAsync();
 
-        var accepted = await stripeServices.HandleWebhook(payload, stripeSignature);
-        return accepted ? Ok() : BadRequest();
+        try
+        {
+            var stripeEvent = EventUtility.ConstructEvent(
+                payload, stripeSignature,
+                Environment.GetEnvironmentVariable("STRIPE_WEBHOOK_SECRET")
+                    ?? throw new StripeException("Webhook secret not configured."));
+
+            if (stripeEvent.Type == "payment_intent.succeeded")
+            {
+                var intent = stripeEvent.Data.Object as PaymentIntent;
+                if (intent is not null
+                    && intent.Metadata.TryGetValue("courseId", out var courseIdStr)
+                    && intent.Metadata.TryGetValue("studentProfileId", out var profileIdStr)
+                    && intent.Metadata.TryGetValue("type", out var type)
+                    && type == "course_purchase"
+                    && Guid.TryParse(courseIdStr, out var courseId)
+                    && Guid.TryParse(profileIdStr, out var profileId))
+                {
+                    await courseService.ConfirmEnrollmentAsync(new ConfirmEnrollmentDto
+                    {
+                        PaymentIntentId = intent.Id,
+                        CourseId = courseId,
+                        StudentProfileId = profileId,
+                        PaidAmount = intent.Amount / 100m
+                    });
+                }
+            }
+
+            // Pass to legacy subscription handler as well
+            await stripeServices.HandleWebhook(payload, stripeSignature);
+        }
+        catch (StripeException ex)
+        {
+            Console.WriteLine("Webhook error: {0}", ex.Message);
+            return BadRequest();
+        }
+
+        return Ok();
     }
 }

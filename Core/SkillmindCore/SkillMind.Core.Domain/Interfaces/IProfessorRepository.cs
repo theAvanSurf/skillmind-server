@@ -15,4 +15,5 @@ public interface IProfessorRepository
     Task<decimal> GetEarningsByPeriodAsync(Guid professorId, DateTime from, DateTime to);
     Task<List<Enrollment>> GetEnrollmentsByCourseAsync(Guid courseId);
     Task<bool> ExistsByUserIdAsync(string userId);
+    Task<ProfessorProfile?> GetByStripeAccountIdAsync(string stripeAccountId);
 }

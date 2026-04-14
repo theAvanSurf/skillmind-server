@@ -73,9 +73,10 @@ public class ProfessorService(
         var totalEarnings = await professorRepository.GetTotalEarningsAsync(professorId);
 
         var now = DateTime.UtcNow;
+        var startOfMonthUtc = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
         var earningsThisMonth = await professorRepository.GetEarningsByPeriodAsync(
             professorId,
-            new DateTime(now.Year, now.Month, 1),
+            startOfMonthUtc,
             now);
 
         var totalCertificates = (await certificateRepository.GetByCourseAsync(
@@ -178,40 +179,36 @@ public class ProfessorService(
 
     // ── Stripe Connect  ───────────────────────────────────────────────────────
 
-    public async Task<StripeConnectOnboardingDto> CreateStripeConnectAccountAsync(Guid professorId, string returnUrl)
+    public async Task<string?> GetStripeAccountIdAsync(Guid professorId)
     {
-        // Stripe connect integration wired in Sprint 9
-        // For now, return a placeholder to validate the flow
-        var profile = await professorRepository.GetByIdAsync(professorId)
-            ?? throw new KeyNotFoundException($"Professor {professorId} not found.");
-
-        profile.PayoutStatus = PayoutStatus.Pending;
-        await professorRepository.UpdateAsync(profile);
-
-        return new StripeConnectOnboardingDto
-        {
-            OnboardingUrl = $"{returnUrl}?status=pending"
-        };
+        var profile = await professorRepository.GetByIdAsync(professorId);
+        return profile?.StripeConnectAccountId;
     }
 
-    public async Task<StripeConnectStatusDto> GetStripeConnectStatusAsync(Guid professorId)
+    public async Task SaveStripeAccountAsync(Guid professorId, string stripeAccountId, PayoutStatus status)
     {
         var profile = await professorRepository.GetByIdAsync(professorId)
             ?? throw new KeyNotFoundException($"Professor {professorId} not found.");
 
-        return new StripeConnectStatusDto
-        {
-            PayoutStatus = profile.PayoutStatus.ToString(),
-            ChargesEnabled = profile.PayoutStatus == PayoutStatus.Active,
-            PayoutsEnabled = profile.PayoutStatus == PayoutStatus.Active,
-            StripeAccountId = profile.StripeConnectAccountId
-        };
+        profile.StripeConnectAccountId = stripeAccountId;
+        profile.PayoutStatus = status;
+        profile.UpdatedOn = DateTime.UtcNow;
+        await professorRepository.UpdateAsync(profile);
     }
 
     public async Task SyncStripeConnectStatusAsync(string stripeAccountId)
     {
-        // Sprint 9: called from the Stripe webhook handler
-        await Task.CompletedTask;
+        var profile = await professorRepository.GetByStripeAccountIdAsync(stripeAccountId);
+        if (profile is null) return;
+
+        // Status will be refreshed next time GetStripeStatus is called (live Stripe query)
+        // Here we just ensure the account ID is persisted and mark as Active if it was Pending
+        if (profile.PayoutStatus == PayoutStatus.Pending)
+        {
+            profile.PayoutStatus = PayoutStatus.Active;
+            profile.UpdatedOn = DateTime.UtcNow;
+            await professorRepository.UpdateAsync(profile);
+        }
     }
 
     // ── Private Helpers ───────────────────────────────────────────────────────

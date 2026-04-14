@@ -1,18 +1,51 @@
+import { IsInt, IsOptional, IsString, Min, IsBoolean } from 'class-validator';
+
 // ─── Professor Profile ────────────────────────────────────────────────────────
 export class CreateProfessorProfileDto {
+    @IsString()
     userId: string;
+
+    @IsString()
     bio: string;
+
+    @IsOptional()
+    @IsString()
     expertise?: string;
+
+    @IsOptional()
+    @IsInt()
+    @Min(0)
     yearsOfExperience?: number;
+
+    @IsOptional()
+    @IsString()
     linkedInUrl?: string;
+
+    @IsOptional()
+    @IsString()
     profilePhotoUrl?: string;
 }
 
 export class UpdateProfessorProfileDto {
+    @IsOptional()
+    @IsString()
     bio?: string;
+
+    @IsOptional()
+    @IsString()
     expertise?: string;
+
+    @IsOptional()
+    @IsInt()
+    @Min(0)
     yearsOfExperience?: number;
+
+    @IsOptional()
+    @IsString()
     linkedInUrl?: string;
+
+    @IsOptional()
+    @IsString()
     profilePhotoUrl?: string;
 }
 
@@ -57,19 +90,62 @@ export class GradeOpenTextDto {
 
 // ─── Certificate ──────────────────────────────────────────────────────────────
 export class CreateCertificateTemplateDto {
-    courseId: string;
+    @IsOptional()
+    courseId?: string;
+
+    @IsString()
     title: string;
+
+    @IsOptional()
+    @IsString()
     description?: string;
+
+    @IsOptional()
+    @IsString()
+    bodyHtml?: string;
+
+    @IsOptional()
+    @IsBoolean()
+    isDefault?: boolean;
+
+    @IsOptional()
+    @IsString()
     signatureUrl?: string;
+
+    @IsOptional()
+    @IsString()
     logoUrl?: string;
+
+    @IsOptional()
     completionThresholdPercent?: number;
 }
 
 export class UpdateCertificateTemplateDto {
+    @IsOptional()
+    @IsString()
     title?: string;
+
+    @IsOptional()
+    @IsString()
     description?: string;
+
+    @IsOptional()
+    @IsString()
+    bodyHtml?: string;
+
+    @IsOptional()
+    @IsBoolean()
+    isDefault?: boolean;
+
+    @IsOptional()
+    @IsString()
     signatureUrl?: string;
+
+    @IsOptional()
+    @IsString()
     logoUrl?: string;
+
+    @IsOptional()
     completionThresholdPercent?: number;
 }
 

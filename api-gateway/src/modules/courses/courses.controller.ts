@@ -1,13 +1,40 @@
-import { Controller, Get, Post, Param, Body, Headers, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Headers, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CoursesService } from './courses.service';
-import { UpdateProgressDto, CreateCourseDto, CreateSeasonDto, CreateLessonDto } from './courses.dto';
+import { UpdateProgressDto, CreateCourseDto, CreateSeasonDto, CreateLessonDto, BrowseCoursesQueryDto } from './courses.dto';
 
 @ApiTags('Courses')
 @ApiBearerAuth()
 @Controller('courses')
 export class CoursesController {
     constructor(private readonly coursesService: CoursesService) {}
+
+    // ── Static routes first (before :courseId param) ──────────────────────────
+
+    @Get('search')
+    getSearchSuggestions(
+        @Query('q') q: string,
+        @Headers('authorization') token: string,
+    ) {
+        return this.coursesService.getSearchSuggestions(q, token);
+    }
+
+    @Get('categories')
+    getCategories(@Headers('authorization') token: string) {
+        return this.coursesService.getCategories(token);
+    }
+
+    // ── Browse (GET /courses with query params) ───────────────────────────────
+
+    @Get()
+    browseCourses(
+        @Query() query: BrowseCoursesQueryDto,
+        @Headers('authorization') token: string,
+    ) {
+        return this.coursesService.browseCourses(query, token);
+    }
+
+    // ── Param routes ──────────────────────────────────────────────────────────
 
     @Get(':courseId')
     getCourseDetails(
@@ -56,5 +83,26 @@ export class CoursesController {
         @Headers('authorization') token: string,
     ) {
         return this.coursesService.createLesson(dto, token);
+    }
+
+    @Get(':courseId/enrollment-status')
+    getEnrollmentStatus(
+        @Param('courseId') courseId: string,
+        @Headers('authorization') token: string,
+    ) {
+        return this.coursesService.getEnrollmentStatus(courseId, token);
+    }
+
+    @Post(':courseId/purchase')
+    createPurchaseIntent(
+        @Param('courseId') courseId: string,
+        @Headers('authorization') token: string,
+    ) {
+        return this.coursesService.createPurchaseIntent(courseId, token);
+    }
+
+    @Get(':courseId/live')
+    getActiveLiveSession(@Param('courseId') courseId: string) {
+        return this.coursesService.getActiveLiveSession(courseId);
     }
 }

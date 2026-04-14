@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using SkillMind.Application.Interfaces;
+using SkillMind.Core.Application.Interfaces;
 using SkillMind.Core.Domain.Interfaces;
 using SkillMind.Core.Domain.Settings;
 using SkillMind.Infrastructure.Shared.Contexts;
@@ -47,5 +48,8 @@ public static class SharedLayerInjection
         services.AddScoped<PriceService>();
         services.AddScoped<SessionService>();
         services.AddScoped<StripeServices>();
+
+        services.AddHttpClient();
+        services.AddTransient<ILiveStreamService, LiveStreamService>();
     }
 }

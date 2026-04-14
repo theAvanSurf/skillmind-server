@@ -76,6 +76,9 @@ export class ProfessorService {
     createCourse(body: any, token: string) {
         return httpClient.post(API_ENDPOINTS.CORE.PROFESSOR_COURSES, body, { headers: { Authorization: token } });
     }
+    publishCourse(courseId: string, token: string) {
+        return httpClient.post(API_ENDPOINTS.CORE.PROFESSOR_COURSE_PUBLISH(courseId), {}, { headers: { Authorization: token } });
+    }
 
     // ── Certificate Templates ─────────────────────────────────────────────────
     getCertificateTemplates(token: string) {
@@ -92,5 +95,37 @@ export class ProfessorService {
     }
     getCertsByCourse(courseId: string, token: string) {
         return httpClient.get(API_ENDPOINTS.CORE.PROFESSOR_CERTS_BY_COURSE(courseId), { headers: { Authorization: token } });
+    }
+
+    // ── Live Streams ──────────────────────────────────────────────────────────
+    getLiveStreams(token: string) {
+        return httpClient.get(API_ENDPOINTS.CORE.PROFESSOR_LIVESTREAMS, { headers: { Authorization: token } });
+    }
+    getLiveStream(id: string, token: string) {
+        return httpClient.get(API_ENDPOINTS.CORE.PROFESSOR_LIVESTREAM_BY_ID(id), { headers: { Authorization: token } });
+    }
+    createLiveStream(body: any, token: string) {
+        return httpClient.post(API_ENDPOINTS.CORE.PROFESSOR_LIVESTREAMS, body, { headers: { Authorization: token } });
+    }
+    startLiveStream(id: string, token: string) {
+        return httpClient.post(API_ENDPOINTS.CORE.PROFESSOR_LIVESTREAM_START(id), {}, { headers: { Authorization: token } });
+    }
+    endLiveStream(id: string, token: string) {
+        return httpClient.post(API_ENDPOINTS.CORE.PROFESSOR_LIVESTREAM_END(id), {}, { headers: { Authorization: token } });
+    }
+    getYouTubeOAuthUrl(token: string) {
+        return httpClient.get(API_ENDPOINTS.CORE.PROFESSOR_LIVESTREAM_OAUTH_URL, { headers: { Authorization: token } });
+    }
+    exchangeYouTubeCode(body: { code: string }, token: string) {
+        return httpClient.post(API_ENDPOINTS.CORE.PROFESSOR_LIVESTREAM_OAUTH_EXCHANGE, body, { headers: { Authorization: token } });
+    }
+    getYouTubeStatus(token: string) {
+        return httpClient.get(API_ENDPOINTS.CORE.PROFESSOR_LIVESTREAM_YOUTUBE_STATUS, { headers: { Authorization: token } });
+    }
+    getActiveCourseSession(courseId: string, token: string) {
+        return httpClient.get(API_ENDPOINTS.CORE.PROFESSOR_LIVESTREAM_COURSE_ACTIVE(courseId), { headers: { Authorization: token } });
+    }
+    getStreamKey(sessionId: string, token: string) {
+        return httpClient.get(`/live-streams/${sessionId}/stream-key`, { headers: { Authorization: token } });
     }
 }

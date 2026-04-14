@@ -79,9 +79,9 @@ services:
       - EmailSettings__Password=${EMAILER_PASS}
       - Kafka__BrokerAddress=kafka:29092
       # Google / YouTube OAuth (Sprint 8)
-      - Google__ClientId=${GOOGLE_OAUTH_CLIENT_ID:-}
-      - Google__ClientSecret=${GOOGLE_OAUTH_CLIENT_SECRET:-}
-      - Google__RedirectUri=https://skillmind-api.avansurf.com/api/v1/livestreams/oauth/callback
+      - Google__ClientId=${Google__ClientId:-}
+      - Google__ClientSecret=${Google__ClientSecret:-}
+      - Google__RedirectUri=${Google__RedirectUri:-https://skillmind-api.avansurf.com/api/v1/live-streams/oauth/callback}
     depends_on:
       kafka:
         condition: service_healthy

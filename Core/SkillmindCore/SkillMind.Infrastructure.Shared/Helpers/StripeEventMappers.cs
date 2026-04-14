@@ -12,6 +12,8 @@ public static class StripeEventMapper
         EventTypes.CustomerSubscriptionCreated      => StripeEventType.CustomerSubscriptionCreated,
         EventTypes.CustomerSubscriptionTrialWillEnd => StripeEventType.CustomerSubscriptionTrialWillEnd,
         EventTypes.EntitlementsActiveEntitlementSummaryUpdated  => StripeEventType.ActiveEntitlementSummaryUpdated,
+        "payment_intent.succeeded"                  => StripeEventType.PaymentIntentSucceeded,
+        "account.updated"                           => StripeEventType.AccountUpdated,
         _                                           => StripeEventType.Unknown
     };
 }

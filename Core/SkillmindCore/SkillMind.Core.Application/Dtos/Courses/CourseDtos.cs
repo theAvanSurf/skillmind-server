@@ -69,6 +69,39 @@ public class CreateCourseDto
     public decimal Price { get; set; }
 }
 
+// ── Browse / Search ───────────────────────────────────────────────────────────
+
+public class BrowseCourseDto
+{
+    public Guid Id { get; set; }
+    public string Title { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public string ThumbnailUrl { get; set; } = string.Empty;
+    public string? Category { get; set; }
+    public string? Tags { get; set; }
+    public decimal Price { get; set; }
+    public int TotalSeasons { get; set; }
+    public int TotalLessons { get; set; }
+    public DateTime CreatedOn { get; set; }
+}
+
+public class BrowseCoursesResultDto
+{
+    public List<BrowseCourseDto> Courses { get; set; } = [];
+    public int TotalCount { get; set; }
+    public int Page { get; set; }
+    public int PageSize { get; set; }
+    public bool HasMore => (Page + 1) * PageSize < TotalCount;
+}
+
+public class CourseSearchSuggestionDto
+{
+    public string Text { get; set; } = string.Empty;
+    /// <summary>"course" | "category" | "tag"</summary>
+    public string Type { get; set; } = string.Empty;
+    public Guid? CourseId { get; set; }
+}
+
 public class CreateSeasonDto
 {
     public Guid CourseId { get; set; }
@@ -84,4 +117,30 @@ public class CreateLessonDto
     public string? Description { get; set; }
     public int Order { get; set; }
     public int DurationSeconds { get; set; }
+}
+
+// ── Enrollment / Purchase ────────────────────────────────────────────────────
+
+public class CourseEnrollmentStatusDto
+{
+    public bool IsEnrolled { get; set; }
+    /// <summary>True when course.Price > 0 and the user is NOT yet enrolled.</summary>
+    public bool PurchaseRequired { get; set; }
+    public decimal Price { get; set; }
+}
+
+public class CoursePurchaseIntentDto
+{
+    /// <summary>Stripe PaymentIntent client_secret — pass to Stripe Elements.</summary>
+    public string ClientSecret { get; set; } = string.Empty;
+    public string PaymentIntentId { get; set; } = string.Empty;
+    public decimal Amount { get; set; }
+}
+
+public class ConfirmEnrollmentDto
+{
+    public string PaymentIntentId { get; set; } = string.Empty;
+    public Guid CourseId { get; set; }
+    public Guid StudentProfileId { get; set; }
+    public decimal PaidAmount { get; set; }
 }

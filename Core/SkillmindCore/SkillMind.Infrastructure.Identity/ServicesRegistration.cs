@@ -144,7 +144,11 @@ public static class ServicesRegistration
         services.AddDbContext<IdentityDatabaseContext>(options =>
             options.UseNpgsql(
                 connectionString,
-                sqlOptions => sqlOptions.MigrationsAssembly(typeof(IdentityDatabaseContext).Assembly.FullName)
+                sqlOptions => 
+                {
+                    sqlOptions.MigrationsAssembly(typeof(IdentityDatabaseContext).Assembly.FullName);
+                    sqlOptions.EnableRetryOnFailure(maxRetryCount: 3, maxRetryDelay: TimeSpan.FromSeconds(5), errorCodesToAdd: null);
+                }
             )
         );
     }

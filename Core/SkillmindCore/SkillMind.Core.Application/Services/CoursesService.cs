@@ -90,4 +90,105 @@ public class CoursesService(ICourseRepository courseRepository, IMapper mapper, 
         var created = await courseRepository.CreateAsync(course);
         return mapper.Map<CourseDto>(created);
     }
+
+    public async Task<CourseDto?> PublishCourseAsync(Guid courseId, Guid professorId)
+    {
+        var course = await courseRepository.GetByIdAsync(courseId);
+        if (course == null || course.ProfessorId != professorId)
+            throw new UnauthorizedAccessException("Not authorized to publish this course.");
+
+        course.Status = SkillMind.Core.Domain.Enums.GlobalStatus.Verified;
+        await courseRepository.UpdateAsync(course.Id, course);
+        return mapper.Map<CourseDto>(course);
+    }
+
+    public async Task<BrowseCoursesResultDto> BrowseCoursesAsync(
+        string? search, string? category, bool? freeOnly, int page, int pageSize, string? sort)
+    {
+        pageSize = Math.Clamp(pageSize, 1, 40);
+        page = Math.Max(0, page);
+
+        var (courses, total) = await courseRepository.BrowseCoursesAsync(search, category, freeOnly, page, pageSize, sort);
+
+        return new BrowseCoursesResultDto
+        {
+            Courses = courses.Select(MapToBrowseDto).ToList(),
+            TotalCount = total,
+            Page = page,
+            PageSize = pageSize
+        };
+    }
+
+    public async Task<List<CourseSearchSuggestionDto>> GetSuggestionsAsync(string query)
+    {
+        if (string.IsNullOrWhiteSpace(query) || query.Length < 2)
+            return [];
+
+        var raw = await courseRepository.GetSuggestionsAsync(query.Trim());
+        return raw.Select(r => new CourseSearchSuggestionDto
+        {
+            Text = r.Text,
+            Type = r.Type,
+            CourseId = r.CourseId
+        }).ToList();
+    }
+
+    public async Task<List<string>> GetCategoriesAsync()
+        => await courseRepository.GetPublishedCategoriesAsync();
+
+    // ── Enrollment ────────────────────────────────────────────────────────────
+
+    public async Task<CourseEnrollmentStatusDto> GetEnrollmentStatusAsync(Guid courseId, Guid profileId)
+    {
+        var course = await courseRepository.GetByIdAsync(courseId);
+        if (course is null)
+            throw new KeyNotFoundException($"Course {courseId} not found.");
+
+        var isEnrolled = await courseRepository.IsEnrolledAsync(profileId, courseId);
+        var isPaid = course.Price > 0;
+
+        return new CourseEnrollmentStatusDto
+        {
+            IsEnrolled = isEnrolled,
+            PurchaseRequired = isPaid && !isEnrolled,
+            Price = course.Price
+        };
+    }
+
+    public async Task ConfirmEnrollmentAsync(ConfirmEnrollmentDto dto)
+    {
+        // Idempotency: skip if already enrolled (webhook may fire twice)
+        var alreadyEnrolled = await courseRepository.IsEnrolledAsync(dto.StudentProfileId, dto.CourseId);
+        if (alreadyEnrolled) return;
+
+        // Avoid duplicate from same payment intent
+        var existing = await courseRepository.GetEnrollmentByPaymentIntentAsync(dto.PaymentIntentId);
+        if (existing is not null) return;
+
+        var enrollment = new SkillMind.Core.Domain.Entities.Enrollment
+        {
+            Id = Guid.NewGuid(),
+            StudentProfileId = dto.StudentProfileId,
+            CourseId = dto.CourseId,
+            PaidAmount = dto.PaidAmount,
+            StripePaymentIntentId = dto.PaymentIntentId,
+            EnrolledAt = DateTime.UtcNow
+        };
+
+        await courseRepository.CreateEnrollmentAsync(enrollment);
+    }
+
+    private static BrowseCourseDto MapToBrowseDto(SkillMind.Core.Domain.Entities.Course c) => new()
+    {
+        Id = c.Id,
+        Title = c.Title,
+        Description = c.Description,
+        ThumbnailUrl = c.ThumbnailUrl,
+        Category = c.Category,
+        Tags = c.Tags,
+        Price = c.Price,
+        TotalSeasons = c.Seasons.Count,
+        TotalLessons = c.Seasons.Sum(s => s.Lessons.Count),
+        CreatedOn = c.CreatedOn
+    };
 }

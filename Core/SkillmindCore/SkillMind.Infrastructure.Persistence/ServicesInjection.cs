@@ -23,6 +23,7 @@ public static class ServicesInjection
             options.UseNpgsql(connectionString, sqlOptions =>
             {
                 sqlOptions.MigrationsAssembly(typeof(SkillMindDbContext).Assembly.FullName);
+                sqlOptions.EnableRetryOnFailure(maxRetryCount: 3, maxRetryDelay: TimeSpan.FromSeconds(5), errorCodesToAdd: null);
             });
         });
 

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SkillMind.Infrastructure.Persistence.Context;
@@ -11,9 +12,11 @@ using SkillMind.Infrastructure.Persistence.Context;
 namespace SkillMind.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(SkillMindDbContext))]
-    partial class SkillMindDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260414144506_CertificateTemplateBodyHtml")]
+    partial class CertificateTemplateBodyHtml
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -247,9 +250,6 @@ namespace SkillMind.Infrastructure.Persistence.Migrations
                     b.Property<decimal>("PaidAmount")
                         .HasPrecision(18, 2)
                         .HasColumnType("numeric(18,2)");
-
-                    b.Property<string>("StripePaymentIntentId")
-                        .HasColumnType("text");
 
                     b.Property<Guid>("StudentProfileId")
                         .HasColumnType("uuid");

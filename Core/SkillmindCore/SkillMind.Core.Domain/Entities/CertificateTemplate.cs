@@ -4,9 +4,11 @@ public class CertificateTemplate
 {
     public required Guid Id { get; set; }
     public required Guid ProfessorId { get; set; }
-    public required Guid CourseId { get; set; }
+    public Guid? CourseId { get; set; }
     public required string Title { get; set; }
     public string? Description { get; set; }
+    public string? BodyHtml { get; set; }
+    public bool IsDefault { get; set; }
     public string? SignatureUrl { get; set; }
     public string? LogoUrl { get; set; }
 
@@ -17,6 +19,6 @@ public class CertificateTemplate
 
     // Navigation
     public ProfessorProfile Professor { get; set; } = null!;
-    public Course Course { get; set; } = null!;
+    public Course? Course { get; set; }
     public ICollection<Certificate> Certificates { get; set; } = [];
 }

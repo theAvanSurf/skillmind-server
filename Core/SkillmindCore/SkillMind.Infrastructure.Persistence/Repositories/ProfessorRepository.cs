@@ -93,4 +93,10 @@ public class ProfessorRepository(SkillMindDbContext context)
         await context.SaveChangesAsync();
         return profile;
     }
+
+    public async Task<ProfessorProfile?> GetByStripeAccountIdAsync(string stripeAccountId)
+    {
+        return await context.ProfessorProfiles
+            .FirstOrDefaultAsync(p => p.StripeConnectAccountId == stripeAccountId);
+    }
 }

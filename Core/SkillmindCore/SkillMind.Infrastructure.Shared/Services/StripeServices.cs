@@ -420,4 +420,112 @@ public class StripeServices(IOptions<StripeConfigurations> configurations, Price
             return Task.FromResult(false);
         }
     }
+
+    // ── Stripe Connect ────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Creates (or reuses) an Express connected account and returns an AccountLink onboarding URL.
+    /// </summary>
+    public async Task<(string AccountId, string OnboardingUrl)> CreateConnectAccountAsync(
+        string? existingAccountId, string returnUrl, string refreshUrl)
+    {
+        string accountId;
+
+        if (string.IsNullOrWhiteSpace(existingAccountId))
+        {
+            var accountOptions = new AccountCreateOptions
+            {
+                Type = "express",
+                Capabilities = new AccountCapabilitiesOptions
+                {
+                    CardPayments = new AccountCapabilitiesCardPaymentsOptions { Requested = true },
+                    Transfers = new AccountCapabilitiesTransfersOptions { Requested = true }
+                }
+            };
+            var accountService = new AccountService();
+            var account = await accountService.CreateAsync(accountOptions);
+            accountId = account.Id;
+        }
+        else
+        {
+            accountId = existingAccountId;
+        }
+
+        var linkOptions = new AccountLinkCreateOptions
+        {
+            Account = accountId,
+            RefreshUrl = refreshUrl,
+            ReturnUrl = returnUrl,
+            Type = "account_onboarding"
+        };
+        var linkService = new AccountLinkService();
+        var link = await linkService.CreateAsync(linkOptions);
+
+        return (accountId, link.Url);
+    }
+
+    /// <summary>
+    /// Retrieves the live charges_enabled / payouts_enabled status for a connected account.
+    /// </summary>
+    public async Task<(bool ChargesEnabled, bool PayoutsEnabled)> GetConnectAccountStatusAsync(string accountId)
+    {
+        var accountService = new AccountService();
+        var account = await accountService.GetAsync(accountId);
+        return (account.ChargesEnabled, account.PayoutsEnabled);
+    }
+
+    /// <summary>
+    /// Returns the pending balance (in the account's default currency) for a connected account.
+    /// </summary>
+    public async Task<decimal> GetConnectPendingBalanceAsync(string accountId)
+    {
+        var balanceService = new BalanceService();
+        var balance = await balanceService.GetAsync(new RequestOptions { StripeAccount = accountId });
+        var pending = balance.Pending?.FirstOrDefault();
+        return pending is null ? 0m : pending.Amount / 100m;
+    }
+
+    /// <summary>
+    /// Creates a PaymentIntent for a course purchase, routing funds to the professor's connected account.
+    /// </summary>
+    public async Task<(string ClientSecret, string PaymentIntentId)> CreateCoursePurchaseIntentAsync(
+        decimal coursePrice, string connectedAccountId, string courseId, string studentProfileId)
+    {
+        var amountCents = (long)Math.Round(coursePrice * 100);
+        var applicationFeeCents = (long)Math.Round(amountCents * (double)_stripeConfigurations.PlatformFeePercent);
+
+        var options = new PaymentIntentCreateOptions
+        {
+            Amount = amountCents,
+            Currency = "usd",
+            AutomaticPaymentMethods = new PaymentIntentAutomaticPaymentMethodsOptions { Enabled = true },
+            ApplicationFeeAmount = applicationFeeCents,
+            TransferData = new PaymentIntentTransferDataOptions
+            {
+                Destination = connectedAccountId
+            },
+            Metadata = new Dictionary<string, string>
+            {
+                ["courseId"] = courseId,
+                ["studentProfileId"] = studentProfileId,
+                ["type"] = "course_purchase"
+            }
+        };
+
+        var service = new PaymentIntentService();
+        var intent = await service.CreateAsync(options);
+        return (intent.ClientSecret, intent.Id);
+    }
+
+    /// <summary>
+    /// Validates a Connect webhook signature and returns the event.
+    /// </summary>
+    public Event ConstructConnectEvent(string json, string stripeSignature)
+    {
+        var secret = !string.IsNullOrWhiteSpace(_stripeConfigurations.ConnectWebhookSecret)
+            ? _stripeConfigurations.ConnectWebhookSecret
+            : _stripeConfigurations.WebhookSecret;
+
+        return EventUtility.ConstructEvent(json, stripeSignature, secret);
+    }
 }
