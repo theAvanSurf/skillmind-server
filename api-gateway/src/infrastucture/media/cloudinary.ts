@@ -31,11 +31,20 @@ export class UploaderService {
   }
 
   uploadFileToCloud(file: MulterFile) {
+    const isVideo = file.mimetype.startsWith('video/');
+
     return new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
           resource_type: "auto",
           folder: "uploads",
+          // Pre-generate DASH segments for video uploads so delivery URLs are
+          // ready immediately. eager_async keeps the upload response fast while
+          // transcoding happens in the background.
+          ...(isVideo && {
+            eager: [{ streaming_profile: 'auto', format: 'mpd' }],
+            eager_async: true,
+          }),
         },
         (error, result) => {
           if (error) return reject(new Error(error?.message || 'Cloudinary upload error'));

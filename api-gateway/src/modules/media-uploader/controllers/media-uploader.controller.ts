@@ -19,7 +19,7 @@ export class UploaderController {
   constructor(private readonly uploaderService: UploaderService) { }
 
   @Post("upload")
-  @ApiOperation({ summary: "Upload video file" })
+  @ApiOperation({ summary: "Upload media file" })
   @ApiConsumes("multipart/form-data")
   @ApiBody({
     schema: {
@@ -40,8 +40,8 @@ export class UploaderController {
         fileSize: 100 * 1024 * 1024, // 100MB
       },
       fileFilter: (_req, file, cb) => {
-        if (!file.mimetype.startsWith("video/")) {
-          cb(new Error("Only video files allowed"), false);
+        if (!file.mimetype.startsWith("video/") && !file.mimetype.startsWith("image/")) {
+          cb(new Error("Only image and video files allowed"), false);
           return;
         }
         cb(null, true);
