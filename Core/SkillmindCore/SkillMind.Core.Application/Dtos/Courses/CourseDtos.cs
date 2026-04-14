@@ -23,7 +23,7 @@ public class SeasonDto
 public class CourseDto
 {
     public Guid Id { get; set; }
-    public Guid ProfessorId { get; set; }
+    public Guid? ProfessorId { get; set; }
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string ThumbnailUrl { get; set; } = string.Empty;

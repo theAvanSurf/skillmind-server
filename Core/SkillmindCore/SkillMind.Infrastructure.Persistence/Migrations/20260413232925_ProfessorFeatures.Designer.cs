@@ -167,7 +167,7 @@ namespace SkillMind.Infrastructure.Persistence.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("numeric(18,2)");
 
-                    b.Property<Guid>("ProfessorId")
+                    b.Property<Guid?>("ProfessorId")
                         .HasColumnType("uuid");
 
                     b.Property<int>("Status")

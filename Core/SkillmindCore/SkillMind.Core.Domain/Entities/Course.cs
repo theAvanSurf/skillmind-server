@@ -5,7 +5,7 @@ namespace SkillMind.Core.Domain.Entities;
 public class Course
 {
     public required Guid Id { get; set; }
-    public required Guid ProfessorId { get; set; }
+    public Guid? ProfessorId { get; set; }
     public required string Title { get; set; }
     public required string Description { get; set; }
     public required string ThumbnailUrl { get; set; }
