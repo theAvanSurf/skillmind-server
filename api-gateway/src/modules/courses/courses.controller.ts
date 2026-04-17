@@ -52,6 +52,14 @@ export class CoursesController {
         return this.coursesService.getRelatedCourses(courseId, token);
     }
 
+    @Get(':courseId/progress')
+    getProgress(
+        @Param('courseId') courseId: string,
+        @Headers('authorization') token: string,
+    ) {
+        return this.coursesService.getProgress(courseId, token);
+    }
+
     @Post(':courseId/progress')
     updateProgress(
         @Param('courseId') courseId: string,
@@ -99,6 +107,16 @@ export class CoursesController {
         return this.coursesService.getEnrolledCourses(token);
     }
 
+    @Get('my-enrollments/in-progress')
+    getInProgressCourses(@Headers('authorization') token: string) {
+        return this.coursesService.getInProgressCourses(token);
+    }
+
+    @Get('my-enrollments/recently-watched')
+    getRecentlyWatched(@Headers('authorization') token: string) {
+        return this.coursesService.getRecentlyWatched(token);
+    }
+
     @Get(':courseId/enrollment-status')
     getEnrollmentStatus(
         @Param('courseId') courseId: string,
@@ -118,5 +136,46 @@ export class CoursesController {
     @Get(':courseId/live')
     getActiveLiveSession(@Param('courseId') courseId: string) {
         return this.coursesService.getActiveLiveSession(courseId);
+    }
+
+    @Get('my-certificates')
+    getMyCertificates(@Headers('authorization') token: string) {
+        return this.coursesService.getMyCertificates(token);
+    }
+
+    @Get(':courseId/exams')
+    getCourseExams(
+        @Param('courseId') courseId: string,
+        @Headers('authorization') token: string,
+    ) {
+        return this.coursesService.getCourseExams(courseId, token);
+    }
+
+    @Get(':courseId/exams/:examId')
+    getCourseExam(
+        @Param('courseId') courseId: string,
+        @Param('examId') examId: string,
+        @Headers('authorization') token: string,
+    ) {
+        return this.coursesService.getCourseExam(courseId, examId, token);
+    }
+
+    @Post(':courseId/exams/:examId/submit')
+    submitExam(
+        @Param('courseId') courseId: string,
+        @Param('examId') examId: string,
+        @Body() body: any,
+        @Headers('authorization') token: string,
+    ) {
+        return this.coursesService.submitExam(courseId, examId, body, token);
+    }
+
+    @Get(':courseId/exams/:examId/my-result')
+    getMyExamResult(
+        @Param('courseId') courseId: string,
+        @Param('examId') examId: string,
+        @Headers('authorization') token: string,
+    ) {
+        return this.coursesService.getMyExamResult(courseId, examId, token);
     }
 }

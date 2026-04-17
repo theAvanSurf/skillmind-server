@@ -43,6 +43,7 @@ public class CourseRepository(SkillMindDbContext context)
         {
             existing.LastLessonId = progress.LastLessonId;
             existing.ProgressPercent = progress.ProgressPercent;
+            existing.LastTimestampSeconds = progress.LastTimestampSeconds;
             existing.UpdatedOn = progress.UpdatedOn;
         }
 
@@ -200,6 +201,26 @@ public class CourseRepository(SkillMindDbContext context)
     {
         return await context.Enrollments
             .FirstOrDefaultAsync(e => e.StripePaymentIntentId == paymentIntentId);
+    }
+
+    public async Task<List<(Course Course, CourseProgress Progress)>> GetRecentlyWatchedByProgressAsync(Guid profileId, int limit)
+    {
+        var progresses = await context.CourseProgresses
+            .Where(p => p.ProfileId == profileId)
+            .OrderByDescending(p => p.UpdatedOn)
+            .Take(limit)
+            .ToListAsync();
+
+        var courseIds = progresses.Select(p => p.CourseId).ToList();
+        var courses = await context.Courses
+            .Include(c => c.Seasons)
+                .ThenInclude(s => s.Lessons)
+            .Where(c => courseIds.Contains(c.Id))
+            .ToListAsync();
+
+        return progresses
+            .Select(p => (courses.First(c => c.Id == p.CourseId), p))
+            .ToList();
     }
 
     public async Task<List<(Course Course, CourseProgress? Progress, DateTime EnrolledAt)>> GetEnrolledCoursesAsync(Guid profileId)

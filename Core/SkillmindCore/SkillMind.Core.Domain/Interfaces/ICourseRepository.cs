@@ -15,6 +15,8 @@ public interface ICourseRepository : IGenericRepository<Course>
     Task<List<(string Text, string Type, Guid? CourseId)>> GetSuggestionsAsync(string query, int maxResults = 8);
     Task<List<string>> GetPublishedCategoriesAsync();
 
+    Task<List<(Course Course, CourseProgress Progress)>> GetRecentlyWatchedByProgressAsync(Guid profileId, int limit);
+
     // Enrollment
     Task<bool> IsEnrolledAsync(Guid profileId, Guid courseId);
     Task<Enrollment> CreateEnrollmentAsync(Enrollment enrollment);

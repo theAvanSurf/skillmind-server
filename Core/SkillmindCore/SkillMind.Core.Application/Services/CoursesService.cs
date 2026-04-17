@@ -46,6 +46,7 @@ public class CoursesService(ICourseRepository courseRepository, IMapper mapper, 
 
         progress.LastLessonId = dto.LastLessonId;
         progress.ProgressPercent = dto.ProgressPercent;
+        progress.LastTimestampSeconds = dto.LastTimestampSeconds;
         progress.UpdatedOn = DateTime.UtcNow;
 
         var saved = await courseRepository.UpsertProgressAsync(progress);
@@ -192,6 +193,70 @@ public class CoursesService(ICourseRepository courseRepository, IMapper mapper, 
             ProgressPercent = e.Progress?.ProgressPercent ?? 0,
             EnrolledAt = e.EnrolledAt
         }).ToList();
+    }
+
+    public async Task<CourseProgressDto?> GetProgressAsync(Guid profileId, Guid courseId)
+    {
+        var progress = await courseRepository.GetProgressAsync(profileId, courseId);
+        return progress is null ? null : mapper.Map<CourseProgressDto>(progress);
+    }
+
+    public async Task<List<EnrolledCourseDto>> GetRecentlyWatchedAsync(Guid profileId, int limit = 20)
+    {
+        var records = await courseRepository.GetRecentlyWatchedByProgressAsync(profileId, limit);
+        return records.Select(r =>
+        {
+            var allLessons = r.Course.Seasons.SelectMany(s => s.Lessons).ToList();
+            var lastLesson = r.Progress.LastLessonId.HasValue
+                ? allLessons.FirstOrDefault(l => l.Id == r.Progress.LastLessonId.Value)
+                : null;
+            return new EnrolledCourseDto
+            {
+                Id = r.Course.Id,
+                Title = r.Course.Title,
+                ThumbnailUrl = r.Course.ThumbnailUrl,
+                Category = r.Course.Category,
+                TotalSeasons = r.Course.Seasons.Count,
+                TotalLessons = allLessons.Count,
+                ProgressPercent = r.Progress.ProgressPercent,
+                EnrolledAt = DateTime.UtcNow,
+                LastLessonId = lastLesson?.Id,
+                LastLessonTitle = lastLesson?.Title,
+                LastLessonDurationSeconds = lastLesson?.DurationSeconds,
+                LastTimestampSeconds = r.Progress.LastTimestampSeconds
+            };
+        }).ToList();
+    }
+
+    public async Task<List<EnrolledCourseDto>> GetInProgressCoursesAsync(Guid profileId)
+    {
+        var enrollments = await courseRepository.GetEnrolledCoursesAsync(profileId);
+        return enrollments
+            .Where(e => e.Progress != null && e.Progress.ProgressPercent > 0 && e.Progress.ProgressPercent < 100)
+            .OrderByDescending(e => e.Progress!.UpdatedOn)
+            .Select(e =>
+            {
+                var allLessons = e.Course.Seasons.SelectMany(s => s.Lessons).ToList();
+                var lastLesson = e.Progress!.LastLessonId.HasValue
+                    ? allLessons.FirstOrDefault(l => l.Id == e.Progress.LastLessonId.Value)
+                    : null;
+
+                return new EnrolledCourseDto
+                {
+                    Id = e.Course.Id,
+                    Title = e.Course.Title,
+                    ThumbnailUrl = e.Course.ThumbnailUrl,
+                    Category = e.Course.Category,
+                    TotalSeasons = e.Course.Seasons.Count,
+                    TotalLessons = allLessons.Count,
+                    ProgressPercent = e.Progress.ProgressPercent,
+                    EnrolledAt = e.EnrolledAt,
+                    LastLessonId = lastLesson?.Id,
+                    LastLessonTitle = lastLesson?.Title,
+                    LastLessonDurationSeconds = lastLesson?.DurationSeconds,
+                    LastTimestampSeconds = e.Progress.LastTimestampSeconds
+                };
+            }).ToList();
     }
 
     private static BrowseCourseDto MapToBrowseDto(SkillMind.Core.Domain.Entities.Course c) => new()

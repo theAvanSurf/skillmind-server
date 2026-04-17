@@ -4,8 +4,8 @@ namespace SkillMind.Core.Application.Dtos.Professor;
 
 public class CreateExamDto
 {
-    public required Guid CourseId { get; set; }
-    public required string Title { get; set; }
+    public Guid CourseId { get; set; }
+    public string Title { get; set; } = string.Empty;
     public string? Description { get; set; }
     public int DurationMinutes { get; set; } = 60;
     public int PassingScore { get; set; } = 70;
@@ -40,8 +40,8 @@ public class ExamDto
 
 public record CreateExamQuestionDto
 {
-    public required Guid ExamId { get; set; }
-    public required string QuestionText { get; set; }
+    public Guid ExamId { get; set; }
+    public string QuestionText { get; set; } = string.Empty;
     public string QuestionType { get; set; } = "MultipleChoice";
     public int Points { get; set; } = 1;
     public int Order { get; set; }
@@ -50,7 +50,7 @@ public record CreateExamQuestionDto
 
 public class CreateQuestionOptionDto
 {
-    public required string OptionText { get; set; }
+    public string OptionText { get; set; } = string.Empty;
     public bool IsCorrect { get; set; }
     public int Order { get; set; }
 }
@@ -77,14 +77,14 @@ public class QuestionOptionDto
 
 public class SubmitExamAttemptDto
 {
-    public required Guid ExamId { get; set; }
-    public required Guid StudentProfileId { get; set; }
+    public Guid ExamId { get; set; }
+    public Guid StudentProfileId { get; set; }
     public List<SubmitAnswerDto> Answers { get; set; } = [];
 }
 
 public class SubmitAnswerDto
 {
-    public required Guid QuestionId { get; set; }
+    public Guid QuestionId { get; set; }
     public Guid? SelectedOptionId { get; set; }
     public string? TextAnswer { get; set; }
 }
@@ -115,11 +115,16 @@ public class AttemptAnswerDto
     public int? PointsAwarded { get; set; }
 }
 
+public class SubmitExamAnswersDto
+{
+    public List<SubmitAnswerDto> Answers { get; set; } = [];
+}
+
 public class GradeOpenTextDto
 {
-    public required Guid AttemptId { get; set; }
-    public required Guid QuestionId { get; set; }
-    public required bool IsCorrect { get; set; }
+    public Guid AttemptId { get; set; }
+    public Guid QuestionId { get; set; }
+    public bool IsCorrect { get; set; }
     public int PointsAwarded { get; set; }
     public string? Feedback { get; set; }
 }

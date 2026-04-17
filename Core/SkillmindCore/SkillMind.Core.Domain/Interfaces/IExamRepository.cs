@@ -8,6 +8,7 @@ public interface IExamRepository
     Task<List<Exam>> GetByCourseIdAsync(Guid courseId);
     Task<Exam> CreateAsync(Exam exam);
     Task<Exam> UpdateAsync(Exam exam);
+    Task AddQuestionAsync(ExamQuestion question);
     Task<ExamAttempt?> GetAttemptAsync(Guid attemptId);
     Task<List<ExamAttempt>> GetAttemptsByExamAsync(Guid examId);
     Task<List<ExamAttempt>> GetAttemptsByStudentAsync(Guid studentProfileId);

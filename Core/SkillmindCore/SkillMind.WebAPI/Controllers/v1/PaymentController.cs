@@ -163,9 +163,6 @@ public class PaymentController(StripeServices stripeServices, ICourseService cou
             return Unauthorized("User identity claims are required.");
 
         var subscription = await stripeServices.GetSubscription(customerEmail, userId);
-        if (subscription is null)
-            return NotFound(new { message = "No subscription found" });
-
         return Ok(subscription);
     }
 

@@ -21,4 +21,7 @@ public interface ICourseService
     Task<CourseEnrollmentStatusDto> GetEnrollmentStatusAsync(Guid courseId, Guid profileId);
     Task ConfirmEnrollmentAsync(ConfirmEnrollmentDto dto);
     Task<List<EnrolledCourseDto>> GetEnrolledCoursesAsync(Guid profileId);
+    Task<List<EnrolledCourseDto>> GetInProgressCoursesAsync(Guid profileId);
+    Task<List<EnrolledCourseDto>> GetRecentlyWatchedAsync(Guid profileId, int limit = 20);
+    Task<CourseProgressDto?> GetProgressAsync(Guid profileId, Guid courseId);
 }

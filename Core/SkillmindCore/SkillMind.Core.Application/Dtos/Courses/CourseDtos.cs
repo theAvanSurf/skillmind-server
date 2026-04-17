@@ -50,6 +50,7 @@ public class CourseProgressDto
     public Guid CourseId { get; set; }
     public Guid? LastLessonId { get; set; }
     public int ProgressPercent { get; set; }
+    public decimal? LastTimestampSeconds { get; set; }
     public DateTime UpdatedOn { get; set; }
 }
 
@@ -57,6 +58,7 @@ public class UpdateProgressDto
 {
     public Guid LastLessonId { get; set; }
     public int ProgressPercent { get; set; }
+    public decimal? LastTimestampSeconds { get; set; }
 }
 
 public class CreateCourseDto
@@ -160,4 +162,8 @@ public class EnrolledCourseDto
     public int TotalLessons { get; set; }
     public int ProgressPercent { get; set; }
     public DateTime EnrolledAt { get; set; }
+    public Guid? LastLessonId { get; set; }
+    public string? LastLessonTitle { get; set; }
+    public int? LastLessonDurationSeconds { get; set; }
+    public decimal? LastTimestampSeconds { get; set; }
 }

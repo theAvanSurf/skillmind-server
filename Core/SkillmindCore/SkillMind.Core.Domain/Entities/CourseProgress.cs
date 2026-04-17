@@ -7,6 +7,7 @@ public class CourseProgress
     public required Guid CourseId { get; set; }
     public Guid? LastLessonId { get; set; }
     public required int ProgressPercent { get; set; } = 0;
+    public decimal? LastTimestampSeconds { get; set; }
     public required DateTime UpdatedOn { get; set; } = DateTime.UtcNow;
 
     public Course Course { get; set; } = null!;

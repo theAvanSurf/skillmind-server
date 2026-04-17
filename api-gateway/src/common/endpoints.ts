@@ -40,11 +40,18 @@ export const API_ENDPOINTS = {
         COURSES_RELATED: (id: string) => `/courses/${id}/related`,
         COURSES_PROGRESS: (id: string) => `/courses/${id}/progress`,
         COURSES_MY_ENROLLMENTS: "/courses/my-enrollments",
+        COURSES_IN_PROGRESS: "/courses/my-enrollments/in-progress",
+        COURSES_RECENTLY_WATCHED: "/courses/my-enrollments/recently-watched",
         COURSES_ENROLLMENT_STATUS: (id: string) => `/courses/${id}/enrollment-status`,
         COURSES_CONFIRM_ENROLLMENT: (id: string) => `/courses/${id}/confirm-enrollment`,
         COURSES_PURCHASE: (id: string) => `/courses/${id}/purchase`,
         COURSES_SEASONS: "/courses/seasons",
         COURSES_LESSONS: "/courses/lessons",
+        COURSES_MY_CERTIFICATES: "/courses/my-certificates",
+        COURSES_EXAMS: (courseId: string) => `/courses/${courseId}/exams`,
+        COURSES_EXAM_BY_ID: (courseId: string, examId: string) => `/courses/${courseId}/exams/${examId}`,
+        COURSES_EXAM_SUBMIT: (courseId: string, examId: string) => `/courses/${courseId}/exams/${examId}/submit`,
+        COURSES_EXAM_MY_RESULT: (courseId: string, examId: string) => `/courses/${courseId}/exams/${examId}/my-result`,
 
         // Professor
         PROFESSOR_PROFILE: "/professor/profile",

@@ -14,8 +14,11 @@ public interface IExamService
     // Questions
     Task<ExamDto> AddQuestionAsync(CreateExamQuestionDto dto);
 
-    // Attempts (Student)
+    // Student-facing
+    Task<List<ExamDto>> GetPublishedExamsByCourseAsync(Guid courseId);
+    Task<ExamDto?> GetExamForStudentAsync(Guid examId);
     Task<ExamAttemptDto> SubmitAttemptAsync(SubmitExamAttemptDto dto);
+    Task<ExamAttemptDto?> GetMyAttemptAsync(Guid examId, Guid studentProfileId);
 
     // Grading
     Task<ExamAttemptDto> GetAttemptAsync(Guid attemptId);

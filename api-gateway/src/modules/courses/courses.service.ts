@@ -36,6 +36,14 @@ export class CoursesService {
     async getRelatedCourses(courseId: string, token: string): Promise<CourseCardDto[]> {
         return httpClient.get<CourseCardDto[]>(API_ENDPOINTS.CORE.COURSES_RELATED(courseId), { headers: { Authorization: token } }) as unknown as CourseCardDto[];
     }
+    async getProgress(courseId: string, token: string): Promise<CourseProgressDto | null> {
+        try {
+            return await httpClient.get<CourseProgressDto>(API_ENDPOINTS.CORE.COURSES_PROGRESS(courseId), { headers: { Authorization: token } }) as unknown as CourseProgressDto;
+        } catch {
+            return null;
+        }
+    }
+
     async updateProgress(courseId: string, body: UpdateProgressDto, token: string): Promise<CourseProgressDto> {
         return httpClient.post<CourseProgressDto>(API_ENDPOINTS.CORE.COURSES_PROGRESS(courseId), body, { headers: { Authorization: token } }) as unknown as CourseProgressDto;
     }
@@ -57,6 +65,14 @@ export class CoursesService {
         return httpClient.get(API_ENDPOINTS.CORE.COURSES_MY_ENROLLMENTS, { headers: { Authorization: token } }) as unknown as EnrolledCourseDto[];
     }
 
+    async getInProgressCourses(token: string): Promise<EnrolledCourseDto[]> {
+        return httpClient.get(API_ENDPOINTS.CORE.COURSES_IN_PROGRESS, { headers: { Authorization: token } }) as unknown as EnrolledCourseDto[];
+    }
+
+    async getRecentlyWatched(token: string, limit = 20): Promise<EnrolledCourseDto[]> {
+        return httpClient.get(`${API_ENDPOINTS.CORE.COURSES_RECENTLY_WATCHED}?limit=${limit}`, { headers: { Authorization: token } }) as unknown as EnrolledCourseDto[];
+    }
+
     async getEnrollmentStatus(courseId: string, token: string) {
         return httpClient.get(API_ENDPOINTS.CORE.COURSES_ENROLLMENT_STATUS(courseId), { headers: { Authorization: token } });
     }
@@ -67,5 +83,25 @@ export class CoursesService {
 
     async getActiveLiveSession(courseId: string) {
         return httpClient.get(API_ENDPOINTS.CORE.PROFESSOR_LIVESTREAM_COURSE_ACTIVE(courseId));
+    }
+
+    async getCourseExams(courseId: string, token: string) {
+        return httpClient.get(API_ENDPOINTS.CORE.COURSES_EXAMS(courseId), { headers: { Authorization: token } });
+    }
+
+    async getCourseExam(courseId: string, examId: string, token: string) {
+        return httpClient.get(API_ENDPOINTS.CORE.COURSES_EXAM_BY_ID(courseId, examId), { headers: { Authorization: token } });
+    }
+
+    async submitExam(courseId: string, examId: string, body: { answers: any[] }, token: string) {
+        return httpClient.post(API_ENDPOINTS.CORE.COURSES_EXAM_SUBMIT(courseId, examId), body, { headers: { Authorization: token } });
+    }
+
+    async getMyExamResult(courseId: string, examId: string, token: string) {
+        return httpClient.get(API_ENDPOINTS.CORE.COURSES_EXAM_MY_RESULT(courseId, examId), { headers: { Authorization: token } });
+    }
+
+    async getMyCertificates(token: string) {
+        return httpClient.get(API_ENDPOINTS.CORE.COURSES_MY_CERTIFICATES, { headers: { Authorization: token } });
     }
 }

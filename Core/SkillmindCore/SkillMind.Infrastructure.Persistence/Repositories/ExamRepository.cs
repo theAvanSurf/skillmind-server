@@ -61,9 +61,15 @@ public class ExamRepository(SkillMindDbContext context)
 
     public new async Task<Exam> UpdateAsync(Exam exam)
     {
-        context.Exams.Update(exam);
+        context.Entry(exam).State = EntityState.Modified;
         await context.SaveChangesAsync();
         return exam;
+    }
+
+    public async Task AddQuestionAsync(ExamQuestion question)
+    {
+        await context.ExamQuestions.AddAsync(question);
+        await context.SaveChangesAsync();
     }
 
     public async Task<ExamAttempt> CreateAttemptAsync(ExamAttempt attempt)

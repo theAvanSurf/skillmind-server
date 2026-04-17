@@ -40,6 +40,35 @@ public class ExamService(IExamRepository examRepository) : IExamService
         return exams.Select(MapToDto).ToList();
     }
 
+    public async Task<List<ExamDto>> GetPublishedExamsByCourseAsync(Guid courseId)
+    {
+        var exams = await examRepository.GetByCourseIdAsync(courseId);
+        return exams
+            .Where(e => e.Status == ExamStatus.Published)
+            .Select(e => MapToDtoForStudent(e))
+            .ToList();
+    }
+
+    public async Task<ExamDto?> GetExamForStudentAsync(Guid examId)
+    {
+        var exam = await examRepository.GetByIdWithDetailsAsync(examId);
+        if (exam is null || exam.Status != ExamStatus.Published) return null;
+        return MapToDtoForStudent(exam);
+    }
+
+    public async Task<ExamAttemptDto?> GetMyAttemptAsync(Guid examId, Guid studentProfileId)
+    {
+        var attempts = await examRepository.GetAttemptsByExamAsync(examId);
+        var attempt = attempts
+            .Where(a => a.StudentProfileId == studentProfileId)
+            .OrderByDescending(a => a.SubmittedAt ?? a.StartedAt)
+            .FirstOrDefault();
+
+        if (attempt is null) return null;
+        var exam = await examRepository.GetByIdWithDetailsAsync(examId);
+        return MapAttemptToDto(attempt, exam!);
+    }
+
     public async Task<ExamDto> UpdateExamAsync(Guid examId, UpdateExamDto dto)
     {
         var exam = await examRepository.GetByIdWithDetailsAsync(examId)
@@ -96,9 +125,11 @@ public class ExamService(IExamRepository examRepository) : IExamService
             }).ToList()
         };
 
-        exam.Questions.Add(question);
-        var updated = await examRepository.UpdateAsync(exam);
-        return MapToDto(updated);
+        await examRepository.AddQuestionAsync(question);
+
+        // Reload to return accurate state with all questions
+        var updated = await examRepository.GetByIdWithDetailsAsync(dto.ExamId);
+        return MapToDto(updated!);
     }
 
     // ── Attempts (Student) ────────────────────────────────────────────────────
@@ -243,6 +274,36 @@ public class ExamService(IExamRepository examRepository) : IExamService
                 Id = o.Id,
                 OptionText = o.OptionText,
                 IsCorrect = o.IsCorrect,
+                Order = o.Order
+            }).ToList()
+        }).ToList()
+    };
+
+    private static ExamDto MapToDtoForStudent(Exam e) => new()
+    {
+        Id = e.Id,
+        CourseId = e.CourseId,
+        Title = e.Title,
+        Description = e.Description,
+        DurationMinutes = e.DurationMinutes,
+        PassingScore = e.PassingScore,
+        IsAutoGraded = e.IsAutoGraded,
+        Status = e.Status.ToString(),
+        QuestionCount = e.Questions.Count,
+        AttemptCount = e.Attempts.Count,
+        CreatedOn = e.CreatedOn,
+        Questions = e.Questions.OrderBy(q => q.Order).Select(q => new ExamQuestionDto
+        {
+            Id = q.Id,
+            QuestionText = q.QuestionText,
+            QuestionType = q.QuestionType.ToString(),
+            Points = q.Points,
+            Order = q.Order,
+            Options = q.Options.OrderBy(o => o.Order).Select(o => new QuestionOptionDto
+            {
+                Id = o.Id,
+                OptionText = o.OptionText,
+                IsCorrect = false, // never expose correct answers to students
                 Order = o.Order
             }).ToList()
         }).ToList()

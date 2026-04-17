@@ -213,6 +213,9 @@ namespace SkillMind.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("ProfileId")
                         .HasColumnType("uuid");
 
+                    b.Property<decimal?>("LastTimestampSeconds")
+                        .HasColumnType("numeric");
+
                     b.Property<int>("ProgressPercent")
                         .HasColumnType("integer");
 

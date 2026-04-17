@@ -41,6 +41,7 @@ export class CourseCardDto {
 export class UpdateProgressDto {
     @ApiProperty() @IsUUID() lastLessonId: string;
     @ApiProperty() @IsNumber() progressPercent: number;
+    @ApiPropertyOptional() @IsOptional() @IsNumber() lastTimestampSeconds?: number;
 }
 
 export class CourseProgressDto {

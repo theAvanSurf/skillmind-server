@@ -34,7 +34,7 @@ async def compute_recommendations(profile_id: uuid.UUID, db: AsyncSession, limit
     watched        = _parse(behavior.watched_course_ids)
     primary_cat    = max(top_categories, key=top_categories.get) if top_categories else None
 
-    courses_result = await db.execute(select(Course).where(Course.Status == 1))
+    courses_result = await db.execute(select(Course).where(Course.Status == 2))
     all_courses = courses_result.scalars().all()
 
     cutoff = datetime.utcnow() - timedelta(days=30)
@@ -87,9 +87,9 @@ async def cold_start_recommendations(db: AsyncSession, limit: int = settings.COL
     ids = [r.course_id for r in pop]
 
     if ids:
-        result = await db.execute(select(Course).where(Course.Id.in_(ids), Course.Status == 1))
+        result = await db.execute(select(Course).where(Course.Id.in_(ids), Course.Status == 2))
     else:
-        result = await db.execute(select(Course).where(Course.Status == 1).order_by(desc(Course.CreatedOn)).limit(limit))
+        result = await db.execute(select(Course).where(Course.Status == 2).order_by(desc(Course.CreatedOn)).limit(limit))
 
     return [
         RecommendedCourse(id=c.Id, title=c.Title, thumbnail_url=c.ThumbnailUrl,

@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SkillMind.Core.Application.Dtos.Courses;
+using SkillMind.Core.Application.Dtos.Professor;
 using SkillMind.Core.Application.Interfaces;
 using SkillMind.Core.Application.Dtos.Profiles;
 using SkillMind.Infrastructure.Shared.Services;
@@ -13,7 +14,9 @@ public class CoursesController(
     ICourseService courseService,
     IProfessorService professorService,
     StripeServices stripeServices,
-    IProfilesServices profilesServices) : BaseController
+    IProfilesServices profilesServices,
+    IExamService examService,
+    ICertificateService certificateService) : BaseController
 {
     /// <summary>
     /// Returns the active profile ID for the current user.
@@ -105,6 +108,31 @@ public class CoursesController(
         return Ok(result);
     }
 
+    [HttpGet("{courseId:guid}/progress")]
+    [Authorize]
+    [ProducesResponseType(typeof(CourseProgressDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetProgress([FromRoute] Guid courseId)
+    {
+        var profileId = await ResolveProfileIdAsync();
+        if (profileId is null) return Unauthorized("User profile could not be determined.");
+
+        var result = await courseService.GetProgressAsync(profileId.Value, courseId);
+        return result is null ? NotFound() : Ok(result);
+    }
+
+    [HttpGet("my-enrollments/recently-watched")]
+    [Authorize]
+    [ProducesResponseType(typeof(List<EnrolledCourseDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetRecentlyWatched([FromQuery] int limit = 20)
+    {
+        var profileId = await ResolveProfileIdAsync();
+        if (profileId is null) return Unauthorized();
+
+        var courses = await courseService.GetRecentlyWatchedAsync(profileId.Value, limit);
+        return Ok(courses);
+    }
+
     // ── Professor / Admin mutations ───────────────────────────────────────────
 
     [HttpPost]
@@ -145,6 +173,18 @@ public class CoursesController(
         if (profileId is null) return Unauthorized();
 
         var courses = await courseService.GetEnrolledCoursesAsync(profileId.Value);
+        return Ok(courses);
+    }
+
+    [HttpGet("my-enrollments/in-progress")]
+    [Authorize]
+    [ProducesResponseType(typeof(List<EnrolledCourseDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetInProgressCourses()
+    {
+        var profileId = await ResolveProfileIdAsync();
+        if (profileId is null) return Unauthorized();
+
+        var courses = await courseService.GetInProgressCoursesAsync(profileId.Value);
         return Ok(courses);
     }
 
@@ -252,5 +292,72 @@ public class CoursesController(
         {
             return BadRequest(new { Message = ex.Message });
         }
+    }
+
+    // ── Student Exams ─────────────────────────────────────────────────────────
+
+    [HttpGet("{courseId:guid}/exams")]
+    [Authorize]
+    [ProducesResponseType(typeof(List<ExamDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetCourseExams([FromRoute] Guid courseId)
+    {
+        var exams = await examService.GetPublishedExamsByCourseAsync(courseId);
+        return Ok(exams);
+    }
+
+    [HttpGet("{courseId:guid}/exams/{examId:guid}")]
+    [Authorize]
+    [ProducesResponseType(typeof(ExamDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetCourseExam([FromRoute] Guid courseId, [FromRoute] Guid examId)
+    {
+        var exam = await examService.GetExamForStudentAsync(examId);
+        if (exam is null) return NotFound();
+        return Ok(exam);
+    }
+
+    [HttpPost("{courseId:guid}/exams/{examId:guid}/submit")]
+    [Authorize]
+    [ProducesResponseType(typeof(ExamAttemptDto), StatusCodes.Status200OK)]
+    public async Task<IActionResult> SubmitExam([FromRoute] Guid courseId, [FromRoute] Guid examId, [FromBody] SubmitExamAnswersDto dto)
+    {
+        var profileId = await ResolveProfileIdAsync();
+        if (profileId is null) return Unauthorized();
+
+        var result = await examService.SubmitAttemptAsync(new SubmitExamAttemptDto
+        {
+            ExamId = examId,
+            StudentProfileId = profileId.Value,
+            Answers = dto.Answers
+        });
+        return Ok(result);
+    }
+
+    [HttpGet("{courseId:guid}/exams/{examId:guid}/my-result")]
+    [Authorize]
+    [ProducesResponseType(typeof(ExamAttemptDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetMyExamResult([FromRoute] Guid courseId, [FromRoute] Guid examId)
+    {
+        var profileId = await ResolveProfileIdAsync();
+        if (profileId is null) return Unauthorized();
+
+        var attempt = await examService.GetMyAttemptAsync(examId, profileId.Value);
+        if (attempt is null) return NotFound();
+        return Ok(attempt);
+    }
+
+    // ── Student Certificates ──────────────────────────────────────────────────
+
+    [HttpGet("my-certificates")]
+    [Authorize]
+    [ProducesResponseType(typeof(List<CertificateDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetMyCertificates()
+    {
+        var profileId = await ResolveProfileIdAsync();
+        if (profileId is null) return Unauthorized();
+
+        var certs = await certificateService.GetCertificatesByStudentAsync(profileId.Value);
+        return Ok(certs);
     }
 }
