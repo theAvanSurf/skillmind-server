@@ -5,6 +5,7 @@ import {
     CourseDto, CourseCardDto, CourseProgressDto, UpdateProgressDto,
     CreateCourseDto, CreateSeasonDto, CreateLessonDto, SeasonDto, LessonDto,
     BrowseCoursesQueryDto, BrowseCoursesResultDto, CourseSearchSuggestionDto,
+    EnrolledCourseDto,
 } from './courses.dto';
 
 @Injectable()
@@ -46,6 +47,14 @@ export class CoursesService {
     }
     async createLesson(body: CreateLessonDto, token: string): Promise<LessonDto> {
         return httpClient.post<LessonDto>(API_ENDPOINTS.CORE.COURSES_LESSONS, body, { headers: { Authorization: token } }) as unknown as LessonDto;
+    }
+
+    async confirmEnrollment(courseId: string, paymentIntentId: string, token: string) {
+        return httpClient.post(API_ENDPOINTS.CORE.COURSES_CONFIRM_ENROLLMENT(courseId), { paymentIntentId }, { headers: { Authorization: token } });
+    }
+
+    async getEnrolledCourses(token: string): Promise<EnrolledCourseDto[]> {
+        return httpClient.get(API_ENDPOINTS.CORE.COURSES_MY_ENROLLMENTS, { headers: { Authorization: token } }) as unknown as EnrolledCourseDto[];
     }
 
     async getEnrollmentStatus(courseId: string, token: string) {

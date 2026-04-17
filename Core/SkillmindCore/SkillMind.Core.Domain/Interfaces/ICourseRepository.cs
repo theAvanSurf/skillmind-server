@@ -19,4 +19,5 @@ public interface ICourseRepository : IGenericRepository<Course>
     Task<bool> IsEnrolledAsync(Guid profileId, Guid courseId);
     Task<Enrollment> CreateEnrollmentAsync(Enrollment enrollment);
     Task<Enrollment?> GetEnrollmentByPaymentIntentAsync(string paymentIntentId);
+    Task<List<(Course Course, CourseProgress? Progress, DateTime EnrolledAt)>> GetEnrolledCoursesAsync(Guid profileId);
 }

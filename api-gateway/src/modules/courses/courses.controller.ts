@@ -85,6 +85,20 @@ export class CoursesController {
         return this.coursesService.createLesson(dto, token);
     }
 
+    @Post(':courseId/confirm-enrollment')
+    confirmEnrollment(
+        @Param('courseId') courseId: string,
+        @Body() body: { paymentIntentId: string },
+        @Headers('authorization') token: string,
+    ) {
+        return this.coursesService.confirmEnrollment(courseId, body.paymentIntentId, token);
+    }
+
+    @Get('my-enrollments')
+    getEnrolledCourses(@Headers('authorization') token: string) {
+        return this.coursesService.getEnrolledCourses(token);
+    }
+
     @Get(':courseId/enrollment-status')
     getEnrollmentStatus(
         @Param('courseId') courseId: string,

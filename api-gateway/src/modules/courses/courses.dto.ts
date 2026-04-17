@@ -96,6 +96,17 @@ export class CourseSearchSuggestionDto {
     @ApiPropertyOptional() courseId?: string;
 }
 
+export class EnrolledCourseDto {
+    @ApiProperty() id: string;
+    @ApiProperty() title: string;
+    @ApiProperty() thumbnailUrl: string;
+    @ApiPropertyOptional() category?: string;
+    @ApiProperty() totalSeasons: number;
+    @ApiProperty() totalLessons: number;
+    @ApiProperty() progressPercent: number;
+    @ApiProperty() enrolledAt: string;
+}
+
 export class CreateSeasonDto {
     @ApiProperty() @IsUUID() courseId: string;
     @ApiProperty() @IsString() title: string;

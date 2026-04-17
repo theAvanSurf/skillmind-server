@@ -178,6 +178,22 @@ public class CoursesService(ICourseRepository courseRepository, IMapper mapper, 
         await courseRepository.CreateEnrollmentAsync(enrollment);
     }
 
+    public async Task<List<EnrolledCourseDto>> GetEnrolledCoursesAsync(Guid profileId)
+    {
+        var enrollments = await courseRepository.GetEnrolledCoursesAsync(profileId);
+        return enrollments.Select(e => new EnrolledCourseDto
+        {
+            Id = e.Course.Id,
+            Title = e.Course.Title,
+            ThumbnailUrl = e.Course.ThumbnailUrl,
+            Category = e.Course.Category,
+            TotalSeasons = e.Course.Seasons.Count,
+            TotalLessons = e.Course.Seasons.Sum(s => s.Lessons.Count),
+            ProgressPercent = e.Progress?.ProgressPercent ?? 0,
+            EnrolledAt = e.EnrolledAt
+        }).ToList();
+    }
+
     private static BrowseCourseDto MapToBrowseDto(SkillMind.Core.Domain.Entities.Course c) => new()
     {
         Id = c.Id,

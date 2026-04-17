@@ -187,7 +187,8 @@ public class PaymentController(StripeServices stripeServices, ICourseService cou
             var stripeEvent = EventUtility.ConstructEvent(
                 payload, stripeSignature,
                 Environment.GetEnvironmentVariable("STRIPE_WEBHOOK_SECRET")
-                    ?? throw new StripeException("Webhook secret not configured."));
+                    ?? throw new StripeException("Webhook secret not configured."),
+                throwOnApiVersionMismatch: false);
 
             if (stripeEvent.Type == "payment_intent.succeeded")
             {

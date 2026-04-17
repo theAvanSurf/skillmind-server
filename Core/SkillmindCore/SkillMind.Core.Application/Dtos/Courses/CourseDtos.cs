@@ -144,3 +144,20 @@ public class ConfirmEnrollmentDto
     public Guid StudentProfileId { get; set; }
     public decimal PaidAmount { get; set; }
 }
+
+public class ConfirmEnrollmentRequestDto
+{
+    public string PaymentIntentId { get; set; } = string.Empty;
+}
+
+public class EnrolledCourseDto
+{
+    public Guid Id { get; set; }
+    public string Title { get; set; } = string.Empty;
+    public string ThumbnailUrl { get; set; } = string.Empty;
+    public string? Category { get; set; }
+    public int TotalSeasons { get; set; }
+    public int TotalLessons { get; set; }
+    public int ProgressPercent { get; set; }
+    public DateTime EnrolledAt { get; set; }
+}

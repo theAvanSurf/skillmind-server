@@ -20,4 +20,5 @@ public interface ICourseService
     // Enrollment
     Task<CourseEnrollmentStatusDto> GetEnrollmentStatusAsync(Guid courseId, Guid profileId);
     Task ConfirmEnrollmentAsync(ConfirmEnrollmentDto dto);
+    Task<List<EnrolledCourseDto>> GetEnrolledCoursesAsync(Guid profileId);
 }

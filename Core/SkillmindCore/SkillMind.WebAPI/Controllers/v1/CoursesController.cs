@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SkillMind.Core.Application.Dtos.Courses;
 using SkillMind.Core.Application.Interfaces;
+using SkillMind.Core.Application.Dtos.Profiles;
 using SkillMind.Infrastructure.Shared.Services;
 using Stripe;
 
@@ -11,8 +12,28 @@ namespace SkillMind.WebAPI.Controllers.v1;
 public class CoursesController(
     ICourseService courseService,
     IProfessorService professorService,
-    StripeServices stripeServices) : BaseController
+    StripeServices stripeServices,
+    IProfilesServices profilesServices) : BaseController
 {
+    /// <summary>
+    /// Returns the active profile ID for the current user.
+    /// Reads X-Profile-Id header first; falls back to the user's first profile.
+    /// </summary>
+    private async Task<Guid?> ResolveProfileIdAsync()
+    {
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+            return null;
+
+        // Prefer explicit header (set by Next.js proxy from activeProfileId cookie)
+        var headerProfileId = Request.Headers["X-Profile-Id"].FirstOrDefault();
+        if (!string.IsNullOrEmpty(headerProfileId) && Guid.TryParse(headerProfileId, out var headerGuid))
+            return headerGuid;
+
+        // Fallback: first profile for this user
+        var profiles = await profilesServices.GetAllProfilesAsync(userId);
+        return profiles.FirstOrDefault()?.Id;
+    }
     // ── Browse & Search (no path param — must be before /{courseId:guid}) ────
 
     [HttpGet]
@@ -67,9 +88,7 @@ public class CoursesController(
     [ProducesResponseType(typeof(List<CourseCardDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetRelatedCourses([FromRoute] Guid courseId)
     {
-        var profileIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        Guid? profileId = Guid.TryParse(profileIdClaim, out var pid) ? pid : null;
-
+        var profileId = await ResolveProfileIdAsync();
         var related = await courseService.GetRelatedCoursesAsync(courseId, profileId);
         return Ok(related);
     }
@@ -79,11 +98,10 @@ public class CoursesController(
     [ProducesResponseType(typeof(CourseProgressDto), StatusCodes.Status200OK)]
     public async Task<IActionResult> UpdateProgress([FromRoute] Guid courseId, [FromBody] UpdateProgressDto dto)
     {
-        var profileIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(profileIdClaim) || !Guid.TryParse(profileIdClaim, out var profileId))
-            return Unauthorized("User identity could not be determined.");
+        var profileId = await ResolveProfileIdAsync();
+        if (profileId is null) return Unauthorized("User profile could not be determined.");
 
-        var result = await courseService.UpdateProgressAsync(profileId, courseId, dto);
+        var result = await courseService.UpdateProgressAsync(profileId.Value, courseId, dto);
         return Ok(result);
     }
 
@@ -118,17 +136,64 @@ public class CoursesController(
 
     // ── Enrollment ────────────────────────────────────────────────────────────
 
+    [HttpGet("my-enrollments")]
+    [Authorize]
+    [ProducesResponseType(typeof(List<EnrolledCourseDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetMyEnrollments()
+    {
+        var profileId = await ResolveProfileIdAsync();
+        if (profileId is null) return Unauthorized();
+
+        var courses = await courseService.GetEnrolledCoursesAsync(profileId.Value);
+        return Ok(courses);
+    }
+
     [HttpGet("{courseId:guid}/enrollment-status")]
     [Authorize]
     [ProducesResponseType(typeof(CourseEnrollmentStatusDto), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetEnrollmentStatus([FromRoute] Guid courseId)
     {
-        var profileIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(profileIdClaim) || !Guid.TryParse(profileIdClaim, out var profileId))
-            return Unauthorized();
+        var profileId = await ResolveProfileIdAsync();
+        if (profileId is null) return Unauthorized();
 
-        var status = await courseService.GetEnrollmentStatusAsync(courseId, profileId);
+        var status = await courseService.GetEnrollmentStatusAsync(courseId, profileId.Value);
         return Ok(status);
+    }
+
+    [HttpPost("{courseId:guid}/confirm-enrollment")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ConfirmEnrollment([FromRoute] Guid courseId, [FromBody] ConfirmEnrollmentRequestDto dto)
+    {
+        var profileId = await ResolveProfileIdAsync();
+        if (profileId is null) return Unauthorized();
+
+        try
+        {
+            var service = new PaymentIntentService();
+            var intent = await service.GetAsync(dto.PaymentIntentId);
+
+            if (intent.Status != "succeeded")
+                return BadRequest(new { Message = "Payment has not been completed." });
+
+            if (!intent.Metadata.TryGetValue("courseId", out var intentCourseId) || intentCourseId != courseId.ToString())
+                return BadRequest(new { Message = "Payment does not match this course." });
+
+            await courseService.ConfirmEnrollmentAsync(new ConfirmEnrollmentDto
+            {
+                PaymentIntentId = intent.Id,
+                CourseId = courseId,
+                StudentProfileId = profileId.Value,
+                PaidAmount = intent.Amount / 100m
+            });
+
+            return Ok(new { enrolled = true });
+        }
+        catch (Stripe.StripeException ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
     }
 
     [HttpPost("{courseId:guid}/purchase")]
@@ -138,11 +203,10 @@ public class CoursesController(
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> CreatePurchaseIntent([FromRoute] Guid courseId)
     {
-        var profileIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(profileIdClaim) || !Guid.TryParse(profileIdClaim, out var profileId))
-            return Unauthorized();
+        var profileId = await ResolveProfileIdAsync();
+        if (profileId is null) return Unauthorized();
 
-        var status = await courseService.GetEnrollmentStatusAsync(courseId, profileId);
+        var status = await courseService.GetEnrollmentStatusAsync(courseId, profileId.Value);
 
         if (status.IsEnrolled)
             return Conflict(new { Message = "You are already enrolled in this course." });
@@ -154,7 +218,7 @@ public class CoursesController(
             {
                 PaymentIntentId = $"free_{Guid.NewGuid()}",
                 CourseId = courseId,
-                StudentProfileId = profileId,
+                StudentProfileId = profileId.Value,
                 PaidAmount = 0
             });
             return Ok(new CoursePurchaseIntentDto { ClientSecret = "", PaymentIntentId = "", Amount = 0 });
@@ -175,7 +239,7 @@ public class CoursesController(
                 status.Price,
                 connectedAccountId,
                 courseId.ToString(),
-                profileId.ToString());
+                profileId.Value.ToString());
 
             return Ok(new CoursePurchaseIntentDto
             {

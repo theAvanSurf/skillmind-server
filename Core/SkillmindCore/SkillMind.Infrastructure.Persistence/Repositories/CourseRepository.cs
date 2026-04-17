@@ -201,4 +201,26 @@ public class CourseRepository(SkillMindDbContext context)
         return await context.Enrollments
             .FirstOrDefaultAsync(e => e.StripePaymentIntentId == paymentIntentId);
     }
+
+    public async Task<List<(Course Course, CourseProgress? Progress, DateTime EnrolledAt)>> GetEnrolledCoursesAsync(Guid profileId)
+    {
+        var enrollments = await context.Enrollments
+            .Include(e => e.Course)
+                .ThenInclude(c => c.Seasons)
+                    .ThenInclude(s => s.Lessons)
+            .Where(e => e.StudentProfileId == profileId)
+            .OrderByDescending(e => e.EnrolledAt)
+            .ToListAsync();
+
+        var courseIds = enrollments.Select(e => e.CourseId).ToList();
+        var progresses = await context.CourseProgresses
+            .Where(p => p.ProfileId == profileId && courseIds.Contains(p.CourseId))
+            .ToListAsync();
+
+        return enrollments.Select(e => (
+            e.Course,
+            progresses.FirstOrDefault(p => p.CourseId == e.CourseId),
+            e.EnrolledAt
+        )).ToList();
+    }
 }

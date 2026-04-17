@@ -73,6 +73,7 @@ services:
       - Stripe__SecretKey=${STRIPE_SECRET_KEY}
       - Stripe__PublishableKey=${STRIPE_PUBLISHABLE_KEY:-}
       - Stripe__WebhookSecret=${STRIPE_WEBHOOK_SECRET}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
       - EmailSettings__Host=${EMAILER_HOST}
       - EmailSettings__Port=${EMAILER_PORT}
       - EmailSettings__User=${EMAILER_USER}

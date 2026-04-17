@@ -381,7 +381,8 @@ public class StripeServices(IOptions<StripeConfigurations> configurations, Price
             var stripeEvent = EventUtility.ConstructEvent(
                 json,
                 stripeSignature,
-                _stripeConfigurations.WebhookSecret
+                _stripeConfigurations.WebhookSecret,
+                throwOnApiVersionMismatch: false
             );
 
             switch (StripeEventMapper.Map(stripeEvent.Type))
@@ -526,6 +527,6 @@ public class StripeServices(IOptions<StripeConfigurations> configurations, Price
             ? _stripeConfigurations.ConnectWebhookSecret
             : _stripeConfigurations.WebhookSecret;
 
-        return EventUtility.ConstructEvent(json, stripeSignature, secret);
+        return EventUtility.ConstructEvent(json, stripeSignature, secret, throwOnApiVersionMismatch: false);
     }
 }
