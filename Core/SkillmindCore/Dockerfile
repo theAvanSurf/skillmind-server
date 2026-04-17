@@ -9,6 +9,7 @@ COPY ["SkillMind.Infrastructure.Persistence/SkillMind.Infrastructure.Persistence
 COPY ["SkillMind.Core.Application/SkillMind.Core.Application.csproj", "SkillMind.Core.Application/"]
 COPY ["SkillMind.Core.Domain/SkillMind.Core.Domain.csproj", "SkillMind.Core.Domain/"]
 
+ENV DOTNET_NUGET_HTTP_RETRY_COUNT=10
 RUN dotnet restore "SkillMind.WebAPI/SkillMind.WebAPI.csproj"
 
 # Copy everything else and build
