@@ -374,6 +374,25 @@ public class StripeServices(IOptions<StripeConfigurations> configurations, Price
         return session.Url;
     }
 
+    public async Task<List<PaymentIntent>> GetSucceededCoursePurchaseIntentsAsync()
+    {
+        var service = new PaymentIntentService();
+        var result = new List<PaymentIntent>();
+        var options = new PaymentIntentListOptions { Limit = 100 };
+
+        await foreach (var intent in service.ListAutoPagingAsync(options))
+        {
+            if (intent.Status == "succeeded" &&
+                intent.Metadata.TryGetValue("type", out var type) &&
+                type == "course_purchase")
+            {
+                result.Add(intent);
+            }
+        }
+
+        return result;
+    }
+
     public Task<bool> HandleWebhook(string json, string stripeSignature)
     {
         try

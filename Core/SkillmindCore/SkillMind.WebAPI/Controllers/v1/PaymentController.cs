@@ -222,4 +222,33 @@ public class PaymentController(StripeServices stripeServices, ICourseService cou
 
         return Ok();
     }
+
+    [HttpPost("reconcile")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> ReconcileEnrollments()
+    {
+        var intents = await stripeServices.GetSucceededCoursePurchaseIntentsAsync();
+        var reconciled = 0;
+
+        foreach (var intent in intents)
+        {
+            if (!intent.Metadata.TryGetValue("courseId", out var courseIdStr) ||
+                !intent.Metadata.TryGetValue("studentProfileId", out var profileIdStr) ||
+                !Guid.TryParse(courseIdStr, out var courseId) ||
+                !Guid.TryParse(profileIdStr, out var profileId))
+                continue;
+
+            await courseService.ConfirmEnrollmentAsync(new ConfirmEnrollmentDto
+            {
+                PaymentIntentId = intent.Id,
+                CourseId = courseId,
+                StudentProfileId = profileId,
+                PaidAmount = intent.Amount / 100m
+            });
+
+            reconciled++;
+        }
+
+        return Ok(new { processed = intents.Count, reconciled });
+    }
 }
