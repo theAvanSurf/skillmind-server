@@ -10,7 +10,7 @@ public partial class CertificateTemplateKey : Migration
     {
         migrationBuilder.AddColumn<string>(
             name: "TemplateKey",
-            table: "CertificateTemplates",
+            table: "CertificateTemplate",
             type: "text",
             nullable: false,
             defaultValue: "classic");
@@ -20,6 +20,6 @@ public partial class CertificateTemplateKey : Migration
     {
         migrationBuilder.DropColumn(
             name: "TemplateKey",
-            table: "CertificateTemplates");
+            table: "CertificateTemplate");
     }
 }
