@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Put, Param, Body, Headers, Query, Req } from '@nestjs/common';
-import { Request } from 'express';
+import type { Request } from 'express';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import sanitizeHtml from 'sanitize-html';
 import { ProfessorService } from './professor.service';
