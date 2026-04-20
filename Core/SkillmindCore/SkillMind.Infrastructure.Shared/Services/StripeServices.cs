@@ -76,9 +76,7 @@ public class StripeServices(IOptions<StripeConfigurations> configurations, Price
     private static (string Plan, DateTimeOffset? CurrentPeriodEnd) ExtractPlanAndPeriodEnd(Subscription subscription)
     {
         var plan = "unknown";
-        DateTimeOffset? currentPeriodEnd = subscription.CurrentPeriodEnd != default
-            ? new DateTimeOffset(subscription.CurrentPeriodEnd, TimeSpan.Zero)
-            : null;
+        DateTimeOffset? currentPeriodEnd = null;
 
         if (subscription.Items?.Data != null)
         {
@@ -310,20 +308,22 @@ public class StripeServices(IOptions<StripeConfigurations> configurations, Price
         if (selected is null)
             return null;
 
-        var (plan, currentPeriodEnd) = ExtractPlanAndPeriodEnd(selected);
-        var isInGracePeriod = selected.Status == "past_due";
+        // Fetch individual subscription so StripeResponse.Content has current_period_end at root
+        var fullSub = await subscriptionService.GetAsync(selected.Id);
+        var (plan, currentPeriodEnd) = ExtractPlanAndPeriodEnd(fullSub);
+        var isInGracePeriod = fullSub.Status == "past_due";
 
         return new SubscriptionDto
         {
-            Id = selected.Id,
+            Id = fullSub.Id,
             UserId = userId,
-            StripeSubscriptionId = selected.Id,
+            StripeSubscriptionId = fullSub.Id,
             Plan = plan,
-            SubscriptionStatus = selected.Status,
+            SubscriptionStatus = fullSub.Status,
             CurrentPeriodEnd = (currentPeriodEnd ?? DateTimeOffset.UtcNow).ToString("O"),
             IsInGracePeriod = isInGracePeriod,
             GracePeriodEnd = isInGracePeriod ? (currentPeriodEnd ?? DateTimeOffset.UtcNow).ToString("O") : null,
-            IntendedPlan = selected.Status == "incomplete" || selected.Status == "past_due" ? plan : null,
+            IntendedPlan = fullSub.Status == "incomplete" || fullSub.Status == "past_due" ? plan : null,
         };
     }
 
