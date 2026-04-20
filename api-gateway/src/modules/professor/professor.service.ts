@@ -39,6 +39,11 @@ export class ProfessorService {
     getStripeStatus(token: string) {
         return httpClient.get(API_ENDPOINTS.CORE.PROFESSOR_STRIPE_STATUS, { headers: { Authorization: token } });
     }
+    stripeConnectWebhook(payload: string, signature: string) {
+        return httpClient.post(API_ENDPOINTS.CORE.PROFESSOR_STRIPE_WEBHOOK, payload, {
+            headers: { 'stripe-signature': signature, 'content-type': 'application/json' },
+        });
+    }
 
     // ── Exams ─────────────────────────────────────────────────────────────────
     createExam(body: CreateExamDto, token: string) {

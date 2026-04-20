@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Put, Param, Body, Headers, Query } from '@nestjs/common';
+import { Controller, Get, Post, Put, Param, Body, Headers, Query, Req } from '@nestjs/common';
+import { Request } from 'express';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import sanitizeHtml from 'sanitize-html';
 import { ProfessorService } from './professor.service';
@@ -56,6 +57,12 @@ export class ProfessorController {
     @Get('stripe/status')
     getStripeStatus(@Headers('authorization') token: string) {
         return this.professorService.getStripeStatus(token);
+    }
+
+    @Post('stripe/webhook')
+    stripeConnectWebhook(@Req() req: Request, @Headers('stripe-signature') signature: string) {
+        const payload = (req as any).rawBody ?? JSON.stringify(req.body);
+        return this.professorService.stripeConnectWebhook(payload, signature);
     }
 
     // ── Exams ─────────────────────────────────────────────────────────────────
