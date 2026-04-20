@@ -16,7 +16,8 @@ httpClient.interceptors.response.use(
     (error) => {
         const status = error.response?.status || 500;
         const data = error.response?.data;
-        const rawMessage: string = data?.message || data?.detail || (typeof data === 'string' ? data : '') || error.message || "Internal Server Error";
+        const isArray = Array.isArray(data);
+        const rawMessage: string = data?.message || data?.detail || (isArray ? data[0] : '') || (typeof data === 'string' ? data : '') || error.message || "Internal Server Error";
 
         if (
             rawMessage.includes("IDX10223") ||
@@ -49,6 +50,7 @@ httpClient.interceptors.response.use(
             {
                 statusCode: status,
                 message: rawMessage,
+                ...(isArray && data.length > 0 && { errors: data }),
             },
             status
         );
