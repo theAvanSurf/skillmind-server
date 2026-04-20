@@ -76,7 +76,9 @@ public class StripeServices(IOptions<StripeConfigurations> configurations, Price
     private static (string Plan, DateTimeOffset? CurrentPeriodEnd) ExtractPlanAndPeriodEnd(Subscription subscription)
     {
         var plan = "unknown";
-        DateTimeOffset? currentPeriodEnd = null;
+        DateTimeOffset? currentPeriodEnd = subscription.CurrentPeriodEnd != default
+            ? new DateTimeOffset(subscription.CurrentPeriodEnd, TimeSpan.Zero)
+            : null;
 
         if (subscription.Items?.Data != null)
         {
