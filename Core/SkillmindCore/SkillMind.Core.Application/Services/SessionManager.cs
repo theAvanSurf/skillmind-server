@@ -87,14 +87,8 @@ public class SessionManager(IRedisContext redisContext) : ISessionManager
         var session = await _cache.GetAsync(userId.ToString());
         if (session is null) return null;
 
-        var updatedDevices = session.ConnectedDevices?.Where(d => d.DeviceId != deviceId).ToList();
+        var updatedDevices = session.ConnectedDevices?.Where(d => d.DeviceId != deviceId).ToList() ?? [];
         session.ConnectedDevices = updatedDevices;
-
-        if (session.ConnectedDevicesCount == 0)
-        {
-            await _cache.DeleteAsync(userId.ToString());
-            return null;
-        }
 
         await _cache.SetAsync(userId.ToString(), session, TimeSpan.FromHours(24));
         return session;

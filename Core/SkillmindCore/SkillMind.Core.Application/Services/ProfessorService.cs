@@ -79,8 +79,14 @@ public class ProfessorService(
             startOfMonthUtc,
             now);
 
-        var totalCertificates = (await certificateRepository.GetByCourseAsync(
-            courses.FirstOrDefault()?.Id ?? Guid.Empty)).Count;
+        var allCerts = await certificateRepository.GetByProfessorAsync(professorId);
+        var totalCertificates = allCerts.Count;
+
+        var allEnrollments = courses.SelectMany(c => c.Enrollments).ToList();
+        var completedEnrollments = allEnrollments.Count(e => e.CompletedAt.HasValue);
+        var completionRate = allEnrollments.Count > 0
+            ? Math.Round((decimal)completedEnrollments / allEnrollments.Count * 100, 1)
+            : 0m;
 
         var courseEngagements = courses.Select(c => new CourseEngagementDto
         {
@@ -90,7 +96,9 @@ public class ProfessorService(
             EnrolledStudents = c.Enrollments.Count,
             Price = c.Price,
             Revenue = c.Enrollments.Sum(e => e.PaidAmount),
-            AverageProgress = 0 // wired in Sprint 5 when we add progress query
+            AverageProgress = c.Enrollments.Count > 0
+                ? (int)Math.Round(c.Enrollments.Average(e => e.CompletedAt.HasValue ? 100.0 : 0.0))
+                : 0
         }).ToList();
 
         return new ProfessorDashboardDto
@@ -100,8 +108,8 @@ public class ProfessorService(
             ActiveStudents = activeStudents,
             TotalEarnings = totalEarnings,
             EarningsThisMonth = earningsThisMonth,
-            CourseCompletionRate = 0, // wired in Sprint 5
-            PendingExamReviews = 0,   // wired in Sprint 6
+            CourseCompletionRate = completionRate,
+            PendingExamReviews = 0,
             CertificatesIssued = totalCertificates,
             Courses = courseEngagements
         };
