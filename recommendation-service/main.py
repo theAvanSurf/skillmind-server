@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
@@ -11,8 +12,16 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    for attempt in range(1, 11):
+        try:
+            async with engine.begin() as conn:
+                await conn.run_sync(Base.metadata.create_all)
+            break
+        except Exception as e:
+            if attempt == 10:
+                raise
+            logger.warning("[DB] Connect failed (attempt %d/10): %s — retrying in 3s", attempt, e)
+            await asyncio.sleep(3)
     logger.info("[DB] Tables ready.")
     await start_kafka_consumer()
     yield
