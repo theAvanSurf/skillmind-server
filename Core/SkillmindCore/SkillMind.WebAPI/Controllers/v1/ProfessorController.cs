@@ -197,6 +197,11 @@ public class ProfessorController(
         using var reader = new StreamReader(Request.Body);
         var payload = await reader.ReadToEndAsync();
 
+        // Stripe v2 thin events (type starts with "v2.") use a different format
+        // that the Stripe.net SDK cannot parse with ConstructEvent — acknowledge and skip.
+        if (payload.Contains("\"v2."))
+            return Ok();
+
         try
         {
             var stripeEvent = stripeServices.ConstructConnectEvent(payload, stripeSignature);
