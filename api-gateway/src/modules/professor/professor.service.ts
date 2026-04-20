@@ -101,6 +101,9 @@ export class ProfessorService {
     getCertsByCourse(courseId: string, token: string) {
         return httpClient.get(API_ENDPOINTS.CORE.PROFESSOR_CERTS_BY_COURSE(courseId), { headers: { Authorization: token } });
     }
+    getAllMyCerts(token: string) {
+        return httpClient.get('/professor/certificates/all', { headers: { Authorization: token } });
+    }
 
     // ── Live Streams ──────────────────────────────────────────────────────────
     getLiveStreams(token: string) {

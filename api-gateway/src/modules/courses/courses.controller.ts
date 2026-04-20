@@ -143,6 +143,16 @@ export class CoursesController {
         return this.coursesService.getMyCertificates(token);
     }
 
+    @Get('my-certificates/:uniqueCode/render')
+    renderCertificate(@Param('uniqueCode') uniqueCode: string, @Headers('authorization') token: string) {
+        return this.coursesService.renderCertificate(uniqueCode, token);
+    }
+
+    @Post(':courseId/retroactive-certificate')
+    retroactiveCertificate(@Param('courseId') courseId: string, @Headers('authorization') token: string) {
+        return this.coursesService.retroactiveCertificate(courseId, token);
+    }
+
     @Get(':courseId/exams')
     getCourseExams(
         @Param('courseId') courseId: string,

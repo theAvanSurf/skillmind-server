@@ -51,6 +51,17 @@ public class CoursesService(ICourseRepository courseRepository, IMapper mapper, 
 
         var saved = await courseRepository.UpsertProgressAsync(progress);
 
+        // Mark enrollment completed when progress reaches 100
+        if (progress.ProgressPercent >= 100)
+        {
+            var enrollment = await courseRepository.GetEnrollmentAsync(profileId, courseId);
+            if (enrollment is not null && enrollment.CompletedAt is null)
+            {
+                enrollment.CompletedAt = DateTime.UtcNow;
+                await courseRepository.MarkEnrollmentCompletedAsync(enrollment);
+            }
+        }
+
         // Auto-issue certificate if threshold reached
         await certificateService.TryAutoIssueAsync(profileId, courseId, progress.ProgressPercent);
 
@@ -89,6 +100,17 @@ public class CoursesService(ICourseRepository courseRepository, IMapper mapper, 
         var course = mapper.Map<Course>(dto);
         course.ProfessorId = professorId;
         var created = await courseRepository.CreateAsync(course);
+
+        // Auto-create a default certificate template so completions are tracked immediately
+        await certificateService.CreateTemplateAsync(new Dtos.Professor.CreateCertificateTemplateDto
+        {
+            CourseId = created.Id,
+            ProfessorId = professorId,
+            Title = $"Certificate of Completion — {created.Title}",
+            TemplateKey = "classic",
+            CompletionThresholdPercent = 100,
+        });
+
         return mapper.Map<CourseDto>(created);
     }
 

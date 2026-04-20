@@ -8,6 +8,8 @@ public class CertificateTemplate
     public required string Title { get; set; }
     public string? Description { get; set; }
     public string? BodyHtml { get; set; }
+    /// <summary>One of: classic | modern | minimal. Resolved to safe HTML server-side.</summary>
+    public string TemplateKey { get; set; } = "classic";
     public bool IsDefault { get; set; }
     public string? SignatureUrl { get; set; }
     public string? LogoUrl { get; set; }

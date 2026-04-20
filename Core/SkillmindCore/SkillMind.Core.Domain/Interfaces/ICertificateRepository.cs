@@ -14,4 +14,6 @@ public interface ICertificateRepository
     Task<List<Certificate>> GetByCourseAsync(Guid courseId);
     Task<Certificate> IssueCertificateAsync(Certificate certificate);
     Task<bool> HasCertificateAsync(Guid studentProfileId, Guid courseId);
+    Task<Certificate?> GetByUniqueCodeAsync(string uniqueCode);
+    Task<List<Certificate>> GetByProfessorAsync(Guid professorId);
 }

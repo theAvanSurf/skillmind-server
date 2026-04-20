@@ -274,6 +274,17 @@ public class ProfessorController(
         return Ok(certs);
     }
 
+    [HttpGet("certificates/all")]
+    [ProducesResponseType(typeof(List<CertificateDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAllMyCerts()
+    {
+        var profile = await GetCurrentProfileAsync();
+        if (profile is null) return NotFound();
+
+        var certs = await certificateService.GetAllCertificatesByProfessorAsync(profile.Id);
+        return Ok(certs);
+    }
+
     // ── Exams ────────────────────────────────────────────────────────────────
 
     [HttpPost("exams")]

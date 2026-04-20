@@ -518,7 +518,11 @@ public class StripeServices(IOptions<StripeConfigurations> configurations, Price
         {
             Amount = amountCents,
             Currency = "usd",
-            AutomaticPaymentMethods = new PaymentIntentAutomaticPaymentMethodsOptions { Enabled = true },
+            AutomaticPaymentMethods = new PaymentIntentAutomaticPaymentMethodsOptions
+            {
+                Enabled = true,
+                AllowRedirects = "never",
+            },
             ApplicationFeeAmount = applicationFeeCents,
             TransferData = new PaymentIntentTransferDataOptions
             {

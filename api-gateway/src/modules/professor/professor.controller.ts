@@ -166,6 +166,11 @@ export class ProfessorController {
         return this.professorService.manualIssueCertificate(dto, token);
     }
 
+    @Get('certificates/all')
+    getAllMyCerts(@Headers('authorization') token: string) {
+        return this.professorService.getAllMyCerts(token);
+    }
+
     @Get('certificates/course/:courseId')
     getCertsByCourse(@Param('courseId') courseId: string, @Headers('authorization') token: string) {
         return this.professorService.getCertsByCourse(courseId, token);

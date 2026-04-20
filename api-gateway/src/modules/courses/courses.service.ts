@@ -104,4 +104,12 @@ export class CoursesService {
     async getMyCertificates(token: string) {
         return httpClient.get(API_ENDPOINTS.CORE.COURSES_MY_CERTIFICATES, { headers: { Authorization: token } });
     }
+
+    async renderCertificate(uniqueCode: string, token: string) {
+        return httpClient.get(`/courses/my-certificates/${uniqueCode}/render`, { headers: { Authorization: token } });
+    }
+
+    async retroactiveCertificate(courseId: string, token: string) {
+        return httpClient.post(`/courses/${courseId}/retroactive-certificate`, {}, { headers: { Authorization: token } });
+    }
 }

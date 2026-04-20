@@ -8,7 +8,8 @@ public record CreateCertificateTemplateDto
     public Guid ProfessorId { get; set; }
     public required string Title { get; set; }
     public string? Description { get; set; }
-    public string? BodyHtml { get; set; }
+    /// <summary>One of: classic | modern | minimal</summary>
+    public string TemplateKey { get; set; } = "classic";
     public bool IsDefault { get; set; }
     public string? SignatureUrl { get; set; }
     public string? LogoUrl { get; set; }
@@ -19,7 +20,8 @@ public class UpdateCertificateTemplateDto
 {
     public string? Title { get; set; }
     public string? Description { get; set; }
-    public string? BodyHtml { get; set; }
+    /// <summary>One of: classic | modern | minimal</summary>
+    public string? TemplateKey { get; set; }
     public bool? IsDefault { get; set; }
     public string? SignatureUrl { get; set; }
     public string? LogoUrl { get; set; }
@@ -33,7 +35,7 @@ public class CertificateTemplateDto
     public string CourseTitle { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
     public string? Description { get; set; }
-    public string? BodyHtml { get; set; }
+    public string TemplateKey { get; set; } = "classic";
     public bool IsDefault { get; set; }
     public string? SignatureUrl { get; set; }
     public string? LogoUrl { get; set; }
@@ -62,4 +64,5 @@ public class CertificateDto
     public DateTime IssuedAt { get; set; }
     public string? LogoUrl { get; set; }
     public string? SignatureUrl { get; set; }
+    public string TemplateKey { get; set; } = "classic";
 }

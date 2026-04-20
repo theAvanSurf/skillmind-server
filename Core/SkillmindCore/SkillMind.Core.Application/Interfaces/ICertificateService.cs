@@ -16,5 +16,6 @@ public interface ICertificateService
     Task<CertificateDto> ManualIssueAsync(ManualIssueCertificateDto dto);
     Task<List<CertificateDto>> GetCertificatesByStudentAsync(Guid studentProfileId);
     Task<List<CertificateDto>> GetCertificatesByCourseAsync(Guid courseId);
+    Task<List<CertificateDto>> GetAllCertificatesByProfessorAsync(Guid professorId);
     Task<CertificateDto?> VerifyCertificateAsync(string uniqueCode);
 }

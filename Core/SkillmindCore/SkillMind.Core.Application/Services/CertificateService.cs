@@ -1,5 +1,6 @@
 using SkillMind.Core.Application.Dtos.Professor;
 using SkillMind.Core.Application.Interfaces;
+using SkillMind.Core.Domain.Certificates;
 using SkillMind.Core.Domain.Entities;
 using SkillMind.Core.Domain.Interfaces;
 
@@ -11,6 +12,10 @@ public class CertificateService(ICertificateRepository certificateRepository) : 
 
     public async Task<CertificateTemplateDto> CreateTemplateAsync(CreateCertificateTemplateDto dto)
     {
+        var key = PredefinedCertificateTemplates.ValidKeys.Contains(dto.TemplateKey)
+            ? dto.TemplateKey.ToLowerInvariant()
+            : PredefinedCertificateTemplates.Classic;
+
         var template = new CertificateTemplate
         {
             Id = Guid.NewGuid(),
@@ -18,7 +23,8 @@ public class CertificateService(ICertificateRepository certificateRepository) : 
             CourseId = dto.CourseId,
             Title = dto.Title,
             Description = dto.Description,
-            BodyHtml = dto.BodyHtml,
+            TemplateKey = key,
+            BodyHtml = PredefinedCertificateTemplates.Resolve(key),
             IsDefault = dto.IsDefault,
             SignatureUrl = dto.SignatureUrl,
             LogoUrl = dto.LogoUrl,
@@ -54,7 +60,11 @@ public class CertificateService(ICertificateRepository certificateRepository) : 
 
         if (dto.Title is not null) template.Title = dto.Title;
         if (dto.Description is not null) template.Description = dto.Description;
-        if (dto.BodyHtml is not null) template.BodyHtml = dto.BodyHtml;
+        if (dto.TemplateKey is not null && PredefinedCertificateTemplates.ValidKeys.Contains(dto.TemplateKey))
+        {
+            template.TemplateKey = dto.TemplateKey.ToLowerInvariant();
+            template.BodyHtml = PredefinedCertificateTemplates.Resolve(template.TemplateKey);
+        }
         if (dto.IsDefault.HasValue) template.IsDefault = dto.IsDefault.Value;
         if (dto.SignatureUrl is not null) template.SignatureUrl = dto.SignatureUrl;
         if (dto.LogoUrl is not null) template.LogoUrl = dto.LogoUrl;
@@ -65,18 +75,16 @@ public class CertificateService(ICertificateRepository certificateRepository) : 
         return MapTemplateToDto(updated);
     }
 
-    // ── Auto-Issuance (triggered from CoursesService.UpdateProgressAsync) ─────
+    // ── Auto-Issuance ─────────────────────────────────────────────────────────
 
     public async Task<CertificateDto?> TryAutoIssueAsync(Guid studentProfileId, Guid courseId, int progressPercent)
     {
-        // Already has a certificate — skip
         if (await certificateRepository.HasCertificateAsync(studentProfileId, courseId))
             return null;
 
         var template = await certificateRepository.GetTemplateByCourseAsync(courseId);
         if (template is null) return null;
 
-        // Progress hasn't reached the threshold — skip
         if (progressPercent < template.CompletionThresholdPercent) return null;
 
         var certificate = new Certificate
@@ -131,11 +139,16 @@ public class CertificateService(ICertificateRepository certificateRepository) : 
         return certs.Select(c => MapCertToDto(c, c.Template)).ToList();
     }
 
+    public async Task<List<CertificateDto>> GetAllCertificatesByProfessorAsync(Guid professorId)
+    {
+        var certs = await certificateRepository.GetByProfessorAsync(professorId);
+        return certs.Select(c => MapCertToDto(c, c.Template)).ToList();
+    }
+
     public async Task<CertificateDto?> VerifyCertificateAsync(string uniqueCode)
     {
-        // TODO: Implement public verification endpoint in Sprint 7
-        await Task.CompletedTask;
-        return null;
+        var cert = await certificateRepository.GetByUniqueCodeAsync(uniqueCode);
+        return cert is null ? null : MapCertToDto(cert, cert.Template);
     }
 
     // ── Mappers ───────────────────────────────────────────────────────────────
@@ -145,7 +158,7 @@ public class CertificateService(ICertificateRepository certificateRepository) : 
         Id = t.Id,
         CourseId = t.CourseId,
         CourseTitle = t.Course?.Title ?? string.Empty,
-        BodyHtml = t.BodyHtml,
+        TemplateKey = t.TemplateKey,
         IsDefault = t.IsDefault,
         Title = t.Title,
         Description = t.Description,
@@ -166,6 +179,59 @@ public class CertificateService(ICertificateRepository certificateRepository) : 
         IsManuallyIssued = c.IsManuallyIssued,
         IssuedAt = c.IssuedAt,
         LogoUrl = t?.LogoUrl,
-        SignatureUrl = t?.SignatureUrl
+        SignatureUrl = t?.SignatureUrl,
+        TemplateKey = t?.TemplateKey ?? PredefinedCertificateTemplates.Classic
     };
+
+    // ── HTML Rendering ────────────────────────────────────────────────────────
+
+    public static string RenderCertificateHtml(CertificateDto cert)
+    {
+        var html = PredefinedCertificateTemplates.Resolve(cert.TemplateKey);
+        html = html
+            .Replace("{{studentName}}", System.Web.HttpUtility.HtmlEncode(cert.StudentName))
+            .Replace("{{courseName}}", System.Web.HttpUtility.HtmlEncode(cert.CourseTitle))
+            .Replace("{{date}}", cert.IssuedAt.ToString("MMMM d, yyyy"))
+            .Replace("{{uniqueCode}}", cert.UniqueCode);
+
+        // Handle {{#if logoUrl}} / {{/if}} blocks
+        html = ReplaceConditionalBlock(html, "logoUrl", cert.LogoUrl);
+        html = ReplaceConditionalBlock(html, "signatureUrl", cert.SignatureUrl);
+
+        return html;
+    }
+
+    private static string ReplaceConditionalBlock(string html, string varName, string? value)
+    {
+        var open = $"{{{{#if {varName}}}}}";
+        var elseTag = "{{else}}";
+        var close = "{{/if}}";
+
+        while (html.Contains(open))
+        {
+            var start = html.IndexOf(open, StringComparison.Ordinal);
+            var end = html.IndexOf(close, start, StringComparison.Ordinal);
+            if (end < 0) break;
+
+            var inner = html[(start + open.Length)..end];
+            string replacement;
+
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                var elseIdx = inner.IndexOf(elseTag, StringComparison.Ordinal);
+                replacement = elseIdx >= 0
+                    ? inner[..elseIdx].Replace($"{{{{{varName}}}}}", System.Web.HttpUtility.HtmlAttributeEncode(value))
+                    : inner.Replace($"{{{{{varName}}}}}", System.Web.HttpUtility.HtmlAttributeEncode(value));
+            }
+            else
+            {
+                var elseIdx = inner.IndexOf(elseTag, StringComparison.Ordinal);
+                replacement = elseIdx >= 0 ? inner[(elseIdx + elseTag.Length)..] : string.Empty;
+            }
+
+            html = html[..start] + replacement + html[(end + close.Length)..];
+        }
+
+        return html;
+    }
 }

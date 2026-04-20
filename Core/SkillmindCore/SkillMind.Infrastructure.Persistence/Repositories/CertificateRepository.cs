@@ -80,4 +80,24 @@ public class CertificateRepository(SkillMindDbContext context)
         return await context.Certificates
             .AnyAsync(c => c.StudentProfileId == studentProfileId && c.CourseId == courseId);
     }
+
+    public async Task<Certificate?> GetByUniqueCodeAsync(string uniqueCode)
+    {
+        return await context.Certificates
+            .Include(c => c.Template)
+            .Include(c => c.Course)
+            .Include(c => c.StudentProfile)
+            .FirstOrDefaultAsync(c => c.UniqueCode == uniqueCode);
+    }
+
+    public async Task<List<Certificate>> GetByProfessorAsync(Guid professorId)
+    {
+        return await context.Certificates
+            .Include(c => c.Course)
+            .Include(c => c.Template)
+            .Include(c => c.StudentProfile)
+            .Where(c => c.Course.ProfessorId == professorId)
+            .OrderByDescending(c => c.IssuedAt)
+            .ToListAsync();
+    }
 }

@@ -203,6 +203,18 @@ public class CourseRepository(SkillMindDbContext context)
             .FirstOrDefaultAsync(e => e.StripePaymentIntentId == paymentIntentId);
     }
 
+    public async Task<Enrollment?> GetEnrollmentAsync(Guid profileId, Guid courseId)
+    {
+        return await context.Enrollments
+            .FirstOrDefaultAsync(e => e.StudentProfileId == profileId && e.CourseId == courseId);
+    }
+
+    public async Task MarkEnrollmentCompletedAsync(Enrollment enrollment)
+    {
+        context.Enrollments.Update(enrollment);
+        await context.SaveChangesAsync();
+    }
+
     public async Task<List<(Course Course, CourseProgress Progress)>> GetRecentlyWatchedByProgressAsync(Guid profileId, int limit)
     {
         var progresses = await context.CourseProgresses

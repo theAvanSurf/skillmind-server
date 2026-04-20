@@ -360,4 +360,28 @@ public class CoursesController(
         var certs = await certificateService.GetCertificatesByStudentAsync(profileId.Value);
         return Ok(certs);
     }
+
+    [HttpGet("my-certificates/{uniqueCode}/render")]
+    [Authorize]
+    [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+    public async Task<IActionResult> RenderCertificate([FromRoute] string uniqueCode)
+    {
+        var cert = await certificateService.VerifyCertificateAsync(uniqueCode);
+        if (cert is null) return NotFound();
+        var html = CertificateService.RenderCertificateHtml(cert);
+        return Content(html, "text/html");
+    }
+
+    [HttpPost("{courseId:guid}/retroactive-certificate")]
+    [Authorize]
+    [ProducesResponseType(typeof(CertificateDto), StatusCodes.Status200OK)]
+    public async Task<IActionResult> RetroactiveCertificate([FromRoute] Guid courseId)
+    {
+        var profileId = await ResolveProfileIdAsync();
+        if (profileId is null) return Unauthorized();
+
+        var cert = await certificateService.TryAutoIssueAsync(profileId.Value, courseId, 100);
+        if (cert is null) return BadRequest(new { Message = "Certificate already exists or no template found for this course." });
+        return Ok(cert);
+    }
 }
