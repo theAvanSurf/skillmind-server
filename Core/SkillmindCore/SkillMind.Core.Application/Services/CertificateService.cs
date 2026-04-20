@@ -185,6 +185,8 @@ public class CertificateService(ICertificateRepository certificateRepository) : 
 
     // ── HTML Rendering ────────────────────────────────────────────────────────
 
+    string ICertificateService.RenderCertificateHtml(CertificateDto cert) => RenderCertificateHtml(cert);
+
     public static string RenderCertificateHtml(CertificateDto cert)
     {
         var html = PredefinedCertificateTemplates.Resolve(cert.TemplateKey);

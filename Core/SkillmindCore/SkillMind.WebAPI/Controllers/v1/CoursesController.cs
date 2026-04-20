@@ -368,7 +368,7 @@ public class CoursesController(
     {
         var cert = await certificateService.VerifyCertificateAsync(uniqueCode);
         if (cert is null) return NotFound();
-        var html = CertificateService.RenderCertificateHtml(cert);
+        var html = certificateService.RenderCertificateHtml(cert);
         return Content(html, "text/html");
     }
 
